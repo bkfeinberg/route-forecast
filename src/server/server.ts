@@ -354,11 +354,13 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
             // tear off the privacy code if any
             const queryPos = req.body.routeNumber.indexOf('?')
             const routeNumber = (queryPos === -1) ? req.body.routeNumber : req.body.routeNumber.slice(0,queryPos);
+            // limit route name to 90 characters to match DB schema
+            const routeName = req.body.routeName.length > 90 ? req.body.routeName.slice(0,90) : req.body.routeName;
             try {
                 const insertResult = await
                     postgresClient.query(
                         "INSERT into randoplan VALUES($1,$2,$3,$4) ON CONFLICT (routeName) DO UPDATE SET timestamp=EXCLUDED.timestamp, location=EXCLUDED.location, routeNumber=EXCLUDED.routeNumber",
-                        [req.body.routeName, routeNumber,
+                        [routeName, routeNumber,
                         new Date(), `(${forecastPoints.lat},${forecastPoints.lon})`]);
                 // console.info(insertResult);
             } catch (err) {
