@@ -405,9 +405,9 @@ app.use((err : Error, req : RequestWithTimeout, res : Response, next : NextFunct
         // Send a specific response for timeout errors
         console.log('Request timed out!');
         if (req.body.locations) {
-            // error(`Request to ${req.body.service} timed out for location ${req.body.locations.lat},${req.body.locations.lon}`);
+            error(`Request to ${req.body.service} timed out for location ${req.body.locations.lat},${req.body.locations.lon}`);
         } else {
-            // error(`Request timed out for unknown location`);
+            error(`Request timed out for unknown location`);
         }
         return res.status(503).send({ details: `Service unavailable: Request to ${req.body.service} exceeded timeout` });
     }
@@ -424,13 +424,13 @@ app.post('/aqi_one', upload.none(), timeout('27s'), haltOnTimedout, async (req :
     if (!process.env.NO_LOGGING) {
         logger.info(`AQI request from ${req.ip} for AQI at ${forecastPoint.lat},${forecastPoint.lon}`)
     }
-    if (req.timedout) {
-        console.warn(`AQI processing finished, but request already timed out. Not sending response.`);
-        return;
-    }        
     try {
         let result = {};
         await getAQI(result, forecastPoint);
+        if (req.timedout) {
+            warn(`AQI processing finished, but request already timed out. Not sending response.`);
+            return;
+        }
         res.status(200).json({ 'aqi': result });
     } catch (err) {
         error(`Error retrieving AQI : ${JSON.stringify(err)}`);
@@ -438,32 +438,6 @@ app.post('/aqi_one', upload.none(), timeout('27s'), haltOnTimedout, async (req :
     }
 });
 
-/* app.post('/aqi', upload.none(), async (req, res) => {
-    if (req.body.locations === undefined) {
-        res.status(400).json({ 'status': 'Missing location key' });
-        return;
-    }
-    const forecastPoints = JSON.parse(req.body.locations);
-    if (!process.env.NO_LOGGING) {
-        logger.info(`AQI request from ${req.ip} for ${forecastPoints.length} points`);
-    }
-    try {
-        let results = [];
-        while (forecastPoints.length > 0) {
-            let point = forecastPoints.shift();
-            // we explicitly do not want to parallelize to avoid swamping the servers we are calling and being throttled
-            // console.log('waiting for AQI');
-            let result = {};
-            // eslint-disable-next-line no-await-in-loop
-            await getAQI(result, point);
-            results.push(result);
-        }
-        res.status(200).json({ 'forecast': results });
-    } catch (error) {
-        res.status(500).json({ 'details': `Error retrieving AQI : ${JSON.stringify(error)}` });
-    }
-});
- */
 interface BitlyResponse {
     message : string
     groups: Array<{
