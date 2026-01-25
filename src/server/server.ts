@@ -122,10 +122,10 @@ const setupPostgres = async () => {
     });
     
     try {
-        await client.connect((err:any) => {if (err) {console.error(err)}});
+        await client.connect((err:any) => {if (err) {warn(err)}});
         return client;
     } catch (excpt) {
-        console.error(excpt);
+        warn(`Postgres connection error: ${excpt}`);
     }
 
 }
