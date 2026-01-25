@@ -184,6 +184,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                         filter(entry => entry[1].maxCallsPerHour === undefined || 
                             entry[1].maxCallsPerHour > forecastData.length).
                         filter(entry => entry[1].max_days >= forecastData.daysInFuture).
+                        filter((entry) => !entry[1].usOnly || country === 'US').
                         map(async (provider) => allForecasts[provider[0]] = await getForecastForProvider(provider[0])))
         // download the file
         writeObjToFile(allForecasts, true)
