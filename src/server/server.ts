@@ -267,7 +267,7 @@ let cache = apicache.options(
 
 
 const stdDevPrecip = (forecastPoint: { lat: number; lon: number; time: string; distance: number; bearing: number; isControl: boolean; }, 
-    zone: string, services: string, res: Response, ip? : string) => {
+    zone: string, services: string, req: RequestWithTimeout, res: Response, ip? : string) => {
     const serviceList = services.split(",").filter(service => service != "climacell")
     try {
         const multipleResults = serviceList.map((service: string) => {
@@ -289,6 +289,10 @@ const stdDevPrecip = (forecastPoint: { lat: number; lon: number; time: string; d
                 ...awaitedResults[0], 
                 stdDev: stdDev
             }
+            if (req.timedout) {
+                warn(`Standard deviation processing finished, but request already timed out. Not sending response.`);
+                return;
+            }        
             res.status(200).json({ 'forecast': resultsWithStdDev });
         })
     } catch (error) {
@@ -375,7 +379,7 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
     }
     
     if (service.indexOf(',') >= 0) {
-        stdDevPrecip(forecastPoints, zone, service, res, req.ip)
+        stdDevPrecip(forecastPoints, zone, service, req, res, req.ip)
         return
     }
     try {
