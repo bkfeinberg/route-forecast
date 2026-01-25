@@ -71,56 +71,48 @@ export const errorDetails = (error : any) => {
     return (error.data) ? error.data.details : JSON.stringify(error);
 }
 
-
-const forecastByParts = (forecastFunc : MutationWrapper, aqiFunc : MutationWrapper, 
-    forecastRequest : Array<ForecastRequest>, zone : string, service : string, 
-    routeName : string, routeNumber : string, dispatch : AppDispatch, fetchAqi : boolean,
+const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper,
+    forecastRequest: Array<ForecastRequest>, zone: string, service: string,
+    routeName: string, routeNumber: string, dispatch: AppDispatch, fetchAqi: boolean,
     lang: string) => {
     let requestCopy = [...forecastRequest]
     let forecastResults = []
     let aqiResults = []
-    let failedRequests: { locations: ForecastRequest; timezone: string; service: string; routeName: string; routeNumber: string; lang: string; which: number; }[] = []
     let locations = requestCopy.shift();
     let which = 0;
     const limit = pLimit(providerValues[service].maxRequests);
-    
+
     while (requestCopy.length >= 0 && locations) {
         try {
-            const request = {locations:locations, timezone:zone, service:service, routeName:routeName, routeNumber:routeNumber, lang:lang, which}
+            const request = { locations: locations, timezone: zone, service: service, routeName: routeName, routeNumber: routeNumber, lang: lang, which }
             const result = limit(() => forecastFunc(request).unwrap())
             result.catch((err) => {
-                 warn(`Forecast fetch failed for part ${which} ${request.locations.lat},${request.locations.lon} with error ${errorDetails(err)}`, {provider:service});
-                 failedRequests.push(request);
-                 info(`There are now ${failedRequests.length} failed requests queued up`);
-                 });
+                warn(`Forecast fetch failed for part ${which} ${request.locations.lat},${request.locations.lon} with error ${errorDetails(err)}`, { provider: service });
+                // retry with alternate provider if any failed
+                if (alternateProvider === service) {
+                    return;
+                }
+                let retryRequest = { ...request, service: alternateProvider };
+                forecastResults.push(limit(() => forecastFunc(retryRequest).unwrap()).catch((err) => {
+                    warn(`Retry forecast fetch failed for part ${which} ${request.locations.lat} using ${alternateProvider} with error ${errorDetails(err)}`, { provider: alternateProvider });
+                }
+                ))
+            }
+            );
             forecastResults.push(result)
             if (fetchAqi) {
-                const aqiRequest = {locations:locations}
+                const aqiRequest = { locations: locations }
                 const aqiResult = aqiFunc(aqiRequest).unwrap()
                 aqiResult.catch((err) => { warn(`AQI fetch failed for part ${which} ${aqiRequest.locations.lat} with error ${errorDetails(err)}`) });
                 aqiResults.push(aqiResult)
             }
-        locations = requestCopy.shift();
+            locations = requestCopy.shift();
             ++which
-        } catch (err :any) {
+        } catch (err: any) {
             dispatch(forecastFetchFailed(err))
         }
     }
-    // retry with alternate provider if any failed
-    if (failedRequests.length > 0) {
-        info(`Retrying ${failedRequests.length} failed forecast requests with alternate provider ${alternateProvider}`);
-/*         for (let i = 0; i < failedRequests.length; ++i) {
-            const request = failedRequests.pop();
-            if (!request) { continue; }
-            request.service = alternateProvider;
-            const result = forecastFunc(request).unwrap();
-            result.catch((err) => {
-                warn(`Retry forecast fetch failed for part ${i} ${request.locations.lat} using ${alternateProvider} with error ${err.details}`);
-                });
-            forecastResults.push(result)
-        } */
-    }
-    return [Promise.allSettled(forecastResults),fetchAqi?Promise.allSettled(aqiResults):[]]
+    return [Promise.allSettled(forecastResults), fetchAqi ? Promise.allSettled(aqiResults) : []]
 }
 
 const doForecastByParts = async (forecastFunc : MutationWrapper, aqiFunc : MutationWrapper,
