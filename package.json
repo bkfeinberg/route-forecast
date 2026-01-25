@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.7.4",
+  "version": "5.7.5",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -17,10 +17,10 @@
     "@emotion/styled": "^11.6.0",
     "@fast-csv/format": "^5.0.2",
     "@loadable/component": "^5.13.2",
-    "@mantine/core": "^8.3.1",
-    "@mantine/dates": "^8.3.1",
-    "@mantine/hooks": "^8.3.1",
-    "@mantine/notifications": "^8.3.2",
+    "@mantine/core": "^8.3.13",
+    "@mantine/dates": "^8.3.13",
+    "@mantine/hooks": "^8.3.13",
+    "@mantine/notifications": "^8.3.13",
     "@mui/material": "^7.0.0",
     "@reduxjs/toolkit": "^2.9.1",
     "@sentry/browser": "^10.19.0",

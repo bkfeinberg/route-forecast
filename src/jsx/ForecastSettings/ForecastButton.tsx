@@ -34,14 +34,13 @@ declare module 'react' {
 
 type PropsFromRedux = ConnectedProps<typeof connector>
 type ForecastButtonProps = PropsFromRedux & {
-    href: string
     origin: string
     computeStdDev: boolean
     downloadAll: boolean
 }
 const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTimestamp, pace, interval,
-     metric, controls, strava_activity, strava_route, provider, href, 
-     urlIsShortened, querySet, zone, computeStdDev, downloadAll} : ForecastButtonProps) => {
+     metric, controls, strava_activity, strava_route, provider, 
+     querySet, zone, computeStdDev, downloadAll} : ForecastButtonProps) => {
     const [forecast, forecastFetchResult] = useForecastMutation()
     const [getAQI, aqiFetchResult] = useGetAqiMutation()
     const dispatch = useAppDispatch()
@@ -65,7 +64,8 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
     const [optionPressed, setOptionPressed] = useState(false)
     const [shiftPressed, setShiftPressed] = useState(false)
     const { i18n } = useTranslation()
-
+    const country = useAppSelector((state: RootState) => state.routeInfo.country);
+    
     const keyIsDown = (event : KeyboardEvent) => {
         if (event.code === "AltLeft" || event.code === "AltRight") {
             setOptionPressed(true)
@@ -101,9 +101,6 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
         let locations = requestCopy.shift();
         let which = 0
         let maxSimultaneousRequests = providerValues[service] ? providerValues[service].maxRequests : 1;
-        if (!providerValues[service]) {
-            warn(`Unknown provider ${service} requested`);
-        }
 
         const limit = pLimit(maxSimultaneousRequests);
         while (requestCopy.length >= 0 && locations) {
@@ -199,6 +196,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
             filter(entry => entry[1].maxCallsPerHour === undefined ||
                 entry[1].maxCallsPerHour > forecastData.length).
             filter(entry => entry[1].max_days >= forecastData.daysInFuture).
+            filter((entry) => !entry[1].usOnly || country === 'US').
             map(value => value[0]);
         // put the primary forecast provider at the front
         const index = providerList.indexOf(provider);
@@ -307,7 +305,6 @@ const mapStateToProps = (state : RootState) =>
         interval: state.uiInfo.routeParams.interval,
         metric: state.controls.metric,
         controls: state.controls.userControlPoints,
-        urlIsShortened: state.uiInfo.dialogParams.shortUrl !== ' ',
         strava_activity: state.strava.activity,
         strava_route: state.strava.route,
         provider: state.forecast.weatherProvider,

@@ -103,7 +103,7 @@ const ForecastSettings = () => {
 }                </div>
                 <div style={{ display: "flex", margin: "30px 0px" }}>
                     <LocationContext.Consumer>
-                        {value => <ForecastButton href={value.href} origin={value.origin} computeStdDev={computeStdDev} downloadAll={downloadAll} />}
+                        {value => <ForecastButton origin={value.origin} computeStdDev={computeStdDev} downloadAll={downloadAll} />}
                     </LocationContext.Consumer>
                 </div>
             </div>
