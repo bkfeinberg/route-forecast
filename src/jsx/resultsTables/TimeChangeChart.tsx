@@ -3,6 +3,7 @@ import { largestTriangleThreeBucket } from 'd3fc-sample';
 import { ResponsiveContainer, LineChart, XAxis, YAxis, Tooltip, Legend, Line, CartesianGrid } from 'recharts';
 import type { ChartDataType, ChartData } from '../../utils/gpxParser';
 import ReactGA from "react-ga4";
+import { ReactNode } from 'react';
 
 export const TimeChangeChart = ({chartData, metric, popoverIsOpen} : {chartData: ChartDataType, metric: boolean, popoverIsOpen: boolean}) => {
     if (!popoverIsOpen || !chartData || chartData.length === 0) {
@@ -37,7 +38,7 @@ export const TimeChangeChart = ({chartData, metric, popoverIsOpen} : {chartData:
             <YAxis dataKey="totalMinutesLost" unit=" mins" />
             <YAxis dataKey="windSpeedMph" type="number" unit={metric?" kph":" mph"} yAxisId="right" orientation="right" 
                 domain={['dataMin', 'dataMax']} tickFormatter={(value:number) => `${value > 0 ? '+':''}${formatWindSpeed(value, metric)}`}/>
-            <Tooltip labelFormatter={(value: number) => formatTipDistance(value, metric)} formatter={(value: number|undefined, name: string|undefined) => formatTooltipValue(value, name, metric)} />
+            <Tooltip labelFormatter={(value: ReactNode) => formatTipDistance(value as number, metric)} formatter={(value: number|undefined, name: string|undefined) => formatTooltipValue(value, name, metric)} />
             <Legend />
             <Line type="monotone" dataKey="totalMinutesLost" dot={false} />
             <Line type="monotone" yAxisId={'right'} dataKey="windSpeedMph" stroke={"#32a852"} dot={false} name={metric?"windSpeedKph":"windSpeedMph"}/>
