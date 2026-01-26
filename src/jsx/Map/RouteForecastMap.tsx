@@ -1,5 +1,6 @@
 import {APIProvider, Map, InfoWindow, useMap, useApiIsLoaded, CollisionBehavior, useMapsLibrary} from '@vis.gl/react-google-maps';
 import * as Sentry from "@sentry/react"
+const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 import sandwich from 'Images/sandwich.png'
 import RainCloud from "Images/lightning-and-blue-rain-cloud-16533.svg?react"
 import PropTypes from 'prop-types';
@@ -255,6 +256,33 @@ const RouteForecastMap = ({maps_api_key} : {maps_api_key: string}) => {
             if (places.length > 0) return
             lookupBusinesses()
         }, [map, placesLib])
+
+        useEffect(() => {
+            if (!map) return;
+
+            // The rendering canvas
+            const canvas = map.getDiv().querySelector('canvas');
+            if (!canvas) return;
+
+            const handleContextLost = (event: { preventDefault: () => void; }) => {
+                // event.preventDefault(); // Prevents the browser from trying to recover automatically
+                warn('LostContextError: WebGL context lost on Google Map.', event);
+                // Implement tracking or UI notification here
+            };
+
+            const handleContextRestored = (event: any) => {
+                info('WebGL context restored.');
+            };
+
+            canvas.addEventListener('webglcontextlost', handleContextLost);
+            canvas.addEventListener('webglcontextrestored', handleContextRestored);
+
+            return () => {
+                canvas.removeEventListener('webglcontextlost', handleContextLost);
+                canvas.removeEventListener('webglcontextrestored', handleContextRestored);
+            };
+        }, [map])
+        
         return <div/>
     }
 
