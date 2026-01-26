@@ -218,7 +218,8 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
             const reactEventParams = {
                 value: distanceInKm, currency:routeNumber, coupon:routeName,
                 items: [{ item_id: '', item_name: '' }], daysInFuture: getDaysInFuture(startTimestamp),
-                provider: forecastProvider
+                // only report the first provider to GA if forecasting with multiple providers
+                provider: forecastProvider.indexOf(',') >= 0 ? provider : forecastProvider
             }
             ReactGA.event('add_payment_info', reactEventParams);
             Sentry.metrics.count("forecast_requests", 1, {attributes:{provider:forecastProvider}});
