@@ -1,7 +1,7 @@
 //import * as Sentry from "@sentry/react";
 import { init, feedbackIntegration, browserSessionIntegration, browserTracingIntegration,
      browserProfilingIntegration, replayIntegration, replayCanvasIntegration, 
-     thirdPartyErrorFilterIntegration, setTag, logger, metrics } from '@sentry/react';
+     thirdPartyErrorFilterIntegration, setTag, logger, metrics, setContext } from '@sentry/react';
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 import { createRoot } from 'react-dom/client';
@@ -30,10 +30,12 @@ if ('serviceWorker' in navigator) {
         return;
     });
 
+    setContext("serviceWorker", { installed: serviceWorkerInstalled });
     navigator.serviceWorker.register('/worker.js').then((registration) => {
         console.log(`Service worker registered! - ${registration.scope}`);
         serviceWorkerInstalled = true;
         metrics.count("install_successes", 1, {attributes:{registration:JSON.stringify(registration)}});
+        setContext("serviceWorker", { installed: true });
         if (registration.active) {
             console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
         }
@@ -43,9 +45,9 @@ if ('serviceWorker' in navigator) {
         if (event.target && (event.target as ServiceWorker).state === 'redundant') {
             warn(`Service worker did not install correctly, was redundant`);
         } else if (event.target && (event.target as ServiceWorker).state === 'activated') {
-            trace(`Service worker state changed to ${(event.target as ServiceWorker).state}`);
+            // trace(`Service worker state changed to ${(event.target as ServiceWorker).state}`);
         }});        
-    }).catch((error) => {
+    }).catch((error) => { 
         warn(`Error registering service worker, while browser was ${navigator.onLine?'online':'offline'}: ${error}`);
         metrics.count("install_failures", 1, {attributes:{error:error}});
     });
