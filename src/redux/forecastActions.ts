@@ -92,6 +92,7 @@ const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper
                 if (alternateProvider === service) {
                     return;
                 }
+                info(`Retrying forecast fetch for part ${which} ${request.locations.lat},${request.locations.lon} using ${alternateProvider}`, { provider: alternateProvider });
                 let retryRequest = { ...request, service: alternateProvider };
                 forecastResults.push(limit(() => forecastFunc(retryRequest).unwrap()).catch((err) => {
                     warn(`Retry forecast fetch failed for part ${which} ${request.locations.lat} using ${alternateProvider} with error ${errorDetails(err)}`, { provider: alternateProvider });

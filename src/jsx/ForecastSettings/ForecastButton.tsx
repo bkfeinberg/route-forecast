@@ -115,6 +115,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                 if (alternateProvider === service) {
                     return;
                 }
+                info(`Retrying forecast fetch [FB] for part ${which} ${request.locations.lat},${request.locations.lon} using ${alternateProvider}`, { provider: alternateProvider });
                 let retryRequest = { ...request, service: alternateProvider };
                 forecastResults.push(limit(() => forecast(retryRequest).unwrap()).catch((err) => {
                     warn(`Retry forecast fetch failed for part ${which} ${request.locations.lat} using ${alternateProvider} with error ${errorDetails(err)}`, { provider: alternateProvider });
