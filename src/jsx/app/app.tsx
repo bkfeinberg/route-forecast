@@ -31,11 +31,13 @@ if ('serviceWorker' in navigator) {
     });
 
     setContext("serviceWorker", { installed: serviceWorkerInstalled });
+    setTag("serviceWorkerInstalled", false);
     navigator.serviceWorker.register('/worker.js').then((registration) => {
         console.log(`Service worker registered! - ${registration.scope}`);
         serviceWorkerInstalled = true;
         metrics.count("install_successes", 1, {attributes:{registration:JSON.stringify(registration)}});
         setContext("serviceWorker", { installed: true });
+        setTag("serviceWorkerInstalled", true);
         if (registration.active) {
             console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
         }
