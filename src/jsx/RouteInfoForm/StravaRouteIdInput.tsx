@@ -2,6 +2,9 @@ import {connect, ConnectedProps} from 'react-redux';
 import type { RootState } from "../../redux/store";
 import { stravaRouteSet } from '../../redux/stravaSlice';
 import { Flex, Input } from '@mantine/core';
+import {logger} from "@sentry/react";
+const { trace, debug, info, warn, error, fatal, fmt } = logger;
+
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 const StravaRouteIdInput = ({ stravaRouteSet, strava_route } : PropsFromRedux) => {
@@ -22,7 +25,7 @@ const StravaRouteIdInput = ({ stravaRouteSet, strava_route } : PropsFromRedux) =
                                     }
                                 });
                             } else {
-                                console.log('vetoing drop of', i, dt.items[i].kind);
+                                info(`vetoing drop of ${i} ${dt.items[i].kind}`);
                                 return false;
                             }
                         }

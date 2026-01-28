@@ -7,6 +7,8 @@ import type { RootState } from "../../redux/store";
 import { ChangeEvent, RefObject } from 'react';
 import { CloseButton, Flex, TextInput } from '@mantine/core';
 import { updateHistory } from '../../jsx/app/updateHistory';
+import {logger} from "@sentry/react";
+const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 export const decideValidationStateFor = (type : string, methodUsed : string|null, loadingSuccess : boolean) => {
     if (type === methodUsed) {
@@ -72,6 +74,7 @@ const RideWithGpsId = ({rwgpsRouteSet,loadingSource,loadingSuccess,rwgpsRoute,ro
                                     settingRoute(value);
                                 });
                             } else {
+                                info(`vetoing drop of ${i} ${dt.items[i].kind}`);
                                 return false;
                             }
                         }

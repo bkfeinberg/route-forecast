@@ -1,4 +1,5 @@
-import * as Sentry from "@sentry/react";
+import {logger} from "@sentry/react";
+const { trace, debug, info, warn, error, fatal, fmt } = logger;
 import { routeLoadingModes } from "../data/enums";
 import { useMemo } from "react";
 import gpxParser, { type Point } from "./gpxParser";
@@ -39,7 +40,7 @@ export const usePointsAndBounds = (): PointsAndBounds => {
     pointsAndBounds = useMemo(() => gpxParser.computePointsAndBounds(gpxParser.parseRwgpsRouteStream(rwgpsRouteData)), [rwgpsRouteData]);
     // pointsAndBounds = gpxParser.computePointsAndBounds(gpxParser.parseRwgpsRouteStream(rwgpsRouteData))
     if (!pointsAndBounds) {
-      console.log(`no points and bounds from RWGPS data with ${rwgpsRouteData[rwgpsRouteData.type].track_points.length} points`);
+      warn(`no points and bounds from RWGPS data with ${rwgpsRouteData[rwgpsRouteData.type].track_points.length} points`);
     }
   } else if (gpxRouteData !== null) {
     pointsAndBounds = useMemo(() => gpxParser.computePointsAndBounds(gpxParser.parseGpxRouteStream(gpxRouteData)), [gpxRouteData]);

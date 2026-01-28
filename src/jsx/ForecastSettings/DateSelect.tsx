@@ -28,7 +28,6 @@ const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFutur
     const { t, i18n } = useTranslation()
     const setDateFromPicker = (dateTimeString : string|null) => {
         if (dateTimeString) {
-            console.log(dateTimeString)
             setStart(DateTime.fromFormat(dateTimeString, "yyyy-MM-dd HH:mm:ss", {zone:zone}).toMillis());
         }
     }

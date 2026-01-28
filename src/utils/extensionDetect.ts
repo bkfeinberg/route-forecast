@@ -1,4 +1,6 @@
 const requiredVersion = 1.0;
+import {logger} from "@sentry/react";
+const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 declare global {
     interface Window { getRpExtVersion: any; }
@@ -39,7 +41,7 @@ export const extensionIsInstalled = () => {
             chrome.runtime.sendMessage('bgodmjchmhnpgccglldbfddddignglep', { message: "version" },
             (reply) => {
                 if (chrome.runtime.lastError) {
-                    console.log(chrome.runtime.lastError.message);
+                    warn(chrome.runtime.lastError.message||'Unknown error when checking extension version');
                     resolve(false);
                 }
                 if (reply) {
