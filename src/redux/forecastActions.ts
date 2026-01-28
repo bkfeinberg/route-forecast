@@ -68,7 +68,7 @@ export const cancelForecast = () => {
 }
 
 export const errorDetails = (error : any) => {
-    return (error.data) ? error.data.details : JSON.stringify(error);
+    return (error.data && error.data.details) ? error.data.details : JSON.stringify(error);
 }
 
 const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper,
