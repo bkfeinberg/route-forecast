@@ -36,6 +36,7 @@ if ('serviceWorker' in navigator) {
         serviceWorkerInstalled: false
     });
 
+    let serviceWorkerInstallationFailed = false;
     navigator.serviceWorker.register('/worker.js').then((registration) => {
         console.log(`Service worker registered! - ${registration.scope}`);
         serviceWorkerInstalled = true;
@@ -53,13 +54,40 @@ if ('serviceWorker' in navigator) {
         registration.installing?.addEventListener('statechange', (event : Event) => {
         if (event.target && (event.target as ServiceWorker).state === 'redundant') {
             warn(`Service worker did not install correctly, was redundant`);
+             serviceWorkerInstallationFailed = true;
+             metrics.count("install_failures", 1, {attributes:{error:'Redundant'}});
         } else if (event.target && (event.target as ServiceWorker).state === 'activated') {
             // trace(`Service worker state changed to ${(event.target as ServiceWorker).state}`);
         }});        
     }).catch((error) => { 
         warn(`Error registering service worker, while browser was ${navigator.onLine?'online':'offline'}: ${error}`);
+        serviceWorkerInstallationFailed = true;
         metrics.count("install_failures", 1, {attributes:{error:error}});
     });
+
+    navigator.serviceWorker.ready
+        .then(registration => {
+            // This code runs when an active service worker is ready to control clients
+            console.log('An active service worker is ready and controlling the page.', registration);
+            // Place code here that depends on the service worker being functional
+            // (e.g., using postMessage or enabling offline features in your UI)
+            if (serviceWorkerInstallationFailed) {
+                info('Service Worker installed after previously failing to install.');
+                metrics.count("install_successes", 1, {attributes:{registration:JSON.stringify(registration)}});
+                metrics.count("install_failures", -1);
+                setContext("serviceWorker", { installed: true });
+                setTag("serviceWorkerInstalled", true);
+                getGlobalScope().setAttributes({
+                    serviceWorkerInstalled: true
+                });
+            }
+            serviceWorkerInstallationFailed = false
+            serviceWorkerInstalled = true;
+        })
+        .catch(error => {
+            warn(`Service Worker ready check failed with ${error}`);
+            serviceWorkerInstallationFailed = true;
+        });
 }
 
 window.addEventListener('online', (event) => {
