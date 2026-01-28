@@ -346,6 +346,7 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     if (fetchAqi) {
         dispatch(fetchAqiSet(fetchAqi==="true"))
     }
+    ReactGA.event('language_detected', {language:i18n.resolvedLanguage});
     if (i18n.resolvedLanguage?.startsWith('fr')) {
         ReactGA.event('tutorial_begin')
     }
