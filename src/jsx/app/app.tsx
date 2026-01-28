@@ -1,7 +1,7 @@
 //import * as Sentry from "@sentry/react";
 import { init, feedbackIntegration, browserSessionIntegration, browserTracingIntegration,
      browserProfilingIntegration, replayIntegration, replayCanvasIntegration, 
-     thirdPartyErrorFilterIntegration, setTag, logger, metrics, setContext } from '@sentry/react';
+     thirdPartyErrorFilterIntegration, setTag, logger, metrics, setContext, getGlobalScope } from '@sentry/react';
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 import { createRoot } from 'react-dom/client';
@@ -32,12 +32,19 @@ if ('serviceWorker' in navigator) {
 
     setContext("serviceWorker", { installed: serviceWorkerInstalled });
     setTag("serviceWorkerInstalled", false);
+    getGlobalScope().setAttributes({
+        serviceWorkerInstalled: false
+    });
+
     navigator.serviceWorker.register('/worker.js').then((registration) => {
         console.log(`Service worker registered! - ${registration.scope}`);
         serviceWorkerInstalled = true;
         metrics.count("install_successes", 1, {attributes:{registration:JSON.stringify(registration)}});
         setContext("serviceWorker", { installed: true });
         setTag("serviceWorkerInstalled", true);
+        getGlobalScope().setAttributes({
+            serviceWorkerInstalled: true
+        });
         if (registration.active) {
             console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
         }
