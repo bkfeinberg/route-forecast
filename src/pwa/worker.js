@@ -14,40 +14,20 @@ const sendLogMessage = (message, type) => {
     });
 };
 
-// sendLogMessage('About to import localforage', 'trace');
-
-try {
-    importScripts('lib/localforage.js');
-} catch (err) {
-    sendLogMessage(`Error importing localforage.js: ${err}`, 'error');
-}
+importScripts('lib/localforage.js');
 
 const cacheName = 'RandoplanCache_v1';
 const indexed_db_app_name = 'RandoplanPOST_DB';
 const indexed_db_table_name = 'RandoplanPOST_Cache';
 let postCache;
 
-// sendLogMessage('Service Worker loading', 'info');
-
 self.addEventListener('install', (event) => {
-    // sendLogMessage('creating Cache in install event', 'trace');
-
-    try {
-        postCache = localforage.createInstance({
-            name: indexed_db_app_name,
-            storeName: indexed_db_table_name})
-    } catch (err) {
-        sendLogMessage(`Error creating IndexedDB instance: ${err}`, 'error');
-    }
-/*     event.waitUntil(caches.open(cacheName).then((cache) => {
-        // `Cache` instance for later use.
-        return cache.addAll([
-            '/static/main.css',
-            '/static/main.bundle.js',
-            'static/favicon.ico',
-            'static/manifest.json'
-        ]));
-    })); */
+    postCache = localforage.createInstance({
+        name: indexed_db_app_name,
+        storeName: indexed_db_table_name
+    });
+    
+    event.waitUntil(Promise.all([postCache.ready(), caches.open(cacheName)]));
     self.skipWaiting().then(() => {
         // sendLogMessage('Service Worker skipWaiting complete', 'trace');
     }).catch((err) => {
@@ -55,9 +35,7 @@ self.addEventListener('install', (event) => {
     });
 });
 
-// 
 self.addEventListener('activate', (e) => {
-    // sendLogMessage('deleting old caches', 'trace');
     try {
         e.waitUntil(caches.keys().then((keyList) => {
             return Promise.all(keyList.map((key) => {
@@ -188,24 +166,26 @@ const getAndCachePOST = async (request) => {
             // console.info(`inserting item into POST cache with key ${cacheKey}`, response);
             if (postCache !== undefined) {
                 postCache.setItem(cacheKey, serializeResponse(response.clone()));
-            } /* else {
-                postCache = localforage.createInstance({
+            } else {
+                sendLogMessage(`POST cache is undefined, cannot cache response for ${request.url} ${cacheKey}`, 'error');
+/*                 postCache = localforage.createInstance({
                     name: indexed_db_app_name,
                     storeName: indexed_db_table_name
                 });
                 postCache.setItem(cacheKey, serializeResponse(response.clone()));
-            } */
+ */            } 
             return response;
         } else {
             // If it does not work, return the cached response. If the cache does not
             // contain a response for our request, it will give us a 503-response
             // don't know how this could happen, but evidently it can
-            // if (postCache === undefined) {
-            //     postCache = localforage.createInstance({
-            //         name: indexed_db_app_name,
-            //         storeName: indexed_db_table_name
-            //     });
-            // }
+            if (postCache === undefined) {
+                sendLogMessage(`POST cache is undefined, cannot retrieve response for ${request.url} ${cacheKey}`, 'error');
+/*                 postCache = localforage.createInstance({
+                    name: indexed_db_app_name,
+                    storeName: indexed_db_table_name
+                });
+ */            }
             let cachedResponse = postCache && await postCache.getItem(cacheKey);
             if (!cachedResponse) {
                 // sendLogMessage(`Returning 502 for POST to ${request.url} with ${cacheKey}`, 'warning');
