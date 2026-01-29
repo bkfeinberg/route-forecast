@@ -46,18 +46,13 @@ if ('serviceWorker' in navigator) {
         getGlobalScope().setAttributes({
             serviceWorkerInstalled: true
         });
-        if (registration.active) {
-            console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
-        }
-    // reg.installing may or may not be set, depending on whether
+        // reg.installing may or may not be set, depending on whether
         // a new SW was registered.
         registration.installing?.addEventListener('statechange', (event : Event) => {
         if (event.target && (event.target as ServiceWorker).state === 'redundant') {
             warn(`Service worker did not install correctly, was redundant`);
              serviceWorkerInstallationFailed = true;
              metrics.count("install_failures", 1, {attributes:{error:'Redundant'}});
-        } else if (event.target && (event.target as ServiceWorker).state === 'activated') {
-            // trace(`Service worker state changed to ${(event.target as ServiceWorker).state}`);
         }});        
     }).catch((error) => { 
         warn(`Error registering service worker, while browser was ${navigator.onLine?'online':'offline'}: ${error}`);
@@ -69,6 +64,9 @@ if ('serviceWorker' in navigator) {
         .then(registration => {
             // This code runs when an active service worker is ready to control clients
             console.log('An active service worker is ready and controlling the page.', registration);
+            if (registration.active) {
+                console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
+            }
             // Place code here that depends on the service worker being functional
             // (e.g., using postMessage or enabling offline features in your UI)
             if (serviceWorkerInstallationFailed) {
@@ -80,6 +78,8 @@ if ('serviceWorker' in navigator) {
                 getGlobalScope().setAttributes({
                     serviceWorkerInstalled: true
                 });
+            } else {
+                info('Service Worker ready check completed normally.');
             }
             serviceWorkerInstallationFailed = false
             serviceWorkerInstalled = true;
