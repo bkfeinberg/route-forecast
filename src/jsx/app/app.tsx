@@ -124,6 +124,7 @@ else {
                 dsn: 'https://ea4c472ff9054dab8c18d594b95d8da2@sentry.io/298059',
                 _experiments: { enableLogs: true },
                 environment: 'production',
+                sendDefaultPii: true,
                 ignoreErrors: [
                     "Non-Error exception captured",
                     "Non-Error promise rejection captured"
@@ -156,10 +157,10 @@ else {
                 tracePropagationTargets: ["localhost", /^https:\/\/www\.randoplan\.com/],
                 // This sets the sample rate to be 10%. You may want this to be 100% while
                 // in development and sample at a lower rate in production
-                replaysSessionSampleRate: 0.02,
+                replaysSessionSampleRate: 0.03,
                 // If the entire session is not sampled, use the below sample rate to sample
                 // sessions when an error occurs.
-                replaysOnErrorSampleRate: 0.8,
+                replaysOnErrorSampleRate: 0.9,
                 normalizeDepth: 5
             });
         }
