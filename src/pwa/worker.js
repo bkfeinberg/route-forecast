@@ -163,17 +163,15 @@ const getAndCachePOST = async (request) => {
         const response = await fetch(request.clone()).catch((err) => sendLogMessage(`Could not POST to ${request.url} ${cacheKey} (${err}), will try cache`, 'warning'));
         if (response !== undefined && response.ok) {
             // If it works, put the response into IndexedDB
-            // console.info(`inserting item into POST cache with key ${cacheKey}`, response);
-            if (postCache !== undefined) {
-                postCache.setItem(cacheKey, serializeResponse(response.clone()));
-            } else {
-                sendLogMessage(`POST cache is undefined, cannot cache response for ${request.url} ${cacheKey}`, 'error');
-/*                 postCache = localforage.createInstance({
+            console.info(`inserting item into POST cache with key ${cacheKey}`, response);
+            if (!postCache) {
+                sendLogMessage(`POST cache is undefined, creating instance for ${request.url} ${cacheKey}`, 'info');
+                postCache = localforage.createInstance({
                     name: indexed_db_app_name,
                     storeName: indexed_db_table_name
                 });
-                postCache.setItem(cacheKey, serializeResponse(response.clone()));
- */            } 
+            }
+            postCache.setItem(cacheKey, serializeResponse(response.clone()));
             return response;
         } else {
             // If it does not work, return the cached response. If the cache does not
