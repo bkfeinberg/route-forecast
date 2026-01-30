@@ -79,7 +79,7 @@ if ('serviceWorker' in navigator) {
                     serviceWorkerInstalled: true
                 });
             } else {
-                info('Service Worker ready check completed normally.');
+                // info('Service Worker ready check completed normally.');
             }
             serviceWorkerInstallationFailed = false
             serviceWorkerInstalled = true;
