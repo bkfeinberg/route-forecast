@@ -73,7 +73,7 @@ const RWGPSRouteList = ({ }) => {
             </Combobox.Target>
 
             <Combobox.Dropdown className="dropdown">
-                <Combobox.Options style={{ overflowY: 'auto' }}>
+                <Combobox.Options mah={400} style={{ overflowY: 'auto' }}>
                     {options.length === 0 ? <Combobox.Empty>Nothing found</Combobox.Empty> : options}
                 </Combobox.Options>
             </Combobox.Dropdown>
