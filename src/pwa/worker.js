@@ -22,7 +22,7 @@ const indexed_db_table_name = 'RandoplanPOST_Cache';
 let postCache;
 
 self.addEventListener('install', (event) => {
-    postCache = localforage.createInstance({
+    self.postCache = self.localforage.createInstance({
         name: indexed_db_app_name,
         storeName: indexed_db_table_name
     });
@@ -164,29 +164,29 @@ const getAndCachePOST = async (request) => {
         if (response !== undefined && response.ok) {
             // If it works, put the response into IndexedDB
             console.info(`inserting item into POST cache with key ${cacheKey}`, response);
-            if (!postCache) {
+            if (!self.postCache) {
                 sendLogMessage(`POST cache is undefined, creating instance for ${request.url} ${cacheKey}`, 'info');
-                postCache = localforage.createInstance({
+                self.postCache = localforage.createInstance({
                     name: indexed_db_app_name,
                     storeName: indexed_db_table_name
                 });
             }
-            postCache.setItem(cacheKey, serializeResponse(response.clone()));
+            self.postCache.setItem(cacheKey, serializeResponse(response.clone()));
             return response;
         } else {
             // If it does not work, return the cached response. If the cache does not
             // contain a response for our request, it will give us a 503-response
             // don't know how this could happen, but evidently it can
-            if (postCache === undefined) {
+            if (self.postCache === undefined) {
                 sendLogMessage(`POST cache is undefined, cannot retrieve response for ${request.url} ${cacheKey}`, 'error');
 /*                 postCache = localforage.createInstance({
                     name: indexed_db_app_name,
                     storeName: indexed_db_table_name
                 });
  */            }
-            let cachedResponse = postCache && await postCache.getItem(cacheKey);
+            let cachedResponse = self.postCache && await self.postCache.getItem(cacheKey);
             if (!cachedResponse) {
-                // sendLogMessage(`Returning 502 for POST to ${request.url} with ${cacheKey}`, 'warning');
+                sendLogMessage(`No cache entry, returning 502 for POST to ${request.url} with ${cacheKey}`, 'warning');
                 if (response) {     // but presumably it's not ok
                     try {
                         const json = await response.json();
@@ -198,7 +198,7 @@ const getAndCachePOST = async (request) => {
                     return Response.json({details: 'No cached POST response available'}, {status:502, statusText: 'Service Unavailable'});
                 }
             }
-            // sendLogMessage(`Returning cached copy for ${request.url}`, 'info');
+            sendLogMessage(`Returning cached copy for ${request.url}`, 'info');
             return deserializeResponse(cachedResponse);
         }
     } catch (err) {
@@ -214,13 +214,12 @@ const getAndCachePOST = async (request) => {
     }
 }
 
-// sendLogMessage('About to define fetch listener in Service Worker loaded', 'trace');
 self.addEventListener('fetch', (event) => {
     const url = event.request.url;
     if (!url.startsWith(self.location.origin) &&
         !url.startsWith("https://maps.googleaapis.com") && !url.startsWith("https://maps.googleapis.com/maps/api/js") &&
-        !url.startsWith("https://fonts.gstatic.com") && !url.startsWith("https://maps.googleapis.com/maps/api/timezone") &&
-        !url.includes('/rwgps_route') && !url.includes('/forecast_one') && !url.startsWith('https://www.weather.gov/images')
+        !url.startsWith("https://fonts.gstatic.com") &&
+        !url.startsWith('https://www.weather.gov/images')
     ) {
         // console.info(`returning and not handling url ${url}`);
         return;
