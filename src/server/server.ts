@@ -608,7 +608,6 @@ const getStravaToken = async (code : string) => {
 };
  */
 const remote_randoplan_uri='https://www.randoplan.com/rwgpsAuthReply';
-// uncomment the line below and comment the one above when testing pinned route functions locally
 const local_randoplan_uri='http://localhost:8080/rwgpsAuthReply';
 
 app.get('/rwgpsAuthReq', (req: Request, res : Response) => {
