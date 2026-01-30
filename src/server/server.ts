@@ -613,7 +613,7 @@ const local_randoplan_uri='http://localhost:8080/rwgpsAuthReply';
 
 app.get('/rwgpsAuthReq', (req: Request, res : Response) => {
     const isLocal = req.socket.localAddress === req.socket.remoteAddress;
-    console.log(isLocal)
+    console.log(`Auth request is ${isLocal ? 'local' : 'remote'}`);
     const randoplan_uri = isLocal ? local_randoplan_uri : remote_randoplan_uri
     const state = req.query.state;
     if (state === undefined) {
