@@ -183,7 +183,7 @@ const getAndCachePOST = async (request) => {
             return response;
         } else {
             // If it does not work, return the cached response. If no cached response, return 502
-            let responseBody = response ? `${response?.status} ${response?.statusText} ${await response.text()}` : 'no response';
+            let responseBody = response ? `${response?.status} ${response?.statusText} ${await response.clone().text()}` : 'no response';
             sendLogMessage(`Checking POST cache for ${request.url} after response of ${responseBody}`, 'info');
             let cachedResponse = await localforage.getItem(cacheKey);
             if (!cachedResponse) {
