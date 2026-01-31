@@ -1,5 +1,7 @@
 /* globals importScripts, localforage */
 
+importScripts('lib/localforage.js');
+
 const sendLogMessage = (message, type) => {
   // Get all active windows/tabs controlled by this service worker
   self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
@@ -14,19 +16,18 @@ const sendLogMessage = (message, type) => {
     });
 };
 
-importScripts('lib/localforage.js');
-
 const version = process.env.SW_VERSION;
 const cacheName = `RandoplanCache_${version}`;
 const indexed_db_app_name = 'RandoplanPOST_DB';
 const indexed_db_table_name = 'RandoplanPOST_Cache';
 
 self.addEventListener('install', (event) => {
-    self.postCache = self.localforage.createInstance({
+    // delete old IndexedDB instance to avoid conflicts
+    self.localforage.dropInstance({
         name: indexed_db_app_name,
         storeName: indexed_db_table_name
     });
-    self.postCache.clear().then(() => {
+    self.localforage.clear().then(() => {
         // sendLogMessage('Cleared POST IndexedDB cache', 'trace');
     });
     const assetsToCache = self.__WB_MANIFEST;
@@ -34,11 +35,13 @@ self.addEventListener('install', (event) => {
         return '/static/' + entry.url;
     });
 
-    event.waitUntil(Promise.all([self.postCache.ready(),
-        caches.open(cacheName).then(async (cache) => {
-            return cache.addAll(urlsToCache);
-        }
-        )
+    event.waitUntil(Promise.all([localforage.ready().catch((err) => {
+        sendLogMessage(`localforage failed to find a storage method: ${err}`, 'error');
+    }),
+    caches.open(cacheName).then(async (cache) => {
+        return cache.addAll(urlsToCache);
+    }
+    )
     ]))
     self.skipWaiting().then(() => {
         // sendLogMessage('Service Worker skipWaiting complete', 'trace');
@@ -176,27 +179,13 @@ const getAndCachePOST = async (request) => {
         if (response !== undefined && response.ok) {
             // If it works, put the response into IndexedDB
             console.info(`inserting item into POST cache with key ${cacheKey}`, response);
-            if (!self.postCache) {
-                sendLogMessage(`POST cache is undefined, creating instance for ${request.url} ${cacheKey}`, 'info');
-                self.postCache = localforage.createInstance({
-                    name: indexed_db_app_name,
-                    storeName: indexed_db_table_name
-                });
-            }
-            self.postCache.setItem(cacheKey, serializeResponse(response.clone()));
+            localforage.setItem(cacheKey, serializeResponse(response.clone()));
             return response;
         } else {
             // If it does not work, return the cached response. If the cache does not
             // contain a response for our request, it will give us a 503-response
             // don't know how this could happen, but evidently it can
-            if (self.postCache === undefined) {
-                sendLogMessage(`POST cache is undefined, cannot retrieve response for ${request.url} ${cacheKey}`, 'error');
-/*                 postCache = localforage.createInstance({
-                    name: indexed_db_app_name,
-                    storeName: indexed_db_table_name
-                });
- */            }
-            let cachedResponse = self.postCache && await self.postCache.getItem(cacheKey);
+            let cachedResponse = await localforage.getItem(cacheKey);
             if (!cachedResponse) {
                 sendLogMessage(`No cache entry, returning 502 for POST to ${request.url} with ${cacheKey}`, 'warning');
                 if (response) {     // but presumably it's not ok
@@ -232,9 +221,10 @@ self.addEventListener('fetch', (event) => {
         !url.startsWith("https://maps.googleaapis.com") && !url.startsWith("https://maps.googleapis.com/maps/api/js") &&
         !url.startsWith("https://fonts.gstatic.com") &&
         !url.startsWith('https://www.weather.gov/images') &&
-        !url.startsWith('/?') && !url.startsWith('/rwgpsAuth')
+        !url.startsWith('/?') && !url.startsWith('/rwgpsAuth') && 
+        !url.startsWith('https://www.randoplan.com/?')
     ) {
-        console.info(`returning and not handling url ${url}`);
+        // console.info(`returning and not handling url ${url}`);
         return;
     }
     // we don't need to cache the pinned routes, the intent of caching is to preserve completed forecasts
