@@ -176,15 +176,15 @@ const getAndCachePOST = async (request) => {
             sendLogMessage(`Contents of unknown POST request to ${request.url}: ${JSON.stringify(formData)}`, 'warning');
         }
         const response = await fetch(request.clone()).catch((err) => sendLogMessage(`Could not POST to ${request.url} ${cacheKey} (${err}), will try cache`, 'warning'));
-        if (response !== undefined && response.ok) {
+        if (response && response.ok) {
             // If it works, put the response into IndexedDB
             console.info(`inserting item into POST cache with key ${cacheKey}`, response);
             localforage.setItem(cacheKey, serializeResponse(response.clone()));
             return response;
         } else {
-            // If it does not work, return the cached response. If the cache does not
-            // contain a response for our request, it will give us a 503-response
-            // don't know how this could happen, but evidently it can
+            // If it does not work, return the cached response. If no cached response, return 502
+            let responseBody = response ? `${response?.status} ${response?.statusText} ${await response.text()}` : 'no response';
+            sendLogMessage(`Checking POST cache for ${request.url} after response of ${responseBody}`, 'info');
             let cachedResponse = await localforage.getItem(cacheKey);
             if (!cachedResponse) {
                 sendLogMessage(`No cache entry, returning 502 for POST to ${request.url} with ${cacheKey}`, 'warning');
