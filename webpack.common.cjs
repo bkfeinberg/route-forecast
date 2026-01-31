@@ -163,7 +163,7 @@ module.exports = (env, argv) => {
             new InjectManifest({
                 swSrc: path.resolve(__dirname, 'src/pwa/worker.js'),
                 swDest: 'worker.js',
-                exclude: [/\.map$/,/\.ejs$/,/source-context\.json$/],
+                exclude: [/\.map$/,/\.ejs$/,/source-context\.json$/, /LICENSE\.txt$/, /visualize\./],
                 maximumFileSizeToCacheInBytes: 10 * 1024 * 1024 // 10 MB
             }),
             new CopyWebpackPlugin({
@@ -172,7 +172,6 @@ module.exports = (env, argv) => {
                     { from: SRC_STATIC_DIR + '/apple-*.*', to: path.resolve(STATIC_DIR, "[name][ext]") },
                     { from: 'manifest.json', to: path.resolve(STATIC_DIR, "[name][ext]") },
                     { from: 'robots.txt', to: path.resolve(STATIC_DIR, "[name][ext]") },
-                    // { from: 'src/pwa/worker.js', to: path.resolve(STATIC_DIR, "[name][ext]") },
                     { from: 'node_modules/localforage/dist/localforage.min.js', to: path.resolve(STATIC_DIR, "lib/localforage.min.js") },
                     { from: 'node_modules/localforage/dist/localforage.js', to: path.resolve(STATIC_DIR, "lib/localforage.js") },
                     { from: 'source-context.json', to: path.resolve(SERVER_DIR, "[name][ext]") }
