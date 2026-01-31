@@ -163,7 +163,7 @@ module.exports = (env, argv) => {
             new InjectManifest({
                 swSrc: path.resolve(__dirname, 'src/pwa/worker.js'),
                 swDest: 'worker.js',
-                exclude: [/\.map$/,/\.ejs$/,/source-context\.json$/, /LICENSE\.txt$/, /visualize\./],
+                exclude: [/\.map$/,/\.ejs$/,/source-context\.json$/, /LICENSE\.txt$/, /visualize\./, /manifest\.json$/],
                 maximumFileSizeToCacheInBytes: 10 * 1024 * 1024 // 10 MB
             }),
             new CopyWebpackPlugin({
