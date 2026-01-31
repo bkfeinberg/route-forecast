@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.7.10",
+  "version": "5.7.11",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -170,7 +170,8 @@
     "typescript": "^5.4.5",
     "webpack-cli": "^6.0.1",
     "webpack-merge": "^6.0.1",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "workbox-webpack-plugin": "^7.4.0"
   },
   "scripts": {
     "prod": "./node_modules/.bin/webpack --mode production --config webpack.prod.js --env sentryRelease && tsc -p tsconfig_server.json > tsc.log",

@@ -16,18 +16,30 @@ const sendLogMessage = (message, type) => {
 
 importScripts('lib/localforage.js');
 
-const cacheName = 'RandoplanCache_v1';
+const version = process.env.SW_VERSION;
+const cacheName = `RandoplanCache_${version}`;
 const indexed_db_app_name = 'RandoplanPOST_DB';
 const indexed_db_table_name = 'RandoplanPOST_Cache';
-let postCache;
 
 self.addEventListener('install', (event) => {
     self.postCache = self.localforage.createInstance({
         name: indexed_db_app_name,
         storeName: indexed_db_table_name
     });
-    
-    event.waitUntil(Promise.all([postCache.ready(), caches.open(cacheName)]));
+    self.postCache.clear().then(() => {
+        // sendLogMessage('Cleared POST IndexedDB cache', 'trace');
+    });
+    const assetsToCache = self.__WB_MANIFEST;
+    const urlsToCache = assetsToCache.map((entry) => {
+        return '/static/' + entry.url;
+    });
+
+    event.waitUntil(Promise.all([self.postCache.ready(),
+        caches.open(cacheName).then(async (cache) => {
+            return cache.addAll(urlsToCache);
+        }
+        )
+    ]))
     self.skipWaiting().then(() => {
         // sendLogMessage('Service Worker skipWaiting complete', 'trace');
     }).catch((err) => {
@@ -219,9 +231,10 @@ self.addEventListener('fetch', (event) => {
     if (!url.startsWith(self.location.origin) &&
         !url.startsWith("https://maps.googleaapis.com") && !url.startsWith("https://maps.googleapis.com/maps/api/js") &&
         !url.startsWith("https://fonts.gstatic.com") &&
-        !url.startsWith('https://www.weather.gov/images')
+        !url.startsWith('https://www.weather.gov/images') &&
+        !url.startsWith('/?') && !url.startsWith('/rwgpsAuth')
     ) {
-        // console.info(`returning and not handling url ${url}`);
+        console.info(`returning and not handling url ${url}`);
         return;
     }
     // we don't need to cache the pinned routes, the intent of caching is to preserve completed forecasts
