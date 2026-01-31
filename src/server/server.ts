@@ -352,8 +352,12 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
         logger.info(`Request from ${req.ip} for ${forecastPoints.lat},${forecastPoints.lon} from ${service} at ${forecastPoints.time}`);
     }
     if (req.body.routeName !== undefined && req.body.routeName !== '' && req.body.which===0) {
-        if (!postgresClient) {
-            postgresClient = await setupPostgres();
+        try {
+            if (!postgresClient) {
+                postgresClient = await setupPostgres();
+            }
+        } catch (err) {
+            warn(`Postgres setup failed: ${err}`);
         }
         if (postgresClient && req.body.routeNumber && req.body.routeName) {
             // tear off the privacy code if any
