@@ -144,7 +144,7 @@ const getAndCacheGET = async (request) => {
     const url = request.url;
     let response = await fetch(request).catch(() => sendLogMessage(`Could not GET, will try cache for ${url}`, 'warning'));
     if (response) {
-        console.info(`inserting item into cache with key ${url}`, response);
+        // console.info(`inserting item into cache with key ${url}`, response);
         cache.put(url, response.clone());
         return response;
     } else {
@@ -227,7 +227,7 @@ const getFromCacheAndRevalidate = async (request) => {
     } else {
         let response = await fetch(request).catch(() => sendLogMessage(`Could not GET ${url}`, 'error'));
         if (response) {
-            console.info(`inserting item into cache with key ${url}`, response);
+            // console.info(`inserting item into cache with key ${url}`, response);
             cache.put(url, response.clone());
             return response;
         }
