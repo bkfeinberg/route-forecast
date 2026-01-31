@@ -143,7 +143,7 @@ const getAndCacheGET = async (request) => {
     const cache = await caches.open(cacheName);
     const url = request.url;
     let response = await fetch(request).catch(() => sendLogMessage(`Could not GET, will try cache for ${url}`, 'warning'));
-    if (response !== undefined) {
+    if (response) {
         console.info(`inserting item into cache with key ${url}`, response);
         cache.put(url, response.clone());
         return response;
@@ -151,12 +151,12 @@ const getAndCacheGET = async (request) => {
         // If the network is unavailable, get
         sendLogMessage(`Searching GET cache for ${url}`, 'info');
         let cachedResponse = await cache.match(url);
-        if (cachedResponse === undefined) {
+        if (!cachedResponse) {
             // try while ignoring query parameters if /
             if (url.startsWith("/?")) {
                 cachedResponse = await cache.match(url, {ignoreSearch:true});
             }
-            if (cachedResponse == undefined) {
+            if (!cachedResponse) {
                 sendLogMessage(`No matching cache entry for GET for ${url}`, 'warning');
                 return new Response('No cached GET response', {status: 503, statusText: 'Service Unavailable'})
             }
@@ -175,7 +175,7 @@ const getAndCachePOST = async (request) => {
         if (cacheKey === 'unknown') {
             sendLogMessage(`Contents of unknown POST request to ${request.url}: ${JSON.stringify(formData)}`, 'warning');
         }
-        const response = await fetch(request.clone()).catch((err) => sendLogMessage(`Could not POST to ${request.url} ${cacheKey} (${err}), will try cache`, 'warning'));
+        const response = await fetch(request.clone());
         if (response && response.ok) {
             // If it works, put the response into IndexedDB
             console.info(`inserting item into POST cache with key ${cacheKey}`, response);
@@ -187,32 +187,51 @@ const getAndCachePOST = async (request) => {
             sendLogMessage(`Checking POST cache for ${request.url} after response of ${responseBody}`, 'info');
             let cachedResponse = await localforage.getItem(cacheKey);
             if (!cachedResponse) {
-                sendLogMessage(`No cache entry, returning 502 for POST to ${request.url} with ${cacheKey}`, 'warning');
+                sendLogMessage(`No cache entry, returning 503 for POST to ${request.url} with ${cacheKey}`, 'warning');
                 if (response) {     // but presumably it's not ok
                     try {
                         const json = await response.json();
-                        return Response.json(json, {status:502, statusText: 'Service Unavailable'});
+                        return Response.json(json, {status:503, statusText: 'Service Unavailable'});
                     } catch (e) {
-                        return Response.json({details: response.statusText}, {status:502, statusText: 'Service Unavailable'});
+                        sendLogMessage(`Failed to parse JSON response for POST to ${request.url}: ${e}`, 'error');
+                        return Response.json({details: `${response.statusText} ${e}`}, {status:503, statusText: 'Service Unavailable'});
                     }
                 } else {
-                    return Response.json({details: 'No cached POST response available'}, {status:502, statusText: 'Service Unavailable'});
+                    return Response.json({details: 'No cached POST response available'}, {status:503, statusText: 'Service Unavailable'});
                 }
             }
             sendLogMessage(`Returning cached copy for ${request.url}`, 'info');
             return deserializeResponse(cachedResponse);
         }
     } catch (err) {
-        // don't even try to cache when we don't know what format of data we're getting
-        sendLogMessage('Could not parse JSON from POST request to ${request.url}', 'error');
-        try {
-            const rawText = await request.clone().text();
-            console.info('Raw request body:', rawText)
-        } catch (e) {
-            sendLogMessage(`Failed to read raw body for POST to ${request.url}: ${e}`, 'error');
-        }        
-        return fetch(request.clone());
+        sendLogMessage(`Could not POST to ${request.url} (${err})`, 'error');
+        return Response.json({details: `Failed to POST to server - ${err}`}, {status:503, statusText: 'Service Unavailable'});
     }
+}
+
+const getFromCacheAndRevalidate = async (request) => {
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request.url);
+    if (cachedResponse) {
+        // Return the cached response immediately
+        // Meanwhile, fetch from network and update cache
+        fetch(request).then((networkResponse) => {
+            if (networkResponse.ok) {
+                const clonedResponse = networkResponse.clone();
+                cache.put(request.url, clonedResponse);
+            }
+        }).catch((err) => {
+            sendLogMessage(`Network fetch failed for ${request.url} during revalidation: ${err}`, 'warning');
+        });
+        return cachedResponse;
+    } else {
+        let response = await fetch(request).catch(() => sendLogMessage(`Could not GET ${url}`, 'error'));
+        if (response) {
+            console.info(`inserting item into cache with key ${url}`, response);
+            cache.put(url, response.clone());
+            return response;
+        }
+    } 
 }
 
 self.addEventListener('fetch', (event) => {
@@ -237,6 +256,8 @@ self.addEventListener('fetch', (event) => {
     // Open the cache
     if (event.request.method === "POST") {
         event.respondWith(getAndCachePOST(event.request));
+    } else if (url.endsWith('.js') || url.endsWith('.css')) {
+        event.respondWith(getFromCacheAndRevalidate(event.request));
     } else {
         event.respondWith(getAndCacheGET(event.request));
     }
