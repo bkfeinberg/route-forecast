@@ -408,6 +408,29 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
     }
 });
 
+app.post('/aqi_one', upload.none(), timeout('27s'), haltOnTimedout, async (req : RequestWithTimeout, res: Response) => {
+    if (req.body.locations === undefined) {
+        res.status(400).json({ 'status': 'Missing location key' });
+        return;
+    }
+    const forecastPoint = req.body.locations
+    if (!process.env.NO_LOGGING) {
+        logger.info(`AQI request from ${req.ip} for AQI at ${forecastPoint.lat},${forecastPoint.lon}`)
+    }
+    try {
+        let result = {};
+        await getAQI(result, forecastPoint);
+        if (req.timedout) {
+            warn(`AQI processing finished, but request already timed out. Not sending response of ${JSON.stringify(result)} for ${forecastPoint.lat},${forecastPoint.lon}`);
+            return;
+        }
+        res.status(200).json({ 'aqi': result });
+    } catch (err) {
+        error(`Error retrieving AQI : ${JSON.stringify(err)}`);
+        res.status(500).json({ 'details': `Error retrieving AQI : ${JSON.stringify(err)}`});
+    }
+});
+
 // A general error handler to catch timeout errors
 app.use((err : Error, req : RequestWithTimeout, res : Response, next : NextFunction) => {
     if (req.timedout) {
@@ -422,29 +445,6 @@ app.use((err : Error, req : RequestWithTimeout, res : Response, next : NextFunct
     }
     // Handle other types of errors
     next(err);
-});
-
-app.post('/aqi_one', upload.none(), timeout('27s'), haltOnTimedout, async (req : RequestWithTimeout, res: Response) => {
-    if (req.body.locations === undefined) {
-        res.status(400).json({ 'status': 'Missing location key' });
-        return;
-    }
-    const forecastPoint = req.body.locations
-    if (!process.env.NO_LOGGING) {
-        logger.info(`AQI request from ${req.ip} for AQI at ${forecastPoint.lat},${forecastPoint.lon}`)
-    }
-    try {
-        let result = {};
-        await getAQI(result, forecastPoint);
-        if (req.timedout) {
-            warn(`AQI processing finished, but request already timed out. Not sending response.`);
-            return;
-        }
-        res.status(200).json({ 'aqi': result });
-    } catch (err) {
-        error(`Error retrieving AQI : ${JSON.stringify(err)}`);
-        res.status(500).json({ 'details': `Error retrieving AQI : ${JSON.stringify(err)}`});
-    }
 });
 
 interface BitlyResponse {
