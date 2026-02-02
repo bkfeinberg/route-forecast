@@ -256,9 +256,9 @@ self.addEventListener('fetch', (event) => {
     // Open the cache
     if (event.request.method === "POST") {
         event.respondWith(getAndCachePOST(event.request));
-    } else if (url.endsWith('.js') || url.endsWith('.css')) {
+/*     } else if (url.endsWith('.js') || url.endsWith('.css')) {
         event.respondWith(getFromCacheAndRevalidate(event.request));
-    } else {
+ */    } else {
         event.respondWith(getAndCacheGET(event.request));
     }
 }
