@@ -2,6 +2,11 @@
 
 importScripts('lib/localforage.js');
 
+const version = process.env.SW_VERSION;
+const cacheName = `RandoplanCache_${version}`;
+const indexed_db_app_name = 'RandoplanPOST_DB';
+const indexed_db_table_name = 'RandoplanPOST_Cache';
+
 const sendLogMessage = (message, type) => {
   // Get all active windows/tabs controlled by this service worker
   self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
@@ -10,16 +15,12 @@ const sendLogMessage = (message, type) => {
         // Send the message to the main application
         client.postMessage({
           type: type,
-          data: message
+          data: message,
+          version : version
         });
       }
     });
 };
-
-const version = process.env.SW_VERSION;
-const cacheName = `RandoplanCache_${version}`;
-const indexed_db_app_name = 'RandoplanPOST_DB';
-const indexed_db_table_name = 'RandoplanPOST_Cache';
 
 self.addEventListener('install', (event) => {
     // delete old IndexedDB instance to avoid conflicts
@@ -228,8 +229,10 @@ const getFromCacheAndRevalidate = async (request) => {
         let response = await fetch(request).catch(() => sendLogMessage(`Could not GET ${url}`, 'error'));
         if (response) {
             // console.info(`inserting item into cache with key ${url}`, response);
-            cache.put(url, response.clone());
+            cache.put(request.url, response.clone());
             return response;
+        } else {
+            return new Response(`No cached GET response for ${request.url}`, {status: 503, statusText: 'Service Unavailable'})
         }
     } 
 }
@@ -256,9 +259,9 @@ self.addEventListener('fetch', (event) => {
     // Open the cache
     if (event.request.method === "POST") {
         event.respondWith(getAndCachePOST(event.request));
-/*     } else if (url.endsWith('.js') || url.endsWith('.css')) {
+    } else if (url.endsWith('.js') || url.endsWith('.css') || url.includes('.js?')) {
         event.respondWith(getFromCacheAndRevalidate(event.request));
- */    } else {
+    } else {
         event.respondWith(getAndCacheGET(event.request));
     }
 }
