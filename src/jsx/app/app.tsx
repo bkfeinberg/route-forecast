@@ -15,7 +15,6 @@ import TopLevel from './topLevel';
 let serviceWorkerInstalled = false;
 let serviceWorkerInstallationFailed = false;
 
-
 window.addEventListener('online', (event) => {
     if (!serviceWorkerInstalled) {
         // retry installing service worker when back online
@@ -137,17 +136,17 @@ else {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
                 if (event.data.type === 'info') {
-                    console.info(`Message from service worker: ${event.data.data}`);
-                    info(`Message from service worker: ${event.data.data}`);
+                    console.info(`Message from service worker version ${event.data.version}: ${event.data.data}`);
+                    info(`Message from service worker version ${event.data.version}: ${event.data.data}`);
                 } else if (event.data.type === 'trace') {
-                    console.debug(`Message from service worker: ${event.data.data}`);
-                    trace(`Message from service worker: ${event.data.data}`);
+                    console.debug(`Message from service worker version ${event.data.version}: ${event.data.data}`);
+                    trace(`Message from service worker version ${event.data.version}: ${event.data.data}`);
                 } else if (event.data.type === 'warning') {
-                    console.warn(`Message from service worker: ${event.data.data}`);
-                    warn(`Message from service worker: ${event.data.data}`);
+                    console.warn(`Message from service worker version ${event.data.version}: ${event.data.data}`);
+                    warn(`Message from service worker version ${event.data.version}: ${event.data.data}`);
                 } else {
-                    console.error(`Message from service worker: ${event.data.data}`);
-                    error(`Message from service worker: ${event.data.data}`);
+                    console.error(`Message from service worker version ${event.data.version}: ${event.data.data}`);
+                    error(`Message from service worker version ${event.data.version}: ${event.data.data}`);
                 }
                 return;
             });
@@ -177,9 +176,13 @@ else {
                     }
                 });
             }).catch((error) => {
-                warn(`Error registering service worker, while browser was ${navigator.onLine ? 'online' : 'offline'}: ${error}`);
+                warn(`Error registering service worker: ${error}`);
                 serviceWorkerInstallationFailed = true;
                 metrics.count("install_failures", 1, { attributes: { error: error } });
+                setTag("serviceWorkerInstalled", false);
+                getGlobalScope().setAttributes({
+                    serviceWorkerInstalled: false
+                });
             });
 
             navigator.serviceWorker.ready
