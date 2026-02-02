@@ -1,7 +1,9 @@
 //import * as Sentry from "@sentry/react";
-import { init, feedbackIntegration, browserSessionIntegration, browserTracingIntegration,
-     browserProfilingIntegration, replayIntegration, replayCanvasIntegration, 
-     thirdPartyErrorFilterIntegration, setTag, logger, metrics, setContext, getGlobalScope } from '@sentry/react';
+import {
+    init, feedbackIntegration, browserSessionIntegration, browserTracingIntegration,
+    browserProfilingIntegration, replayIntegration, replayCanvasIntegration,
+    thirdPartyErrorFilterIntegration, setTag, logger, metrics, setContext, getGlobalScope
+} from '@sentry/react';
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 import { createRoot } from 'react-dom/client';
@@ -11,84 +13,8 @@ import LocationContext from '../locationContext';
 import TopLevel from './topLevel';
 
 let serviceWorkerInstalled = false;
+let serviceWorkerInstallationFailed = false;
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
-        if (event.data.type === 'info') {
-            console.info(`Message from service worker: ${event.data.data}`);
-            info(`Message from service worker: ${event.data.data}`);
-        } else if (event.data.type === 'trace') {
-            console.debug(`Message from service worker: ${event.data.data}`);
-            trace(`Message from service worker: ${event.data.data}`);
-        } else if (event.data.type === 'warning') {
-            console.warn(`Message from service worker: ${event.data.data}`);
-            warn(`Message from service worker: ${event.data.data}`);
-        } else {
-            console.error(`Message from service worker: ${event.data.data}`);
-            error(`Message from service worker: ${event.data.data}`);
-        }
-        return;
-    });
-
-    setContext("serviceWorker", { installed: serviceWorkerInstalled });
-    setTag("serviceWorkerInstalled", false);
-    getGlobalScope().setAttributes({
-        serviceWorkerInstalled: false
-    });
-
-    let serviceWorkerInstallationFailed = false;
-    navigator.serviceWorker.register('/worker.js').then((registration) => {
-        console.log(`Service worker registered! - ${registration.scope}`);
-        serviceWorkerInstalled = true;
-        metrics.count("install_successes", 1, {attributes:{registration:JSON.stringify(registration)}});
-        setContext("serviceWorker", { installed: true });
-        setTag("serviceWorkerInstalled", true);
-        getGlobalScope().setAttributes({
-            serviceWorkerInstalled: true
-        });
-        // reg.installing may or may not be set, depending on whether
-        // a new SW was registered.
-        registration.installing?.addEventListener('statechange', (event : Event) => {
-        if (event.target && (event.target as ServiceWorker).state === 'redundant') {
-            warn(`Service worker did not install correctly, was redundant`);
-             serviceWorkerInstallationFailed = true;
-             metrics.count("install_failures", 1, {attributes:{error:'Redundant'}});
-        }});        
-    }).catch((error) => { 
-        warn(`Error registering service worker, while browser was ${navigator.onLine?'online':'offline'}: ${error}`);
-        serviceWorkerInstallationFailed = true;
-        metrics.count("install_failures", 1, {attributes:{error:error}});
-    });
-
-    navigator.serviceWorker.ready
-        .then(registration => {
-            // This code runs when an active service worker is ready to control clients
-            console.log('An active service worker is ready and controlling the page.', registration);
-            if (registration.active) {
-                console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
-            }
-            // Place code here that depends on the service worker being functional
-            // (e.g., using postMessage or enabling offline features in your UI)
-            if (serviceWorkerInstallationFailed) {
-                info('Service Worker installed after previously failing to install.');
-                metrics.count("install_successes", 1, {attributes:{registration:JSON.stringify(registration)}});
-                metrics.count("install_failures", -1);
-                setContext("serviceWorker", { installed: true });
-                setTag("serviceWorkerInstalled", true);
-                getGlobalScope().setAttributes({
-                    serviceWorkerInstalled: true
-                });
-            } else {
-                // info('Service Worker ready check completed normally.');
-            }
-            serviceWorkerInstallationFailed = false
-            serviceWorkerInstalled = true;
-        })
-        .catch(error => {
-            warn(`Service Worker ready check failed with ${error}`);
-            serviceWorkerInstallationFailed = true;
-        });
-}
 
 window.addEventListener('online', (event) => {
     if (!serviceWorkerInstalled) {
@@ -96,11 +22,11 @@ window.addEventListener('online', (event) => {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/worker.js').then((registration) => {
                 console.log(`Service worker registered on reconnect! - ${registration.scope}`);
-                metrics.count("install_successes", 1, {attributes:{registration:registration}});
+                metrics.count("install_successes", 1, { attributes: { registration: registration } });
                 serviceWorkerInstalled = true;
             }).catch((error) => {
                 warn(`Error registering service worker on reconnect: ${error}`);
-                metrics.count("install_failures", 1, {attributes:{error:error}});
+                metrics.count("install_failures", 1, { attributes: { error: error } });
             });
         }
     }
@@ -151,7 +77,7 @@ else {
                 ],
                 // denyUrls: ["https://maps.googleapis"],
                 // To set a uniform sample rate
-                tracesSampleRate: Number.parseFloat(trace_sample_rate?trace_sample_rate:'0.1'),
+                tracesSampleRate: Number.parseFloat(trace_sample_rate ? trace_sample_rate : '0.1'),
                 // profileSessionSampleRate: 0.3,
                 // profileLifecycle: "trace",
                 tracePropagationTargets: ["localhost", /^https:\/\/www\.randoplan\.com/],
@@ -173,15 +99,15 @@ else {
     let version = script.getAttribute('version');
 
     setTag('version', version)
-    
+
     interface TopLevelProps {
-        action: string, 
+        action: string,
         maps_api_key: string,
-         timezone_api_key: string, 
-         bitly_token: string, 
-         preloaded_state?: object
+        timezone_api_key: string,
+        bitly_token: string,
+        preloaded_state?: object
     }
-    const render = (Component : React.FC<TopLevelProps>) => {
+    const render = (Component: React.FC<TopLevelProps>) => {
         const container = document.getElementById('content')
         if (!container) {
             return (<div>Missing root container for application</div>)
@@ -192,9 +118,9 @@ else {
         if (!version) {
             version = '0.0.0'
         } else {
-            ReactGA.set({'appName': 'randoplan'})
-            ReactGA.set({'appVersion' : version})
-            ReactGA.event('appVersion', {rpVersion: version})
+            ReactGA.set({ 'appName': 'randoplan' })
+            ReactGA.set({ 'appVersion': version })
+            ReactGA.event('appVersion', { rpVersion: version })
         }
         const root = createRoot(container);
         root.render(
@@ -206,5 +132,86 @@ else {
         )
     };
 
+    window.addEventListener('load', (event) => {
+        console.log('The page has fully loaded');
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
+                if (event.data.type === 'info') {
+                    console.info(`Message from service worker: ${event.data.data}`);
+                    info(`Message from service worker: ${event.data.data}`);
+                } else if (event.data.type === 'trace') {
+                    console.debug(`Message from service worker: ${event.data.data}`);
+                    trace(`Message from service worker: ${event.data.data}`);
+                } else if (event.data.type === 'warning') {
+                    console.warn(`Message from service worker: ${event.data.data}`);
+                    warn(`Message from service worker: ${event.data.data}`);
+                } else {
+                    console.error(`Message from service worker: ${event.data.data}`);
+                    error(`Message from service worker: ${event.data.data}`);
+                }
+                return;
+            });
+
+            setContext("serviceWorker", { installed: serviceWorkerInstalled });
+            setTag("serviceWorkerInstalled", false);
+            getGlobalScope().setAttributes({
+                serviceWorkerInstalled: false
+            });
+
+            navigator.serviceWorker.register('/worker.js').then((registration) => {
+                console.log(`Service worker registered! - ${registration.scope}`);
+                serviceWorkerInstalled = true;
+                metrics.count("install_successes", 1, { attributes: { registration: JSON.stringify(registration) } });
+                setContext("serviceWorker", { installed: true });
+                setTag("serviceWorkerInstalled", true);
+                getGlobalScope().setAttributes({
+                    serviceWorkerInstalled: true
+                });
+                // reg.installing may or may not be set, depending on whether
+                // a new SW was registered.
+                registration.installing?.addEventListener('statechange', (event: Event) => {
+                    if (event.target && (event.target as ServiceWorker).state === 'redundant') {
+                        warn(`Service worker did not install correctly, was redundant`);
+                        serviceWorkerInstallationFailed = true;
+                        metrics.count("install_failures", 1, { attributes: { error: 'Redundant' } });
+                    }
+                });
+            }).catch((error) => {
+                warn(`Error registering service worker, while browser was ${navigator.onLine ? 'online' : 'offline'}: ${error}`);
+                serviceWorkerInstallationFailed = true;
+                metrics.count("install_failures", 1, { attributes: { error: error } });
+            });
+
+            navigator.serviceWorker.ready
+                .then(registration => {
+                    // This code runs when an active service worker is ready to control clients
+                    console.log('An active service worker is ready and controlling the page.', registration);
+                    if (registration.active) {
+                        console.log(`Worker details:${registration.active.state} ${registration.active.scriptURL}`);
+                    }
+                    // Place code here that depends on the service worker being functional
+                    // (e.g., using postMessage or enabling offline features in your UI)
+                    if (serviceWorkerInstallationFailed) {
+                        info('Service Worker installed after previously failing to install.');
+                        metrics.count("install_successes", 1, { attributes: { registration: JSON.stringify(registration) } });
+                        metrics.count("install_failures", -1);
+                        setContext("serviceWorker", { installed: true });
+                        setTag("serviceWorkerInstalled", true);
+                        getGlobalScope().setAttributes({
+                            serviceWorkerInstalled: true
+                        });
+                    } else {
+                        // info('Service Worker ready check completed normally.');
+                    }
+                    serviceWorkerInstallationFailed = false
+                    serviceWorkerInstalled = true;
+                })
+                .catch(error => {
+                    warn(`Service Worker ready check failed with ${error}`);
+                    serviceWorkerInstallationFailed = true;
+                });
+        }
+
+    });
     render(TopLevel);
 }
