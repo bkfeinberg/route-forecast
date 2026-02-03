@@ -56,8 +56,8 @@ self.addEventListener('activate', (e) => {
         e.waitUntil(caches.keys().then((keyList) => {
             return Promise.all(keyList.map((key) => {
                 if (key === cacheName) { /*sendLogMessage(`Skipping cache ${key}`, 'trace'); */ return null; }
-                sendLogMessage(`Deleting cache ${key}`, 'trace');
-                return caches.delete(key).then(sendLogMessage(`Deleted cache ${key}`, 'trace')).catch((err) => {
+                // sendLogMessage(`Deleting cache ${key}`, 'trace');
+                return caches.delete(key).then(/*sendLogMessage(`Deleted cache ${key}`, 'trace')*/).catch((err) => {
                     sendLogMessage(`Error deleting cache ${key}: ${err}`, 'error');
                 });
             }
