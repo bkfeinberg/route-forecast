@@ -170,17 +170,18 @@ app.get('/dbquery', async (req : Request, res : Response) => {
     }
 });
 
-app.use((req : Request, res : Response, next) => {
+const redirector = (req: Request, res: Response, next: () => any) => {
     // Switch to randoplan.com
     var host = req.hostname;
     // const originalHost = req.header('host');
     // console.info(`Forwarded host is ${originalHost} request host is ${host}`);
     if (host === 'randoplan.herokuapp.com' || host === 'randoplan.com') {
-        logger.info(`Redirected ${host} to www.randoplan.com`);
+        info(`Redirected ${host} to www.randoplan.com`);
         return res.redirect(301, 'https://www.randoplan.com' + req.originalUrl);
     }
     return next();
-});
+};
+app.use(redirector);
 
 const buildRouteUrl = (routeNumber : string, apiKey : string) => {
     const privacyCodeLoc = routeNumber.indexOf('?privacy_code')

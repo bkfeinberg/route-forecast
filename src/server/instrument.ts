@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'development') {
         integrations: [
             nodeProfilingIntegration()
         ],
-        tracesSampleRate: 0.15,
+        tracesSampleRate: 0.2,
         // profileSessionSampleRate: 0.5,
         // profileLifecycle: "trace"
     });
