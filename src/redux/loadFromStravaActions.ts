@@ -128,7 +128,7 @@ const getRouteParser = async function () {
     return parser.default;
 };
 
-const loadGpxRoute = function(gpxFileData : GpxRouteData) {
+const loadGpxRoute = function(gpxFileData : string) {
     return async function (dispatch : AppDispatch) {
         const parser = await getRouteParser().catch((err) => {dispatch(gpxRouteLoadingFailed(err));return null});
         // handle failed load, error has already been dispatched
@@ -175,7 +175,7 @@ export const loadStravaRoute = (routeId : string) => {
                         dispatch(errorDetailsSet('Error fetching Strava route: Received an unparsable JSON error from Strava.'));
                     }
                 } else if (routeInfo.includes('<gpx') || routeInfo.includes('<?xml')) {
-                    await dispatch(loadGpxRoute(routeInfo as unknown as GpxRouteData));
+                    await dispatch(loadGpxRoute(routeInfo));
                 } else {
                     dispatch(errorDetailsSet('Error fetching Strava route: Data received from Strava was not recognized as GPX.'));
                 }

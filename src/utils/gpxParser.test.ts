@@ -488,8 +488,8 @@ describe('AnalyzeRoute', () => {
                 tracks: [
                     {
                         points: [
-                            { lat: 40.7128, lon: -74.0060, ele: 10 },
-                            { lat: 40.7138, lon: -74.0050, ele: 20 }
+                            { latitude: 40.7128, longitude: -74.0060, elevation: 10 },
+                            { latitude: 40.7138, longitude: -74.0050, elevation: 20 }
                         ]
                     }
                 ]
@@ -652,7 +652,7 @@ describe('AnalyzeRoute', () => {
             };
             const result = AnalyzeRoute.loadGpxFile(gpxData);
             expect(result.gpxData).toBeDefined();
-            expect(result.gpxData.name).toBeDefined();
+            expect(result.gpxData?.name).toBeDefined();
         });
 
         it('should extract track information', () => {
@@ -661,7 +661,7 @@ describe('AnalyzeRoute', () => {
                 metadata: { name: 'Test Route' }
             };
             const result = AnalyzeRoute.loadGpxFile(gpxData);
-            expect(result.gpxData.tracks).toBeDefined();
+            expect(result.gpxData?.tracks).toBeDefined();
         });
     });
 

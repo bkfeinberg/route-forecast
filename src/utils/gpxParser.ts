@@ -1,4 +1,4 @@
-let gpxParser = require('gpxparser')
+import { parseGPX } from "@we-gold/gpxjs";
 import { DateTime } from 'luxon';
 
 import { inputPaceToSpeed, setMinMaxCoords } from './util';
@@ -48,7 +48,7 @@ interface RwgpsCoursePointWithDescription {
 export type RwgpsCoursePoint = RwgpsCoursePointWithN|RwgpsCoursePointWithDescription
 export type RwgpsPoi  = {lat: number, lng: number, n:string, t: number, d:string}
 export type RwgpsPoint = {x:number, y:number, d:number, e:number}
-export type GpxPoint = {lat: number, lon: number, ele: number}
+export type GpxPoint = {latitude: number, longitude: number, elevation: number}
 export interface ExtractedControl {
     distance: number,
     duration: number,
@@ -104,11 +104,13 @@ class AnalyzeRoute {
 
     toRad = (num : number) => num * Math.PI / 180;
 
-    loadGpxFile(gpxFileData : XMLDocument) {
-        // eslint-disable-next-line new-cap
-        const gpx = new gpxParser()
-        gpx.parse(gpxFileData)
-        return {gpxData:{tracks:gpx.tracks,name:gpx.metadata.name}}
+    loadGpxFile(gpxFileData : string) {
+        const [parsedFile, error] = parseGPX(gpxFileData)
+        if (parsedFile) {
+            return {gpxData:{tracks:parsedFile.tracks,name:parsedFile.metadata.name}}
+        } else {
+            return {error: new Error('Error parsing GPX file: ' + (error ? error.message : 'unknown error'))}
+        }
     }
 
     /**
@@ -252,7 +254,7 @@ class AnalyzeRoute {
 
     parseGpxRouteStream ( routeData : GpxRouteData) : Array<Point> {
         return routeData.tracks.reduce((accum : Array<GpxPoint>, current: {points: Array<GpxPoint>}) => accum.concat(current.points, []), []).
-        map((point : GpxPoint) => ({ lat: point.lat, lon: point.lon, elevation: point.ele }))
+        map((point : GpxPoint) => ({ lat: point.latitude, lon: point.longitude, elevation: point.elevation }))
     }
 
     parseRwgpsRouteStream( routeData : RwgpsRoute|RwgpsTrip) : Array<Point> {
