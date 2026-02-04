@@ -3,7 +3,7 @@ import "./RidingPace.css"
 import {connect, ConnectedProps} from 'react-redux';
 import { setPace } from "../../redux/actions";
 import { useActualPace, useFormatSpeed } from '../../utils/hooks';
-import { inputPaceToSpeed, metricPaceToSpeed, paceToSpeed, saveCookie, milesToMeters } from '../../utils/util';
+import { inputPaceToSpeed, metricPaceToSpeed, paceToSpeed, milesToMeters } from '../../utils/util';
 import { DesktopTooltip } from '../shared/DesktopTooltip';
 import {useTranslation} from 'react-i18next'
 import type { RootState } from "../../redux/store";
@@ -11,6 +11,7 @@ import { Combobox, useCombobox, Flex, Button } from '@mantine/core';
 
 import { maxWidthForMobile } from '../../utils/util';
 import  {useMediaQuery} from 'react-responsive';
+import Cookies from "universal-cookie";
 
 type PropsFromRedux = ConnectedProps<typeof connector>
 
@@ -102,7 +103,8 @@ const RidingPace = ({ pace, setPace, metric }: PropsFromRedux) => {
     const { t } = useTranslation()
     const actualPace = useActualPace()
     const onDesktop = useMediaQuery({query:`(min-width: ${maxWidthForMobile})`})
-
+    const cookies = new Cookies(null, { path: '/' });
+    
     // convert mph to kph if we are using metric
     const cvtMilesToKm = (distance: number) => {
         return metric ? ((distance * milesToMeters) / 1000) : distance;
@@ -136,7 +138,7 @@ const RidingPace = ({ pace, setPace, metric }: PropsFromRedux) => {
             {<Combobox
                 store={combobox}
                 onOptionSubmit={(selected: string) => {
-                    saveCookie("pace", selected)
+                    cookies.set("pace", selected)
                     setPace(selected)
                     combobox.closeDropdown();
                 }}

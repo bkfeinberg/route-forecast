@@ -20,7 +20,7 @@ import getPurpleAirAQI from'./purpleAirAQI'
 import getAirNowAQI from './airNowAQI'
 import querystring from 'querystring';
 import * as Sentry from "@sentry/node"
-import type { NextFunction, RequestHandler } from 'express';
+import type { NextFunction } from 'express';
 const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 import axios, { AxiosError, isAxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
 const axiosRetry = require('axios-retry').default

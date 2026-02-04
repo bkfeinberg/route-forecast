@@ -1,9 +1,21 @@
 // src/jsx/ForecastSettings/RidingPace.test.tsx
-import React from 'react';
 import { render, fireEvent } from 'test-utils';
 import { describe, beforeEach, jest, test, expect } from '@jest/globals';
-
+import Cookies from 'universal-cookie';
 // Mocks
+const mCookie = {
+  get: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn()
+};
+
+jest.mock('universal-cookie', () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => mCookie)
+  }; 
+});
+
 jest.mock('react-i18next', () => ({
   __esModule: true,
   useTranslation: jest.fn()
@@ -18,12 +30,6 @@ jest.mock('../../utils/hooks', () => ({
   useActualPace: jest.fn(),
   useFormatSpeed: jest.fn()
 }));
-
-jest.mock('../../utils/util', () => {
-  const actual = jest.requireActual('../../utils/util');
-  // Object.assign used to avoid TypeScript "Spread types" error on some environments
-  return Object.assign({ __esModule: true }, actual, { saveCookie: jest.fn() });
-});
 
 // Simple wrapper for DesktopTooltip to expose label & className for assertions
 jest.mock('../shared/DesktopTooltip', () => ({
@@ -44,7 +50,6 @@ jest.mock('../../redux/actions', () => ({
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import { useActualPace, useFormatSpeed } from '../../utils/hooks';
-import * as util from '../../utils/util';
 import { RidingPace } from './RidingPace';
 
 describe('RidingPace', () => {
@@ -52,7 +57,6 @@ describe('RidingPace', () => {
   const mockedUseMedia = useMediaQuery as unknown as jest.Mock;
   const mockedUseActualPace = useActualPace as unknown as jest.Mock;
   const mockedUseFormatSpeed = useFormatSpeed as unknown as jest.Mock;
-  const mockedSaveCookie = util.saveCookie as unknown as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -114,7 +118,7 @@ describe('RidingPace', () => {
     fireEvent.click(option);
 
     // expect cookie saved and setPace called with value 'C'
-    expect(mockedSaveCookie).toHaveBeenCalledWith('pace', 'C');
+    expect(mCookie.set).toHaveBeenCalledWith('pace', 'C');
     expect(mockSetPace).toHaveBeenCalledWith('C');
   });
 
@@ -173,7 +177,7 @@ describe('RidingPace', () => {
     const option = getByText('22 kph');
     fireEvent.click(option);
 
-    expect(mockedSaveCookie).toHaveBeenCalledWith('pace', 'C');
+    expect(mCookie.set).toHaveBeenCalledWith('pace', 'C');
     expect(mockSetPace).toHaveBeenCalledWith('C');
   });
 });

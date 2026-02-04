@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import queryString from 'query-string';
-import cookie from 'react-cookies';
+import Cookies from 'universal-cookie';
 import { Api } from 'rest-api-handler';
 
 import { paceToSpeed, setMinMaxCoords } from './util';
@@ -38,6 +38,8 @@ class StravaActivityParser {
             return new Promise<{activity: StravaActivityData;
                 stream: StravaActivityStream}>((_resolve, reject) => reject(new Error('fetching authentication token')));
         }
+        const cookies = new Cookies(null, { path: '/' });
+        
         this.api.setDefaultHeader('Authorization', `Bearer ${token}`);
         let activityPromise = this.fetchActivity(activityId, this.api);
         return new Promise<{activity: StravaActivityData;
@@ -47,14 +49,14 @@ class StravaActivityParser {
                 activityDataPromise.then((activityStream : StravaActivityStream) => {
                     if (activityData.message !== undefined) {
                         if (activityData.message !== "Record Not Found") {
-                            cookie.remove('strava_token');
+                            cookies.remove('strava_token');
                         }
                         reject(activityData.message);
                         return;
                     }
                     if (activityStream.message !== undefined) {
                         if (activityStream.message !== "Record Not Found") {
-                            cookie.remove('strava_token');
+                            cookies.remove('strava_token');
                         }
                         reject(activityStream.message);
                         return;

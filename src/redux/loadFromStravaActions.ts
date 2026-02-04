@@ -1,7 +1,6 @@
 import type { RootState } from "../redux/store";
 import type { AppDispatch } from "../redux/store";
 import ReactGA from "react-ga4";
-import { GpxRouteData } from "./routeInfoSlice";
 import * as Sentry from "@sentry/react";
 import { routeLoadingBegun } from "./dialogParamsSlice";
 import { gpxRouteLoaded } from "./routeInfoSlice";

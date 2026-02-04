@@ -1,14 +1,14 @@
 import {useEffect,useState} from "react";
-import cookie from 'react-cookies';
+import Cookies from 'universal-cookie';
 import { Button } from "@mantine/core";
 import { browserIsChrome, browserIsFirefox, browserIsSafari,extensionIsInstalled } from "../utils/extensionDetect";
 
 export const InstallExtensionButton = () => {
+    const cookies = new Cookies(null, { path: '/' });
     const [
         promptForExtensionInstall,
         setPromptForExtensionInstall
-    ] = useState<boolean>(!cookie.load('muteExtensionInstallPrompt'))
-
+    ] = useState<boolean>(!(cookies.get('muteExtensionInstallPrompt') === "true"));
     const [
         isInstalled,
         setIsInstalled
@@ -22,7 +22,7 @@ export const InstallExtensionButton = () => {
     })
 
     const mutePrompt = () => {
-        cookie.save('muteExtensionInstallPrompt', "true", { path: '/' } )
+        cookies.set('muteExtensionInstallPrompt', "true", { path: '/' } )
         setPromptForExtensionInstall(false)
     }
 

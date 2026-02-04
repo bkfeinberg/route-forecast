@@ -46,7 +46,6 @@ const { info } = Sentry.logger;
 import {Info} from "luxon";
 import queryString from 'query-string';
 import React, {lazy,  ReactElement, Suspense,useEffect} from 'react';
-import cookie from 'react-cookies';
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import type { AppDispatch } from "../../redux/store";
 import  {useMediaQuery} from 'react-responsive';
@@ -61,6 +60,8 @@ import { metricSet, displayControlTableUiSet } from "../../redux/controlsSlice";
 import { defaultProvider, providerValues } from "../../redux/providerValues";
 import type { DesktopUIProps } from "../DesktopUI";
 import { Notifications } from '@mantine/notifications';
+
+import Cookies from 'universal-cookie';
 
 const theme = createTheme({
   components: {
@@ -91,7 +92,7 @@ const LoadableMobile = lazy(() => {return import( /* webpackChunkName: "MobileUI
 })})
 
 import { routeLoadingModes } from '../../data/enums';
-import { loadCookie, saveCookie } from "../../utils/util";
+
 import {
     loadRouteFromURL,
     MutationWrapper,
@@ -111,7 +112,7 @@ const checkCredentialsInterface = () => {
         "password" in PasswordCredential && "name" in PasswordCredential)
 }
 
-export const saveRwgpsCredentials = (token : string) => {
+export const saveRwgpsCredentials = (token : string, cookies: Cookies) => {
     Sentry.addBreadcrumb({
         category: 'rwgps',
         level: 'info',
@@ -131,24 +132,24 @@ export const saveRwgpsCredentials = (token : string) => {
         console.info("Rwgps login info stored by the user agent.");
         }, (err) => {
             Sentry.captureException(err)
-            cookie.save('rwgpsToken', token, { path: '/' });
+            cookies.set('rwgpsToken', token, { path: '/' });
             console.info('RideWithGps login info stored in cookie');
             });
     } else {
-        cookie.save('rwgpsToken', token, { path: '/' });
+        cookies.set('rwgpsToken', token, { path: '/' });
         console.info('RideWithGps login info stored in cookie');
     }
 };
 
-const loadAndStoreRwgpsCredentialsViaCookie = (dispatch : AppDispatch) => {
-    const token = loadCookie("rwgpsToken");
+const loadAndStoreRwgpsCredentialsViaCookie = (dispatch : AppDispatch, cookies: Cookies) => {
+    const token = cookies.get('rwgpsToken');
     if (token) {
         dispatch(rwgpsTokenSet(token))
-        saveRwgpsCredentials(token);
+        saveRwgpsCredentials(token, cookies);
     }
 }
 
-const setupRideWithGps = async (dispatch : AppDispatch) => {
+const setupRideWithGps = async (dispatch : AppDispatch, cookies: Cookies) => {
     Sentry.addBreadcrumb({
         category: 'rwgps',
         level: 'info',
@@ -160,22 +161,22 @@ const setupRideWithGps = async (dispatch : AppDispatch) => {
             credentials = await navigator.credentials.get({password:true,mediation:"silent"});
             if (credentials === null) {
                 console.info('No rwgps login info retrieved, trying cookie');
-                loadAndStoreRwgpsCredentialsViaCookie(dispatch)
+                loadAndStoreRwgpsCredentialsViaCookie(dispatch, cookies);
             } else {
                 console.info('Rwgps login info retrieved from manager');
                 if ("password" in credentials && credentials.password) {
                     dispatch(rwgpsTokenSet(credentials.password))
-                    saveRwgpsCredentials(credentials.password);    
+                    saveRwgpsCredentials(credentials.password, cookies);    
                 }
             }
         } catch (err) {
             console.info(`failed to load rwgps login info with ${err}`)
             Sentry.captureException(err)
-            loadAndStoreRwgpsCredentialsViaCookie(dispatch)
+            loadAndStoreRwgpsCredentialsViaCookie(dispatch, cookies);
     }
     } else {
         console.info('Login info manager not supported, retrieved from cookie');
-        loadAndStoreRwgpsCredentialsViaCookie(dispatch)
+        loadAndStoreRwgpsCredentialsViaCookie(dispatch, cookies)
     }
 }
 
@@ -200,7 +201,8 @@ type QueryParams = {
     stopAfterLoad: boolean,
     viewControls: boolean
 }
-const setupBrowserForwardBack = (dispatch : AppDispatch, origin : string, forecastFunc : MutationWrapper, aqiFunc : MutationWrapper, lang: string) => {
+const setupBrowserForwardBack = (dispatch : AppDispatch, origin : string,
+     cookies : Cookies) => {
     if (typeof window !== 'undefined') {
         window.onpopstate = (event) => {
             Sentry.addBreadcrumb({
@@ -227,24 +229,24 @@ const setupBrowserForwardBack = (dispatch : AppDispatch, origin : string, foreca
                 let queryParams = queryString.parse(event.state, {parseBooleans: true, parseNumbers:true});
                 dispatch(querySet({url:`${origin}/?${event.state}`,search:event.state}))
                 ReactGA.event('browser_history')
-                updateFromQueryParams(dispatch, queryParams as unknown as QueryParams);
+                updateFromQueryParams(dispatch, queryParams as unknown as QueryParams, cookies);
             }
         }
     }
 }
 
-const getStravaToken = (queryParams : QueryParams, dispatch : AppDispatch) => {
+const getStravaToken = (queryParams : QueryParams, dispatch : AppDispatch, cookies: { [x: string]: any; set?: any; get?: any; }) => {
     if (queryParams.strava_access_token !== undefined && queryParams.strava_refresh_token && queryParams.strava_token_expires_at) {
-        saveCookie('strava_access_token', queryParams.strava_access_token);
-        saveCookie('strava_refresh_token', queryParams.strava_refresh_token);
-        saveCookie('strava_token_expires_at', queryParams.strava_token_expires_at.toString());
+        cookies.set('strava_access_token', queryParams.strava_access_token);
+        cookies.set('strava_refresh_token', queryParams.strava_refresh_token);
+        cookies.set('strava_token_expires_at', queryParams.strava_token_expires_at.toString());
         dispatch(stravaTokenSet({ token: queryParams.strava_access_token, expires_at: queryParams.strava_token_expires_at }))
         dispatch(stravaRefreshTokenSet(queryParams.strava_refresh_token))
         return queryParams.strava_access_token;
     } else {
-        const stravaToken = loadCookie('strava_access_token');
-        dispatch(stravaTokenSet({token:stravaToken, expires_at:loadCookie('strava_token_expires_at')}))
-        dispatch(stravaRefreshTokenSet(loadCookie('strava_refresh_token')))
+        const stravaToken = cookies.get('strava_access_token');
+        dispatch(stravaTokenSet({token:stravaToken, expires_at:cookies.get('strava_token_expires_at')}))
+        dispatch(stravaRefreshTokenSet(cookies.get('strava_refresh_token')))
         return stravaToken;
     }
 }
@@ -257,14 +259,15 @@ const hasZone = (zone? : string) => {
     return zone && Info.isValidIANAZone(zone);
 }
 
-const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams) => {
+const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams, 
+    cookies : Cookies) => {
     if (!queryParams) {
         return;
     }
     if (hasProvider(queryParams.provider)) {
         dispatch(setWeatherProvider(queryParams.provider))
     } else {
-        const provider = loadCookie('provider');
+        const provider = cookies.get('provider');
         if (hasProvider(provider)) {
             dispatch(setWeatherProvider(provider!))
         } else {
@@ -272,7 +275,7 @@ const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams
         }
     }
     dispatch(rwgpsRouteSet(queryParams.rwgpsRoute))
-    getStravaToken(queryParams, dispatch);
+    getStravaToken(queryParams, dispatch, cookies);
     if (queryParams.startTimestamp) {
         if (hasZone(queryParams.zone)) {
             dispatch(startTimestampSet({ start: Number.parseInt(queryParams.startTimestamp), zone: queryParams.zone }))
@@ -283,7 +286,7 @@ const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams
     if (queryParams.pace && inputPaceToSpeed[queryParams.pace.trim()]) {
         dispatch(setPace(queryParams.pace.trim()))
     } else {
-        let lastPace = loadCookie("pace");
+        let lastPace = cookies.get('pace');
         if (lastPace) {
             dispatch(setPace(lastPace))
         }
@@ -303,7 +306,7 @@ const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams
         dispatch(rwgpsTokenSet(queryParams.rwgpsToken))
         // if we have just received an auth token then we previously clicked show pinned routes
         dispatch(usePinnedRoutesSet(true))
-        saveRwgpsCredentials(queryParams.rwgpsToken);
+        saveRwgpsCredentials(queryParams.rwgpsToken, cookies);
     }
     dispatch(viewingControls(queryParams.viewControls))
     dispatch(stopAfterLoadSet(queryParams.stopAfterLoad))
@@ -318,12 +321,12 @@ interface RouteWeatherUIProps {
     bitly_token: string
     origin: string
 }
-const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, bitly_token, origin} : RouteWeatherUIProps) => {
-    const dispatch = useAppDispatch()
-    const [forecast] = useForecastMutation()
-    const [getAqi] = useGetAqiMutation()
-    const { i18n } = useTranslation()
 
+const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, bitly_token, origin} : RouteWeatherUIProps) => {
+    const cookies = new Cookies(null, { path: '/' });
+    const dispatch = useAppDispatch()
+    const { i18n } = useTranslation()
+    // const isDesktop = useMediaQuery({ minWidth: 1224 })
     let queryParams = queryString.parse(search, {parseBooleans: true, parseNumbers:false, types:{viewControls:'boolean'}});
     // temporarily log query params as received by DuckDuckGo
     if (window.navigator.userAgent.indexOf('Ddg') !== -1) {
@@ -332,17 +335,17 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     const queryParamsAsObj = queryParams as unknown as QueryParams
     dispatch(querySet({url:href,search:search}))
     Sentry.setContext("query", {queryString:search})
-    updateFromQueryParams(dispatch, queryParamsAsObj);
+    updateFromQueryParams(dispatch, queryParamsAsObj, cookies);
     dispatch(actionUrlAdded(action))
     dispatch(apiKeysSet({maps_api_key:maps_api_key,timezone_api_key:timezone_api_key, bitly_token:bitly_token}))
-    setupRideWithGps(dispatch);
-    setupBrowserForwardBack(dispatch, origin, forecast, getAqi, i18n.language)
+    setupRideWithGps(dispatch, cookies);
+    setupBrowserForwardBack(dispatch, origin, cookies)
     dispatch(updateUserControls(queryParams.controlPoints?parseControls(queryParamsAsObj.controlPoints, true):[]))
-    const zoomToRange = loadCookie('zoomToRange');
-    if (zoomToRange !== undefined) {
+    const zoomToRange = cookies.get('zoomToRange');
+    if (zoomToRange) {
         dispatch(zoomToRangeSet(zoomToRange==="true"))
     }
-    const fetchAqi = loadCookie('fetchAqi');
+    const fetchAqi = cookies.get('fetchAqi');
     if (fetchAqi) {
         dispatch(fetchAqiSet(fetchAqi==="true"))
     }

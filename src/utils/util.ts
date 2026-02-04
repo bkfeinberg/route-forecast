@@ -1,5 +1,3 @@
-import cookie from 'react-cookies';
-
 import type {UserControl} from '../redux/controlsSlice'
 import type {Point} from './gpxParser'
 import type { GpxRouteData, RwgpsRoute, RwgpsTrip, } from '../redux/routeInfoSlice';
@@ -102,7 +100,7 @@ export const getRouteNumberFromValue = (value : string) => {
   return value;
 }
 
-const sanitizeCookieName = (cookieName : string) => {
+/*const sanitizeCookieName = (cookieName : string) => {
   return encodeURIComponent(cookieName.replace(/[ =/]/,''));
 };
 
@@ -112,4 +110,4 @@ export const saveCookie = (name : string,value : string) => {
 
 export const loadCookie = (name : string) => {
   return cookie.load(sanitizeCookieName(name));
-};
+};*/

@@ -1,8 +1,20 @@
 // src/jsx/ForecastSettings/WeatherProviderSelector.test.tsx
-import React from 'react';
 import { render, fireEvent } from 'test-utils';
 import { describe, beforeEach, jest, test, expect } from '@jest/globals';
+import Cookies from 'universal-cookie';
 
+const mCookie = {
+  get: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn()
+};
+
+jest.mock('universal-cookie', () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => mCookie)
+  }; 
+});
 // Mock actions to avoid importing ESM-heavy modules
 jest.mock('../../redux/actions', () => ({
   __esModule: true,
@@ -38,16 +50,11 @@ jest.mock('react-ga4', () => ({
   default: { event: jest.fn() }
 }));
 
-jest.mock('react-cookies', () => ({
-  __esModule: true,
-  default: { save: jest.fn() }
-}));
 
 import { useTranslation } from 'react-i18next';
 import { useForecastRequestData } from '../../utils/useForecastRequestData';
 import { useAppSelector } from '../../utils/hooks';
 import ReactGA from 'react-ga4';
-import cookie from 'react-cookies';
 import { providerValues } from '../../redux/providerValues';
 import { WeatherProviderSelector } from './WeatherProviderSelector';
 
@@ -56,7 +63,6 @@ describe('WeatherProviderSelector', () => {
   const mockedUseForecast = useForecastRequestData as unknown as jest.Mock;
   const mockedUseAppSelector = useAppSelector as unknown as jest.Mock;
   const mockedGA = ReactGA as unknown as { event: jest.Mock };
-  const mockedCookie = cookie as unknown as { save: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -95,7 +101,7 @@ describe('WeatherProviderSelector', () => {
     fireEvent.click(option);
 
     expect(mockedGA.event).toHaveBeenCalledWith('unlock_achievement', { achievement_id: 'openMeteo' });
-    expect(mockedCookie.save).toHaveBeenCalledWith('provider', 'openMeteo', { path: '/' });
+    expect(mCookie.set).toHaveBeenCalledWith('provider', 'openMeteo', { path: '/' });
     expect(mockSet).toHaveBeenCalledWith('openMeteo');
   });
 

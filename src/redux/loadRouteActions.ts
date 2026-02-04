@@ -98,9 +98,9 @@ const filterProvider = (provider : string, country : string, providerValues : an
 
 export type MutationWrapper = (request:{}) => {unwrap: () => Promise<any>}
 
-export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : MutationWrapper, lang: string) => {
+export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : MutationWrapper, 
+    lang: string) => {
     return async function(dispatch : AppDispatch, getState: () => RootState) {
-        // ReactGA.send({ hitType: "pageview", page: "/loadRoute" });
         // ReactGA.event('login', {method:getState().uiInfo.routeParams.rwgpsRoute});
         await dispatch(loadingFromUrlSet(true))
         if (getState().uiInfo.routeParams.rwgpsRoute !== '') {
@@ -127,12 +127,7 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
             if (queryString && searchString) {
                 updateHistory(queryString, searchString, true);
             }
-            const url = getState().params.queryString
-            // TODO: temporarily disabled automatic url shortening, must click to generate one
-/*             if (url && !url.includes("localhost")) {
-                await dispatch(shortenUrl(url))
-            }
- */            if (getState().strava.activity && getState().strava.activity !== '') {
+            if (getState().strava.activity && getState().strava.activity !== '') {
                 dispatch(loadStravaActivity())
             }
         }

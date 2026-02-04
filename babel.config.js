@@ -14,7 +14,6 @@ module.exports = {
   plugins: [
     "@babel/plugin-transform-runtime",
     "react-html-attrs",
-    // "@babel/plugin-transform-class-properties",
     // "@babel/plugin-syntax-dynamic-import",
     // "@babel/plugin-syntax-import-meta",
 //    "@babel/plugin-transform-json-strings",

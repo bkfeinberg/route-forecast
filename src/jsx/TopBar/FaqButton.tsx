@@ -1,9 +1,9 @@
 import React, {Suspense, useState} from "react"
-import cookie from 'react-cookies';
 import  {useMediaQuery} from 'react-responsive'
+import Cookies from "universal-cookie";
 const FaqDrawer = React.lazy(() => import("./FaqImpl").then(module => ({ default: module.FaqDrawer })));
 
-const FaqImage = ({flash} : {flash:boolean}) => {
+const FaqImage = ({flash} : {flash:boolean}) => {    
     const textClass = flash ? "flashing-red-text" : ""
     const width = 50;
     const height = 30;
@@ -18,15 +18,16 @@ const FaqImage = ({flash} : {flash:boolean}) => {
 
 const FaqButton = () => {
     const [faqVisible, setFaqVisible] = useState(false)
+    const cookies = new Cookies(null, { path: '/' });
     const showFaq = () => {
-        cookie.save('clickedFaq', "true", { path: '/' }); 
+        cookies.set('clickedFaq', "true", { path: '/' }); 
         setFaqVisible(true)
     }
 
     const hideFaq = () => {
         setFaqVisible(false)
     }
-    const faqWasClicked = cookie.load('clickedFaq')
+    const faqWasClicked = cookies.get('clickedFaq') === "true"
     const isMobile = useMediaQuery({query:'(max-width: 600px)'})
     const drawerSize = isMobile? "sm" : "xl"
 

@@ -1,7 +1,7 @@
 import 'animate.css/animate.min.css';
 
 import { useState } from 'react';
-import cookie from 'react-cookies';
+import Cookies from 'universal-cookie';
 import {connect, ConnectedProps} from 'react-redux';
 import * as Sentry from "@sentry/react"
 import { zoomToRangeToggled } from '../../redux/forecastSlice';
@@ -27,6 +27,7 @@ declare module 'react' {
 
 const PaceTable = ({activityData, activityStream, analysisInterval, mapSubrangeSet, mapRangeToggled, zoomToRange, zoomToRangeToggled} : PropsFromRedux) =>  {
     const { t } = useTranslation()
+    const cookies = new Cookies(null, { path: '/' });
     const [
         selectedRow,
         setSelectedRow
@@ -47,7 +48,7 @@ const PaceTable = ({activityData, activityStream, analysisInterval, mapSubrangeS
 
     const toggleZoom = () => {
         zoomToRangeToggled();
-        cookie.save('zoomToRange', (!zoomToRange).toString(), { path: '/' });
+        cookies.set('zoomToRange', (!zoomToRange).toString(), { path: '/' });
     };
 
     const toggleRange = (event : React.MouseEvent) => {

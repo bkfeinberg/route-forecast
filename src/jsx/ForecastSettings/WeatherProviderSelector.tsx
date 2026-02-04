@@ -8,7 +8,7 @@ import { useForecastRequestData } from "../../utils/useForecastRequestData";
 import type { RootState } from "../../redux/store";
 import ReactGA from "react-ga4";
 import { Combobox, useCombobox, Button, Flex } from '@mantine/core';
-import cookie from 'react-cookies';
+import Cookies from 'universal-cookie';
 
 type PropsFromRedux = ConnectedProps<typeof connector>
 
@@ -17,7 +17,9 @@ const WeatherProviderSelector = ({ weatherProvider, setWeatherProvider }: PropsF
     const { t } = useTranslation()
     const forecastData = useForecastRequestData()
     const country = useAppSelector((state: RootState) => state.routeInfo.country);
+    const cookies = new Cookies(null, { path: '/' });
     
+  
     const items = Object.entries(providerValues).
         filter((entry) => entry[1].maxCallsPerHour === undefined ||
             entry[1].maxCallsPerHour > forecastData.length).
@@ -42,7 +44,7 @@ const WeatherProviderSelector = ({ weatherProvider, setWeatherProvider }: PropsF
                 onOptionSubmit={(selected: string) => {
                     ReactGA.event('unlock_achievement', { achievement_id: selected });
                     setWeatherProvider(selected);
-                    cookie.save('provider', selected, { path: '/' });
+                    cookies.set('provider', selected, { path: '/' });
                     combobox.closeDropdown();
                 }
                 }

@@ -1,18 +1,22 @@
 // src/jsx/TopBar/DonationRequest.test.tsx
-import React from 'react';
 import { render, fireEvent, act } from 'test-utils';
 import { describe, beforeEach, jest, test, expect } from '@jest/globals';
+import Cookies from 'universal-cookie';
 
 // Mocks
-jest.mock('react-cookies', () => {
+const mCookie = {
+  get: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn()
+};
+
+jest.mock('universal-cookie', () => {
   return {
     __esModule: true,
-    default: {
-      load: jest.fn(),
-      save: jest.fn()
-    }
-  };
+    default: jest.fn().mockImplementation(() => mCookie)
+  }; 
 });
+
 jest.mock('react-ga4', () => {
   return {
     __esModule: true,
@@ -41,18 +45,6 @@ jest.mock('react-i18next', () => {
   };
 });
 
- // Render Mantine Button as an anchor-like wrapper preserving props and children
-/* jest.mock('@mantine/core', () => {
-  return {
-    __esModule: true,
-    Button: (props: any) => {
-      const { children, ...rest } = props;
-      return <a {...rest}>{children}</a>;
-    }
-  };
-});
- */
-import cookie from 'react-cookies';
 import ReactGA from 'react-ga4';
 import { useMediaQuery } from 'react-responsive';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +55,7 @@ const french_donation_image = 'https://www.paypalobjects.com/fr_XC/i/btn/btn_don
 const spanish_donation_image = 'https://www.paypalobjects.com/es_XC/i/btn/btn_donate_LG.gif';
 
 describe('DonationRequest', () => {
-  const mockedCookie = cookie as unknown as { load: jest.Mock, save: jest.Mock };
+  
   const mockedGA = ReactGA as unknown as { event: jest.Mock };
   const mockedUseMedia = useMediaQuery as unknown as jest.Mock;
   const mockedUseTranslation = useTranslation as unknown as jest.Mock;
@@ -71,7 +63,6 @@ describe('DonationRequest', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // default mocks
-    mockedCookie.load.mockReturnValue(undefined);
     mockedUseMedia.mockReturnValue(false);
     mockedUseTranslation.mockReturnValue({
       t: (k: any) => k,
@@ -100,18 +91,16 @@ describe('DonationRequest', () => {
   });
 
   test('clicking donate saves cookie and calls ReactGA.event', () => {
-    mockedCookie.load.mockReturnValue(undefined);
     const { container } = render(<DonationRequest wacky={false} />);
     const donateEl = container.querySelector('#donate') as HTMLElement | null;
     expect(donateEl).not.toBeNull();
     fireEvent.click(donateEl!);
-    expect(mockedCookie.save).toHaveBeenCalledWith('clickedDonate', "true", { path: '/' });
+    expect(mCookie.set).toHaveBeenCalledWith('clickedDonate', "true", { path: '/' });
     expect(mockedGA.event).toHaveBeenCalledWith('purchase', { currency: 'dollars' });
   });
 
   test('wacky true animates transform and filter over time when cookie not set', () => {
     jest.useFakeTimers();
-    mockedCookie.load.mockReturnValue(undefined);
     const { container } = render(<DonationRequest wacky={true} />);
     const wrapper = container.firstChild as HTMLElement;
     // initial style values are empty
@@ -129,7 +118,6 @@ describe('DonationRequest', () => {
 
   test('when donateWasClicked is true, wacky does not animate', () => {
     jest.useFakeTimers();
-    mockedCookie.load.mockReturnValue("true");
     const { container, getByRole } = render(<DonationRequest wacky={true} />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.style.transform).toBe('');

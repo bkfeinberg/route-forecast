@@ -7,7 +7,6 @@ import VisualCrossingLogo from 'Images/vclogo.svg?react';
 import oneCallLogo from 'Images/OpenWeather-Master-Logo RGB.png'
 import OpenMeteoLogo from 'Images/OpenMeteo.svg?react'
 import { DateTime, Interval } from 'luxon';
-import cookie from 'react-cookies';
 import MediaQuery, {useMediaQuery} from 'react-responsive';
 import { finishTimeFormat } from '../ForecastSettings/TimeFields';
 import { fetchAqiToggled, weatherRangeSet, weatherRangeToggled, zoomToRangeToggled, tableViewedSet, Forecast } from '../../redux/forecastSlice';
@@ -27,6 +26,7 @@ import { Button, Tooltip, Table, Card, Title, Text } from '@mantine/core';
 
 import { IconClipboard, IconTemperature, IconPercentage } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import Cookies from 'universal-cookie';
 
 type TimeFormats = {
     [index:string]:string
@@ -140,7 +140,8 @@ const ForecastTable = () => {
     const dispatch = useAppDispatch()
     useEffect(() => { dispatch(tableViewedSet()) }, [])
     const { t } = useTranslation()
-    
+    const cookies = new Cookies(null, { path: '/' });
+
     const distHeaderText = <span>{metric ? 'KM' : 'Mile'}</span>
     const distHeader = <DesktopTooltip label={t('tooltips.distHeader')} position='top'>{distHeaderText}</DesktopTooltip>
 
@@ -171,7 +172,7 @@ const ForecastTable = () => {
     const toggleZoom = () => {
         ReactGA.event('select_content', {content_type: 'zoom'})
         dispatch(zoomToRangeToggled())
-        cookie.save('zoomToRange', (!zoomToRange).toString(), { path: '/' })
+        cookies.set('zoomToRange', (!zoomToRange).toString(), { path: '/' })
     }
 
     const toggleRelBearing = () => {
@@ -217,7 +218,7 @@ const ForecastTable = () => {
     const toggleAqi = async () => {
         ReactGA.event('select_content', {content_type: 'aqi'})
         dispatch(fetchAqiToggled())
-        cookie.save('fetchAqi', (!fetchAqi).toString(), { path: '/' });
+        cookies.set('fetchAqi', (!fetchAqi).toString(), { path: '/' });
         // whatever the value in props is will be toggled by this
         if (!fetchAqi) {
             notifications.show({ message: t('toasts.aqi.enabled'), autoClose:3000, withCloseButton: false });
