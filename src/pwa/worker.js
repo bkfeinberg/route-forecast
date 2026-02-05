@@ -30,6 +30,8 @@ self.addEventListener('install', (event) => {
     });
     self.localforage.clear().then(() => {
         // sendLogMessage('Cleared POST IndexedDB cache', 'trace');
+    }).catch((err) => {
+        sendLogMessage(`Error clearing POST IndexedDB cache: ${err}`, 'error');
     });
     const assetsToCache = self.__WB_MANIFEST;
     const urlsToCache = assetsToCache.map((entry) => {
@@ -40,9 +42,13 @@ self.addEventListener('install', (event) => {
         sendLogMessage(`localforage failed to find a storage method: ${err}`, 'error');
     }),
     caches.open(cacheName).then(async (cache) => {
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).catch((err) => {
+            sendLogMessage(`Error adding assets to cache: ${err}`, 'error');
+        });
     }
-    )
+    ).catch((err) => {
+        sendLogMessage(`Error caching assets during install: ${err}`, 'error');
+    })
     ]))
     self.skipWaiting().then(() => {
         // sendLogMessage('Service Worker skipWaiting complete', 'trace');
