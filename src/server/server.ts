@@ -84,6 +84,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/worker.js', limiter)
 app.get('/worker.js', (req: Request, res : Response) => {
     res.set('Content-Type', 'application/javascript');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');    
     res.sendFile(path.resolve(__dirname,'../static/worker.js'));
 })
 
@@ -91,6 +94,11 @@ app.use('/lib/localforage.js', limiter)
 app.get('/lib/localforage.js', (req : Request, res : Response) => {
     res.set('Content-Type', 'application/javascript');
     res.sendFile(path.resolve(__dirname,'../static/lib/localforage.js'));
+});
+
+app.get('/lib/localforage.min.js', (req : Request, res : Response) => {
+    res.set('Content-Type', 'application/javascript');
+    res.sendFile(path.resolve(__dirname,'../static/lib/localforage.min.js'));
 })
 app.get('/robots.txt', (req : Request, res : Response) => {
     res.sendFile(path.resolve(__dirname,'../static/robots.txt'));
