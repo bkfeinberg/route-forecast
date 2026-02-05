@@ -117,7 +117,8 @@ const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper
 }
 
 const doForecastByParts = async (forecastFunc : MutationWrapper, aqiFunc : MutationWrapper,
-     dispatch : AppDispatch, getState : () => RootState, lang : string) => {
+     dispatch : AppDispatch, getState : () => RootState, lang : string,
+    provider: string) => {
     const type = ((getState().routeInfo.rwgpsRouteData !== null) ? "rwgps" : "gpx")
     const routeNumber = (type === "rwgps") ? getState().uiInfo.routeParams.rwgpsRoute : getState().strava.route
     const rwgpsRouteData = getState().routeInfo.rwgpsRouteData
@@ -149,10 +150,10 @@ const doForecastByParts = async (forecastFunc : MutationWrapper, aqiFunc : Mutat
         getState().uiInfo.routeParams.segment, getState().routeInfo.routeUUID
     )
 
-    ReactGA.event('weather_provider', { provider: getState().forecast.weatherProvider });    
-    Sentry.metrics.count("forecast_requests", 1, {attributes:{provider:getState().forecast.weatherProvider}});
+    ReactGA.event('weather_provider', { provider: provider });
+    Sentry.metrics.count("forecast_requests", 1, {attributes:{provider:provider}});
     return forecastByParts(forecastFunc, aqiFunc, forecastRequest, getState().uiInfo.routeParams.zone,
-        getState().forecast.weatherProvider, getState().routeInfo.name, routeNumber, dispatch,
+        provider, getState().routeInfo.name, routeNumber, dispatch,
         getState().forecast.fetchAqi, lang)
 }
 
@@ -191,7 +192,12 @@ export const forecastWithHook = async (forecastFunc: MutationWrapper, aqiFunc: M
      dispatch: AppDispatch, getState: () => RootState, lang: string) => {
     const routeInfo = getState().routeInfo;
     const daysInFuture = getDaysInFuture(getState().uiInfo.routeParams.startTimestamp)
-    
+    let provider = getState().forecast.weatherProvider;
+    // override a provider if the url has specified one which cannot forecast that far in the future
+    if (daysInFuture > providerValues[provider].max_days) {
+        provider = 'visualcrossing';
+        info(`Overriding weather provider to ${'visualcrossing'} as ${getState().forecast.weatherProvider} cannot forecast ${daysInFuture} days in the future`, { originalProvider: getState().forecast.weatherProvider, daysInFuture: daysInFuture });
+    }
     if (routeInfo.rwgpsRouteData) {
         ReactGA.event('add_payment_info', {
             value: getRouteDistanceInKm(routeInfo.rwgpsRouteData), coupon: getRwgpsRouteName(routeInfo.rwgpsRouteData),
@@ -211,7 +217,7 @@ export const forecastWithHook = async (forecastFunc: MutationWrapper, aqiFunc: M
     fetchAbortMethod = abortMethod;
 
     dispatch(forecastFetchBegun())
-    const forecastAndAqiResults = await doForecastByParts(forecastFunc, aqiFunc, dispatch, getState, lang)
+    const forecastAndAqiResults = await doForecastByParts(forecastFunc, aqiFunc, dispatch, getState, lang, provider);
     const forecastResults = await forecastAndAqiResults[0]
     const aqiResults = await forecastAndAqiResults[1]
     let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast}>).value)
