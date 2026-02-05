@@ -72,10 +72,11 @@ interface ForecastGridType {
         }
     }
 }
-const findNearestTime = <T>(data : {values: Array<{validTime: string, value: T}>}, time : DateTime) : T => {
+const findNearestTime = <T>(data : {values: Array<{validTime: string, value: T}>}, 
+    time : DateTime, dataType: string) : T => {
     let newerThan = data.values.find(value => {return Interval.fromISO(value.validTime, {setZone:true}).contains(time)});
     if (!newerThan) {
-        throw Error(`No matching weather data for ${time.toString()}`);
+        throw Error(`No matching ${dataType} data for ${time.toString()}`);
     }
     return newerThan.value;
 };
@@ -93,22 +94,21 @@ const formatSummary = (summary : Summary) => {
 }
 
 const extractForecast = (forecastGridData : ForecastGridType, currentTime : DateTime) => {
-    const temperatureInC = findNearestTime(forecastGridData.data.properties.temperature, currentTime);
-    const apparentTemperatureInC = findNearestTime(forecastGridData.data.properties.apparentTemperature, currentTime);
-    const cloudCover = findNearestTime(forecastGridData.data.properties.skyCover, currentTime);
-    const windBearing = findNearestTime(forecastGridData.data.properties.windDirection, currentTime);
-    const windSpeed = findNearestTime(forecastGridData.data.properties.windSpeed, currentTime);
-    const gust = findNearestTime(forecastGridData.data.properties.windGust, currentTime);
-    const precip = findNearestTime(forecastGridData.data.properties.probabilityOfPrecipitation, currentTime);
+    const temperatureInC = findNearestTime(forecastGridData.data.properties.temperature, currentTime, 'temperature');
+    const apparentTemperatureInC = findNearestTime(forecastGridData.data.properties.apparentTemperature, currentTime, 'apparentTemperature');
+    const cloudCover = findNearestTime(forecastGridData.data.properties.skyCover, currentTime, 'skyCover');
+    const windBearing = findNearestTime(forecastGridData.data.properties.windDirection, currentTime, 'windDirection');
+    const windSpeed = findNearestTime(forecastGridData.data.properties.windSpeed, currentTime, 'windSpeed');
+    const gust = findNearestTime(forecastGridData.data.properties.windGust, currentTime, 'windGust');
+    const precip = findNearestTime(forecastGridData.data.properties.probabilityOfPrecipitation, currentTime, 'probabilityOfPrecipitation');
     let weatherSummary = null
     try {
-        const {attributes, visibility, ...summary} = findNearestTime<Array<any>>(forecastGridData.data.properties.weather, currentTime)[0];
+        const {attributes, visibility, ...summary} = findNearestTime<Array<any>>(forecastGridData.data.properties.weather, currentTime, 'weather')[0];
         weatherSummary = summary
     } catch (err : any) {
         error(`Failed to get weather summary for ${currentTime} - ${JSON.stringify(forecastGridData.data.properties.weather)}`)
     }
-    const humidity = findNearestTime(forecastGridData.data.properties.relativeHumidity, currentTime);
-
+    const humidity = findNearestTime(forecastGridData.data.properties.relativeHumidity, currentTime, 'relativeHumidity');
     return {
         temperatureInC:temperatureInC,
         apparentTemperatureInC:apparentTemperatureInC,
