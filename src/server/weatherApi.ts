@@ -76,7 +76,7 @@ const callWeatherApi = async function (lat : number, lon : number, currentTime :
         'vectorBearing':bearing,
         'gust':current.gust_mph===undefined?'<unavailable>':`${Math.round(current.gust_mph)}`,
         'feel':current.feelslike_f===undefined?Math.round(current.temp_f):Math.round(current.feelslike_f),
-        'aqi':forecastResult.data.current.air_quality.pm2_5,
+        'aqi':forecastResult.data?.current?.air_quality?.pm2_5,
         isControl:isControl
     }
 } as WeatherFunc;
