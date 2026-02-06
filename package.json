@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.8.0",
+  "version": "5.8.1",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -140,7 +140,6 @@
     "css-minimizer-webpack-plugin": "^7.0.0",
     "exports-loader": "^5.0.0",
     "fetch-mock": "^12.6.0",
-    "fetch-mock-jest": "^1.5.1",
     "globals": "^17.0.0",
     "html-webpack-plugin": "^5.3.1",
     "i": "^0.3.7",

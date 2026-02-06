@@ -74,7 +74,7 @@ else {
                         autoInject: false
                     })
                 ],
-                // denyUrls: ["https://maps.googleapis"],
+                denyUrls: ["https://maps.googleapis"],
                 // To set a uniform sample rate
                 tracesSampleRate: Number.parseFloat(trace_sample_rate ? trace_sample_rate : '0.1'),
                 // profileSessionSampleRate: 0.3,
