@@ -22,6 +22,15 @@ const sendLogMessage = (message, type) => {
     });
 };
 
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.command === 'GET_VERSION') {
+    event.source.postMessage({
+      command: 'RETURN_VERSION',
+      version: version
+    });
+  }
+});
+
 self.addEventListener('install', (event) => {
     // delete old IndexedDB instance to avoid conflicts
     self.localforage.dropInstance({

@@ -131,11 +131,17 @@ else {
         )
     };
 
+    let worker_version = 'unknown';
+    
     window.addEventListener('load', (event) => {
         console.log('The page has fully loaded');
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event: MessageEvent) => {
-                if (event.data.type === 'info') {
+                if (event.data && event.data.command === 'RETURN_VERSION') {
+                    info('Service Worker Version:', event.data.version);
+                    worker_version = event.data.version;
+                }          
+                else if (event.data.type === 'info') {
                     console.info(`Message from service worker version ${event.data.version}: ${event.data.data}`);
                     info(`Message from service worker version ${event.data.version}: ${event.data.data}`);
                 } else if (event.data.type === 'trace') {
@@ -170,6 +176,10 @@ else {
                 // a new SW was registered.
                 registration.installing?.addEventListener('statechange', (event: Event) => {
                     if (event.target && (event.target as ServiceWorker).state === 'redundant') {
+                        // request the version of the active service worker if the new one becomes redundant immediately, which can happen if the new one has the same content as the old one
+                        if (navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({ command: 'GET_VERSION' });
+                        }
                         warn(`Service worker did not install correctly, was redundant`);
                         serviceWorkerInstallationFailed = true;
                         metrics.count("install_failures", 1, { attributes: { error: 'Redundant' } });
