@@ -76,7 +76,7 @@ const findNearestTime = <T>(data : {values: Array<{validTime: string, value: T}>
     time : DateTime, dataType: string) : T => {
     let newerThan = data.values.find(value => {return Interval.fromISO(value.validTime, {setZone:true}).contains(time)});
     if (!newerThan) {
-        throw Error(`No matching ${dataType} data for ${time.toString()}`);
+        throw Error(`No matching ${dataType} data for ${time.toString()} in ${JSON.stringify(data.values)}`);
     }
     return newerThan.value;
 };
