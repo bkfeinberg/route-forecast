@@ -2,7 +2,7 @@ const { debug } = require("node:console");
 
 module.exports = {
   presets: [
-    ['@babel/preset-env', {debug: true}],
+    ['@babel/preset-env', {debug: false}],
     [
       '@babel/preset-react',
       {
