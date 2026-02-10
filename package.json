@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.8.3",
+  "version": "5.8.4",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -31,7 +31,9 @@
     "@tabler/icons": "^3.35.0",
     "@tabler/icons-react": "^3.35.0",
     "@testing-library/jest-dom": "^6.9.1",
-    "@turf/turf": "^7.3.1",
+    "@turf/clean-coords": "^7.3.4",
+    "@turf/helpers": "^7.3.4",
+    "@turf/nearest-point-on-line": "^7.3.4",
     "@types/luxon": "^3.4.2",
     "@types/webappsec-credential-management": "^0.6.8",
     "@vis.gl/react-google-maps": "^1.0.0",

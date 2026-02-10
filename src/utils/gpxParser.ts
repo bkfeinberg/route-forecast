@@ -6,10 +6,11 @@ import {getPowerOrVelocity} from "./windUtils"
 import * as Sentry from "@sentry/browser"
 import { UserControl} from '../redux/controlsSlice';
 import type { GpxRouteData, RwgpsRoute, RwgpsTrip } from '../redux/routeInfoSlice';
-import * as turf from "@turf/turf";
-
+import {nearestPointOnLine}from "@turf/nearest-point-on-line";
+import {cleanCoords} from "@turf/clean-coords";
+import { lineString, point } from "@turf/helpers";
 import { create, all } from 'mathjs/number'
-import { Feature, LineString, GeoJsonProperties } from 'geojson';
+import type { Feature, LineString, GeoJsonProperties } from 'geojson';
 
 // Format for finish times (moved from TimeFields to avoid circular dependency in tests)
 const finishTimeFormat = 'EEE, MMM dd yyyy h:mma';
@@ -223,8 +224,8 @@ class AnalyzeRoute {
         if (found) {
             return Math.min(Math.round((found.d*kmToMiles)/1000),distanceInMiles)
         }
-        const point = turf.point([poi.lng, poi.lat])
-        const nearestPoint = turf.nearestPointOnLine(routeDataAsLineString, point, { units: "miles" })
+        const poiPoint = point([poi.lng, poi.lat])
+        const nearestPoint = nearestPointOnLine(routeDataAsLineString, poiPoint, { units: "miles" })
         // console.log(`POI ${poi.n} is ${nearestPoint.properties.dist} miles from the route`)
         const foundNearest = routeData[routeData.type]?.track_points.find((value) => 
             math.equal(value.x, nearestPoint.geometry.coordinates[0]) && math.equal(value.y, nearestPoint.geometry.coordinates[1]))
@@ -246,8 +247,8 @@ class AnalyzeRoute {
     extractControlsFromPois = (routeData : RwgpsRoute|RwgpsTrip) => {
         // create GeoJson LineString for later POI analysis
         const coordinates = this.parseRwgpsRouteStream(routeData).map( point => [point.lon, point.lat])
-        const routeAsLineString = turf.lineString(coordinates)
-        const cleanedLine = turf.cleanCoords(routeAsLineString)
+        const routeAsLineString = lineString(coordinates)
+        const cleanedLine = cleanCoords(routeAsLineString)
         return routeData[routeData.type]?.points_of_interest.filter((poi: RwgpsPoi) =>
              (poi.t===31||poi.t===13||poi.t===27)).map((poi: RwgpsPoi) => this.controlFromPoi(poi, routeData, cleanedLine))
     }
