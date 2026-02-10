@@ -1,6 +1,12 @@
+
 import { DateTime } from 'luxon';
 import type { Point, ForecastRequest, CalculatedValue, ExtractedControl, RouteAnalysisResults } from './gpxParser';
 import AnalyzeRoute, { AnalyzeRoute as AnalyzeRouteClass } from './gpxParser';
+
+// Make mock points available to all tests
+const mockPoint1: Point = { lat: 40.7128, lon: -74.0060, elevation: 10 };
+const mockPoint2: Point = { lat: 40.7138, lon: -74.0050, elevation: 20 };
+const mockPoint3: Point = { lat: 40.7148, lon: -74.0040, elevation: 30 };
 
 describe('AnalyzeRoute', () => {
     const mockPoint1: Point = { lat: 40.7128, lon: -74.0060, elevation: 10 };
@@ -404,6 +410,135 @@ describe('AnalyzeRoute', () => {
         });
     });
 
+    describe('parseCoursePoints', () => {
+        it('should return course_points for route', () => {
+            const routeData: any = {
+                type: 'route',
+                route: { course_points: [1, 2, 3] }
+            };
+            const result = AnalyzeRoute.parseCoursePoints(routeData);
+            expect(result).toEqual([1, 2, 3]);
+        });
+        it('should return course_points for trip', () => {
+            const routeData: any = {
+                type: 'trip',
+                trip: { course_points: [4, 5] }
+            };
+            const result = AnalyzeRoute.parseCoursePoints(routeData);
+            expect(result).toEqual([4, 5]);
+        });
+    });
+
+    describe('findPoiDistance', () => {
+        it('should return distance for matching POI', () => {
+            const poi = { lat: 1, lng: 2, n: 'Test', t: 31, d: 'desc' };
+            const routeData: any = {
+                type: 'route',
+                route: { distance: 10000, track_points: [
+                    { x: 2, y: 1, d: 5000, e: 0 },
+                    { x: 3, y: 2, d: 10000, e: 0 }
+                ] }
+            };
+            const routeLine = { type: 'LineString', coordinates: [[2, 1], [3, 2]] };
+            const result = AnalyzeRoute.findPoiDistance(poi, routeData, routeLine as any);
+            expect(result).toBeGreaterThan(0);
+        });
+        it('should return 0 if no match found', () => {
+            const poi = { lat: 1, lng: 2, n: 'Test', t: 31, d: 'desc' };
+            const routeData: any = {
+                type: 'route',
+                route: { distance: 100, track_points: [{ x: 3, y: 4, d: 50, e: 0 }] }
+            };
+            const routeLine = { type: 'LineString', coordinates: [[2, 1], [2, 1]] };
+            const result = AnalyzeRoute.findPoiDistance(poi, routeData, routeLine as any);
+            expect(result).toBe(0);
+        });
+    });
+
+    describe('controlFromPoi', () => {
+        it('should create control from POI', () => {
+            const poi = { lat: 1, lng: 2, n: 'Test', t: 31, d: '_Cafe_' };
+            const routeData: any = {
+                type: 'route',
+                route: { distance: 100, track_points: [{ x: 2, y: 1, d: 50, e: 0 }], points_of_interest: [poi] }
+            };
+            const routeLine = { type: 'LineString', coordinates: [[2, 1], [2, 1]] };
+            const result = AnalyzeRoute.controlFromPoi(poi, routeData, routeLine as any);
+            expect(result.name).toContain('Test');
+            expect(result.business).toBe('Cafe');
+        });
+    });
+
+    describe('extractControlsFromPois', () => {
+        it('should extract controls from POIs', () => {
+            const poi = { lat: 1, lng: 2, n: 'Test', t: 31, d: '_Cafe_' };
+            const routeData: any = {
+                type: 'route',
+                route: {
+                    distance: 100,
+                    track_points: [
+                        { x: 2, y: 1, d: 50, e: 0 },
+                        { x: 3, y: 2, d: 100, e: 0 }
+                    ],
+                    points_of_interest: [poi]
+                }
+            };
+            const result = AnalyzeRoute.extractControlsFromPois(routeData);
+            expect(result && result.length).toBeGreaterThan(0);
+            expect(result && result[0].business).toBe('Cafe');
+        });
+    });
+
+    describe('adjustForWind', () => {
+        it('should return default result for empty forecastInfo', () => {
+            const result = AnalyzeRoute.adjustForWind([], [], 'fast', [], [], DateTime.now(), '', 'UTC', 100);
+            expect(result.weatherCorrectionMinutes).toBe(0);
+            expect(result.calculatedControlPointValues).toEqual([]);
+        });
+    });
+
+    describe('calculateValuesForWind', () => {
+        it('should update calculatedValues if control is reached', () => {
+            const controls = [{ distance: 10, id: 1 }];
+            const prevVals = [{ arrival: DateTime.now().toFormat('EEE, MMM dd yyyy h:mma'), banked: 0, val: 1, distance: 10 }];
+            const calcVals: any[] = [];
+            const start = DateTime.now();
+            const next = AnalyzeRouteClass.calculateValuesForWind(
+                controls,
+                prevVals,
+                calcVals,
+                0,
+                10,
+                5,
+                start,
+                10,
+                'UTC'
+            );
+            expect(calcVals.length).toBe(1);
+            expect(next).toBe(1);
+        });
+        it('should not update if control not reached', () => {
+            const controls = [{ distance: 20, id: 1 }];
+            const prevVals = [{ arrival: DateTime.now().toFormat('EEE, MMM dd yyyy h:mma'), banked: 0, val: 1, distance: 20 }];
+            const calcVals: any[] = [];
+            const start = DateTime.now();
+            const next = AnalyzeRouteClass.calculateValuesForWind(
+                controls,
+                prevVals,
+                calcVals,
+                0,
+                10,
+                5,
+                start,
+                10,
+                'UTC'
+            );
+            expect(calcVals.length).toBe(0);
+            expect(next).toBe(0);
+        });
+    });
+    });
+
     describe('computePointsAndBounds', () => {
         it('should compute bounds from point stream', () => {
             const points: Point[] = [mockPoint1, mockPoint2, mockPoint3];
@@ -460,7 +595,7 @@ describe('AnalyzeRoute', () => {
                         { x: -74.0050, y: 40.7138, e: 20, d: 1 }
                     ]
                 }
-            };
+            };                 
             const result = AnalyzeRoute['parseRwgpsRouteStream'](routeData);
             expect(result.length).toBe(2);
             expect(result[0].dist).toBe(0);
@@ -904,4 +1039,3 @@ describe('AnalyzeRoute', () => {
             expect(calculated.length).toBe(0);
         });
     });
-});

@@ -19,6 +19,9 @@ const config: Config.InitialOptions = {
     // Add other options as needed
     moduleNameMapper: {
         '^Images/(.*)$': '<rootDir>/src/static/$1',
+        '^gpxparser$': '<rootDir>/__mocks__/gpxparser.js',
+        '^./stravaRouteParser$': '<rootDir>/__mocks__/stravaRouteParser.js',
+        '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
     },
     transform: {
         '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
