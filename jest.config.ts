@@ -16,6 +16,9 @@ const config: Config.InitialOptions = {
   moduleNameMapper: {
     '^Images/(.*)$': '<rootDir>/src/static/$1',
     '^gpxparser$': '<rootDir>/__mocks__/gpxparser.js',
+    '^uuid$': '<rootDir>/__mocks__/uuid.js',
+    '^query-string$': '<rootDir>/__mocks__/query-string.js',
+    '^p-limit$': '<rootDir>/__mocks__/p-limit.js',
     '^./stravaRouteParser$': '<rootDir>/__mocks__/stravaRouteParser.js',
     '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
   },
