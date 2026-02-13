@@ -9,7 +9,8 @@ const __dirname = dirname(__filename);
 
 const config: Config.InitialOptions = {
   // using explicit ts-jest transform below (avoid preset to prevent default hoisting transformer)
-  testEnvironment: 'jsdom',
+  preset: "ts-jest",
+  testEnvironment: 'jest-fixed-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Points to the setup file for jest-dom matchers
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'], // Ensures correct file resolution
   // Add other options as needed
@@ -23,17 +24,17 @@ const config: Config.InitialOptions = {
     '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@exodus|gpxparser|query-string))',
+    'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async)/)'
   ],
   transform: {
     '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
-    '^.+\\.tsx?$': ['ts-jest', {
+    '^.+\\.(tsx?|jsx?)$': ['ts-jest', {
       tsconfig: 'tsconfig.test.json',
       babelConfig: true,
-      astTransformers: {
-        before: [],
-        after: []
-      }
+      // astTransformers: {
+      //   before: [],
+      //   after: []
+      // }
     }]
   },
   moduleDirectories: [
