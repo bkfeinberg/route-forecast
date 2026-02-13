@@ -13,17 +13,6 @@ import {routeParamsReducer} from './routeParamsSlice'
 import { forecastReducer } from './forecastSlice';
 export const loggerMiddleware = createLogger();
 
-const bannedActionKeys = [
-    'routeData',
-    'controls',
-    'values',
-    'forecastInfo',
-    'gpxRouteData',
-    'data',
-    'arrivalTimes',
-    'bitlyToken'
-];
-
 /**
  *
  * @param {Object} _preloadedState from server
