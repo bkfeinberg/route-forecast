@@ -4,7 +4,7 @@ export const forecastApiSlice = createApi({
     reducerPath:'forecastFetch',
     baseQuery: fetchBaseQuery({
         // Fill in your own server starting URL here
-        baseUrl: '/'
+        baseUrl: window.location.origin,
     }),
     endpoints: build => ({
         forecast: build.mutation({

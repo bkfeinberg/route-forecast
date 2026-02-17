@@ -1,59 +1,20 @@
 // src/jsx/RouteInfoForm/RideWithGpsId.test.tsx
-import { render, fireEvent } from 'test-utils';
+import { renderWithProviders, fireEvent } from 'test-utils';
 import { describe, beforeEach, test, expect } from '@jest/globals';
-import { Provider } from 'react-redux';
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import RideWithGpsId from './RideWithGpsId';
-import { routeParamsReducer } from '../../redux/routeParamsSlice';
-import { dialogParamsReducer } from '../../redux/dialogParamsSlice';
 import React from 'react';
 
 // Mocks
-jest.mock('react-i18next', () => ({
-  __esModule: true,
-  useTranslation: () => {
-    return {
-      t: (str: string) => str,
-      i18n: { changeLanguage: () => new Promise(() => {}) }
-    };
-  }
-}));
 
 jest.mock('../../jsx/app/updateHistory', () => ({
   __esModule: true,
   updateHistory: jest.fn()
 }));
 
-jest.mock('../../redux/paramsSlice', () => ({
-  __esModule: true,
-  querySet: jest.fn(() => ({ type: 'params/querySet' }))
-}));
-
-jest.mock('@sentry/react', () => ({
-  __esModule: true,
-  logger: {
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    fmt: jest.fn()
-  }
-}));
-
-// Helper to create a Redux store for testing
-const createTestStore = (preloadedState?: any) => {
-  return configureStore({
-    reducer: {
-      uiInfo: combineReducers({
-        routeParams: routeParamsReducer,
-        dialogParams: dialogParamsReducer
-      })
-    },
-    preloadedState
-  });
-};
+// jest.mock('../../redux/paramsSlice', () => ({
+//   __esModule: true,
+//   querySet: jest.fn(() => ({ type: 'params/querySet' }))
+// }));
 
 // Default preloaded state
 const defaultPreloadedState = {
@@ -69,20 +30,17 @@ const defaultPreloadedState = {
 };
 
 describe('RideWithGpsId Component', () => {
-  let store: ReturnType<typeof createTestStore>;
-  let mockLoadButtonRef: React.RefObject<HTMLButtonElement>;
+  let mockLoadButtonRef: React.RefObject<HTMLButtonElement|null>;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   test('renders TextInput with correct id and attributes', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -95,12 +53,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('displays label with correct translation key', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const label = container.querySelector('label');
@@ -121,12 +77,10 @@ describe('RideWithGpsId Component', () => {
       }
     };
     
-    store = createTestStore(preloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -134,12 +88,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('renders CloseButton', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     // Mantine CloseButton renders as a button, check if it exists
@@ -148,12 +100,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('applies font size styling to TextInput', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -163,12 +113,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('applies glowing_input class to TextInput', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('.glowing_input');
@@ -176,16 +124,14 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('handles Enter key press when loadButtonRef is set', () => {
-    store = createTestStore(defaultPreloadedState);
     const mockClickFn = jest.fn();
     const loadButtonRef = {
       current: { click: mockClickFn } as any
     };
     
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={loadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={loadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -195,16 +141,14 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('handles non-Enter key press without clicking button', () => {
-    store = createTestStore(defaultPreloadedState);
     const mockClickFn = jest.fn();
     const loadButtonRef = {
       current: { click: mockClickFn } as any
     };
     
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={loadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={loadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -214,12 +158,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('handles input change event', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -241,12 +183,10 @@ describe('RideWithGpsId Component', () => {
       }
     };
     
-    store = createTestStore(preloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -267,12 +207,10 @@ describe('RideWithGpsId Component', () => {
       }
     };
     
-    store = createTestStore(preloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -281,12 +219,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('handles drag and drop of text', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -296,12 +232,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('input is autoFocus and has correct tabIndex', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -312,12 +246,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('renders with Flex layout column direction', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     // Flex component from mantine renders with data attributes
@@ -326,12 +258,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('closeButton is positioned on the right of input', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route');
@@ -339,12 +269,10 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('input has correct width set', () => {
-    store = createTestStore(defaultPreloadedState);
     mockLoadButtonRef = { current: null };
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={mockLoadButtonRef} />
-      </Provider>
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={mockLoadButtonRef} />,
+      { preloadedState: defaultPreloadedState }
     );
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
@@ -352,14 +280,12 @@ describe('RideWithGpsId Component', () => {
   });
 
   test('component handles null loadButtonRef gracefully', () => {
-    store = createTestStore(defaultPreloadedState);
     const nullRef = { current: null };
     
-    const { container } = render(
-      <Provider store={store}>
-        <RideWithGpsId loadButtonRef={nullRef} />
-      </Provider>
-    );
+    const { container } = renderWithProviders(
+      <RideWithGpsId loadButtonRef={nullRef} />,
+      { preloadedState: defaultPreloadedState }
+    ); 
     
     const input = container.querySelector('#rwgps_route') as HTMLInputElement;
     // Should still render and handle keyDown without error

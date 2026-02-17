@@ -15,6 +15,7 @@ const config: Config.InitialOptions = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'], // Ensures correct file resolution
   // Add other options as needed
   moduleNameMapper: {
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|htm)(\\?.*)?$": "<rootDir>/__mocks__/fileMock.js",
     '^Images/(.*)$': '<rootDir>/src/static/$1',
     '^gpxparser$': '<rootDir>/__mocks__/gpxparser.js',
     '^uuid$': '<rootDir>/__mocks__/uuid.js',

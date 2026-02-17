@@ -1,6 +1,5 @@
 // src/jsx/ForecastSettings/TimeFields.test.tsx
-import React from 'react';
-import { render, renderWithProviders, screen } from 'test-utils';
+import { renderWithProviders, screen } from 'test-utils';
 import { describe, beforeEach, jest, test, expect } from '@jest/globals';
 import { TimeFields, finishTimeFormat } from './TimeFields';
 import { DateTime } from 'luxon';
@@ -21,14 +20,15 @@ describe('TimeFields component', () => {
   const mockedDateTime = DateTime as unknown as any;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     mockedUseActualFinishTime.mockReturnValue(null);
     mockedUseForecastDependentValues.mockReturnValue({ finishTime: null });
   });
 
   test('renders DateSelect component', () => {
     renderWithProviders(<TimeFields />, {preloadedState: {uiInfo: { routeParams: { 
-            startTimestamp: 1770908400265, zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: true } }}});
+            startTimestamp: 1770908400265, zone: 'America/Los_Angeles', 
+            maxDaysInFuture: 5, canForecastPast: true } }}});
     expect(screen.getByText('February 12, 2026 7:00am')).toBeTruthy();
   });
 

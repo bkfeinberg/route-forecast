@@ -2,6 +2,7 @@
 import { DateTime } from 'luxon';
 import type { Point, ForecastRequest, CalculatedValue, ExtractedControl, RouteAnalysisResults } from './gpxParser';
 import AnalyzeRoute, { AnalyzeRoute as AnalyzeRouteClass } from './gpxParser';
+import type { UserControl } from '../redux/controlsSlice';
 
 // Make mock points available to all tests
 const mockPoint1: Point = { lat: 40.7128, lon: -74.0060, elevation: 10 };
@@ -499,7 +500,7 @@ describe('AnalyzeRoute', () => {
 
     describe('calculateValuesForWind', () => {
         it('should update calculatedValues if control is reached', () => {
-            const controls = [{ distance: 10, id: 1 }];
+            const controls : UserControl[] = [{ distance: 10, id: 1, duration: 30, name: 'Control', banked: 5 }];
             const prevVals = [{ arrival: DateTime.now().toFormat('EEE, MMM dd yyyy h:mma'), banked: 0, val: 1, distance: 10 }];
             const calcVals: any[] = [];
             const start = DateTime.now();
@@ -518,7 +519,7 @@ describe('AnalyzeRoute', () => {
             expect(next).toBe(1);
         });
         it('should not update if control not reached', () => {
-            const controls = [{ distance: 20, id: 1 }];
+            const controls: UserControl[] = [{ distance: 20, id: 1, duration: 30, name: 'Control', banked: 5 }];
             const prevVals = [{ arrival: DateTime.now().toFormat('EEE, MMM dd yyyy h:mma'), banked: 0, val: 1, distance: 20 }];
             const calcVals: any[] = [];
             const start = DateTime.now();

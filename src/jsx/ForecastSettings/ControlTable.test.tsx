@@ -1,19 +1,5 @@
 import { fireEvent, screen } from '@testing-library/react';
 import {renderWithProviders} from '../../utils/test-utils';
-import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
-
-const handlers = [
-  http.get('/forecast_one', () => {
-    return HttpResponse.json([{ id: 1, title: 'Mock Post' }]);
-  }),
-];
-
-const server = setupServer(...handlers);
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
 
 import { ControlTable } from './ControlTable';
 

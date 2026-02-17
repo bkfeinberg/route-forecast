@@ -8,7 +8,7 @@ import RideWithGpsId from './RideWithGpsId';
 import {useTranslation} from 'react-i18next'
 import type { RefObject } from 'react';
 import { Button } from '@mantine/core';
-import { useAppSelector, useAppDispatch } from '../../utils/hooks.js';
+import { useAppSelector, useAppDispatch } from '../../utils/hooks';
 export const RouteInfoInputRWGPS = () => {
   const usingPinnedRoutes = useAppSelector(state => state.rideWithGpsInfo.usePinnedRoutes)
   const [
