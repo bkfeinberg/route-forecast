@@ -72,7 +72,14 @@ const longerName = (a : ExtractedControl,b : ExtractedControl) => {
 }
 
 const compareControls = (a: ExtractedControl, b: ExtractedControl) => {
-  if (a.distance === b.distance) return longerName(a,b)
+  if (a.distance === b.distance) {
+    if (a.duration === b.duration) {
+      return longerName(a,b)
+    }
+    else {
+      return b.duration - a.duration
+    }
+  }
     return a.distance - b.distance
 }
 
