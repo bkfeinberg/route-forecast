@@ -184,7 +184,7 @@
     "lint": "eslint src --fix",
     "test": "jest",
     "coverage": "jest --config jest.fullcov.config.ts",
-    "testUTC": "TZ=utc nyc jest",
+    "testUTC": "TZ=utc jest",
     "testDbg": "node --inspect-brk node_modules/.bin/jest",
     "testUTCDbg": "TZ=utc node --inspect-brk node_modules/.bin/jest",
     "start": "node dist/server/index.js",
