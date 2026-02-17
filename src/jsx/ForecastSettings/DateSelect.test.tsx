@@ -70,7 +70,7 @@ describe('DateSelect', () => {
       }
     );
 
-    const dateButton = screen.getByText(new RegExp(futureTime.toFormat('MMMM d, yyyy h:mma'), 'i'));
+    const dateButton = screen.getByText(new RegExp(futureTime.toFormat('MMMM d, yyyy'), 'i'));
     await user.click(dateButton);
     const pastDate = DateTime.now().minus({ days: 1 }).toFormat('d MMMM yyyy');
     const pastButton = screen.getByRole('button', {
