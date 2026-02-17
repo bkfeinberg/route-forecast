@@ -31,10 +31,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}     
-#      - name: Install Packages
-#        run: npm install
-#      - name: Run tests
-#        run: npm run test -- --detectOpenHandles --coverage=false
+      - name: Install Packages
+        run: npm install
+      - name: Run tests
+        run: npm test
 #      - name: Sentry Release
 #        uses: getsentry/action-release@v1
 #        env:
