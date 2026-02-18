@@ -1,9 +1,9 @@
 import {useEffect,useState} from "react";
 import Cookies from 'universal-cookie';
 import { Button } from "@mantine/core";
-import { browserIsChrome, browserIsFirefox, browserIsSafari,extensionIsInstalled } from "../utils/extensionDetect";
+import { browserIsChrome, browserIsFirefox, browserIsSafari, extensionIsInstalled } from "../utils/extensionDetect";
 
-export const InstallExtensionButton = () => {
+const InstallExtensionButton = () => {
     const cookies = new Cookies(null, { path: '/' });
     const [
         promptForExtensionInstall,
@@ -58,3 +58,5 @@ export const InstallExtensionButton = () => {
     }
     return null;
 }
+
+export default InstallExtensionButton;
