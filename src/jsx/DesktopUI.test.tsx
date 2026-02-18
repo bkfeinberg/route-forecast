@@ -2,58 +2,6 @@
 import { renderWithProviders, screen, waitFor } from 'test-utils';
 import { describe, beforeEach, jest, test } from '@jest/globals';
 
-// Mock child components
-jest.mock('./RouteInfoForm/RouteInfoForm', () => ({
-  __esModule: true,
-  default: () => <div data-testid="route-info-form">RouteInfoForm</div>
-}));
-
-jest.mock('./ForecastSettings/ForecastSettings', () => ({
-  __esModule: true,
-  default: () => <div data-testid="forecast-settings">ForecastSettings</div>
-}));
-
-// jest.mock('./resultsTables/ForecastTable', () => ({
-//   __esModule: true,
-//   default: () => <div data-testid="forecast-table">ForecastTable</div>
-// }));
-
-// jest.mock('./resultsTables/WeatherCorrections', () => ({
-//   __esModule: true,
-//   default: () => <div data-testid="weather-corrections">WeatherCorrections</div>
-// }));
-
-jest.mock('./resultsTables/PaceTable', () => ({
-  __esModule: true,
-  default: () => <div data-testid="pace-table">PaceTable</div>
-}));
-
-// jest.mock('./Map/MapLoader', () => ({
-//   __esModule: true,
-//   default: () => <div data-testid="map-loader">MapLoader</div>,
-//   addBreadcrumb: jest.fn()
-// }));
-
-jest.mock('./TopBar/TopBar', () => ({
-  __esModule: true,
-  TopBar: () => <div data-testid="top-bar">TopBar</div>
-}));
-
-// jest.mock('./TitleScreen', () => ({
-//   __esModule: true,
-//   TitleScreen: () => <div data-testid="title-screen">TitleScreen</div>
-// }));
-
-// jest.mock('./shared/RouteTitle', () => ({
-//   __esModule: true,
-//   RouteTitle: () => <div data-testid="route-title">RouteTitle</div>
-// }));
-
-jest.mock('./shared/TransitionWrapper', () => ({
-  __esModule: true,
-  TransitionWrapper: ({ children }: any) => <div data-testid="transition-wrapper">{children}</div>
-}));
-
 jest.mock('@sentry/react', () => ({
   __esModule: true,
   ErrorBoundary: ({ children, fallback }: any) => (
@@ -78,8 +26,9 @@ jest.mock('@sentry/react', () => ({
 }));
 
 import DesktopUI from './DesktopUI';
+import { DateTime } from 'luxon';
 
-describe.skip('DesktopUI sidePaneOptions', () => {
+describe('DesktopUI sidePaneOptions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();    
@@ -101,7 +50,16 @@ describe.skip('DesktopUI sidePaneOptions', () => {
   },
   uiInfo: {
     routeParams: {
-      routeLoadingMode: 'rwgps'
+      routeLoadingMode: 1,
+      rwgpsRoute: '',
+      rwgpsRouteIsTrip: false,
+      startTimestamp: DateTime.now().toMillis(),
+      zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: false,
+      pace: 'D',
+      interval: 1,
+      min_interval: 1,
+      segment: [0,0],
+      succeededed: null
     },
     dialogParams: {
       errorMessageList: [],
@@ -109,6 +67,8 @@ describe.skip('DesktopUI sidePaneOptions', () => {
     }
   }
 };
+    const futureTime = DateTime.now().plus({ days: 4 }).set({hour:7, minute:0});
+    const futureTimestamp = futureTime.toMillis();
 
   test('DesktopUI component renders without errors', async () => {
     await waitFor(() => {
@@ -120,66 +80,113 @@ describe.skip('DesktopUI sidePaneOptions', () => {
 
   test('contains ForecastSettings in sidePaneOptions when route data exists', async () => {
     const state = {
-      preloadedState: {
+       preloadedState: {
         routeInfo: {
-          rwgpsRouteData: { id: 123 },
+          rwgpsRouteData: {type: 'route', route: { track_points: [], distance: 0}},
           gpxRouteData: null,
           loadingFromURL: false,
           type: 'rwgps'
         },
+        forecast: {
+          forecast: []
+        },
         uiInfo: {
           routeParams: {
-            routeLoadingMode: 'rwgps'
+            routeLoadingMode: 1,
+            rwgpsRoute: '123',
+            rwgpsRouteIsTrip: false,
+            startTimestamp: futureTimestamp,
+            zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: false,
+            pace: 'D',
+            interval: 1,
+            segment: [0,0]
           },
           dialogParams: {
             errorMessageList: [],
             viewControls: false
           }
+        },
+        strava: {
+          activityData: null,
+          route: '',
+          activity: '',
+          activityStream: null
         }
       }
     };
     await waitFor(() => {
-      const { container } = renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, state);
-      // ForecastSettings should be available in the DOM (in sidePaneOptions)
-      // It might be rendered as part of Suspense/Lazy loading
-      expect(container).toBeTruthy();
+      renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, state);
     });
+    // ForecastSettings should be available in the DOM (in sidePaneOptions)
+    // It might be rendered as part of Suspense/Lazy loading
+    expect(screen.getByText('titles.forecastSettings')).toBeTruthy();
 
   });
 
   test('contains ForecastTable in sidePaneOptions when forecast data exists', async () => {
+
     await waitFor(() => {
       renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />,
         {
           preloadedState: {
             forecast: {
               forecast: [{ id: 1 }]
+            },
+          uiInfo: {
+            routeParams: {
+              startTimestamp: futureTimestamp,
+              zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: false,
+              pace: 'D',
+              interval: 1,
+              segment: [0,0]
             }
           }
+          }
         });
-      // ForecastTable should be available in the DOM (in sidePaneOptions)
-      expect(screen.queryByTestId('forecast-table')).toBeInTheDocument();
     });
+    // ForecastTable should be available in the DOM (in sidePaneOptions)
+    expect(screen.getByText('titles.forecast')).toBeTruthy();
   });
 
   test('contains PaceTable in sidePaneOptions when strava activity data exists', async () => {
     await waitFor(() => {
-      renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {preloadedState: {
-        strava: {
-          activityData: { id: 123 },
-          route: ''
+      renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
+        preloadedState: {
+          strava: {
+            activityData: { id: 123 },
+            route: ''
+          },
+          uiInfo: {
+            routeParams: {
+              startTimestamp: futureTimestamp,
+              zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: false,
+              pace: 'D',
+              interval: 1,
+              segment: [0,0]
+            }
+          },
+          routeInfo: {
+            rwgpsRouteData: {type: 'route', route: { track_points: [], distance: 0}},
+            gpxRouteData: null,
+            loadingFromURL: false,
+            type: 'rwgps'
+          },
+          forecast: {
+            forecast: [{a:'1'}]
+          },
         }
-      }});
-      
-      // PaceTable should be available in the DOM (in sidePaneOptions)
-      expect(screen.queryByTestId('pace-table')).toBeInTheDocument();
+      });
     });
+    // PaceTable should be available in the DOM (in sidePaneOptions)
+    expect(screen.getByText('titles.paceAnalysis')).toBeTruthy();
   });
 
-  test('wraps sidePaneOptions content in ErrorBoundary', () => {
-    const { getAllByTestId } = renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {preloadedState: defaultState});
-    
-    const errorBoundaries = getAllByTestId('error-boundary');
-    expect(errorBoundaries.length).toBeGreaterThan(0);
+  test('wraps sidePaneOptions content in ErrorBoundary', async () => {
+    await waitFor(() => {
+      const { getAllByTestId } = renderWithProviders(<DesktopUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, { preloadedState: defaultState });
+
+      const errorBoundaries = getAllByTestId('error-boundary');
+      expect(errorBoundaries.length).toBeGreaterThan(0);
+    })
   });
 });
