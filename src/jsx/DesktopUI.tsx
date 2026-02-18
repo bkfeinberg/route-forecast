@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "../utils/hooks";
 import { routeLoadingModes } from "../data/enums";
 import { useDelay, usePrevious, useValueHasChanged, useWhenChanged } from "../utils/hooks";
 const ForecastSettings = React.lazy(() => import("./ForecastSettings/ForecastSettings"));
-import { InstallExtensionButton } from "./InstallExtensionButton";
+import InstallExtensionButton from "./InstallExtensionButton";
 import MapLoader, {addBreadcrumb} from "./Map/MapLoader";
 const PaceTable = React.lazy(() => import("./resultsTables/PaceTable"));
 import RouteInfoForm from "./RouteInfoForm/RouteInfoForm";

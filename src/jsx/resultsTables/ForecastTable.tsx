@@ -13,7 +13,7 @@ import { fetchAqiToggled, weatherRangeSet, weatherRangeToggled, zoomToRangeToggl
 import { useFormatSpeed, useAppSelector, useAppDispatch } from '../../utils/hooks';
 import { useForecastDependentValues } from "../../utils/forecastValuesHook";
 import { maxWidthForMobile, milesToMeters } from '../../utils/util';
-import { InstallExtensionButton } from "../InstallExtensionButton";
+import InstallExtensionButton from "../InstallExtensionButton";
 import { ToggleButton } from '../shared/ToggleButton';
 import { WeatherCorrections } from './WeatherCorrections';
 import {useTranslation} from 'react-i18next'
