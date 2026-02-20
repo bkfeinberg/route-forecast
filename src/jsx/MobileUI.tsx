@@ -47,28 +47,24 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
         const forecastData = useAppSelector(state => state.forecast.forecast)
         const viewingControls = useAppSelector(state => state.uiInfo.dialogParams.viewControls)
 
-        // if we've been reset while displaying another tab
-        if (pathname !== '/' && routeData === null) {
-            navigate('/')
-        }
         useWhenChanged(routeData, () => navigate("/controlPoints", { replace: true }), routeData !== null)
-        useWhenChanged(forecastData, () => navigate("/forecastTable", { replace: true }), forecastData.length > 0 && !viewingControls)
-        useWhenChanged(stravaActivityData, () => navigate("/paceTable", { replace: true }))
+        useWhenChanged(forecastData, () => navigate("/forecastTable/", { replace: true }), forecastData.length > 0 && !viewingControls)
+        useWhenChanged(stravaActivityData, () => navigate("/paceTable/", { replace: true }))
 
         React.useEffect(() => {
             // if we've been reset while displaying another tab
-            if (pathname !== '/' && routeData === null) {
+            if (pathname !== '/' && routeData === null && stravaActivityData === null) {
                 navigate('/')
             }
-        }), [pathname, routeData]
+        }), [pathname, routeData, stravaActivityData]
 
         React.useEffect(() => {
             if (props.orientationChanged) {
                 if (forecastData.length > 0) {
-                    navigate("/forecastTable", { replace: true })
+                    navigate("/forecastTable/", { replace: true })
                 }
                 else if (routeData) {
-                    navigate("/controlPoints", { replace: true })
+                    navigate("/controlPoints/", { replace: true })
                 }
             }
         }, [props.orientationChanged, forecastData, routeData])
@@ -118,7 +114,7 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
                         </NavLink>
                         {
                             stravaActivityData &&
-                            <NavLink to={"/paceTable/"} className={'nav-link'}>
+                            <NavLink to={"/paceTable/"}>
                                 <Button size='compact-xs' leftSection={<IconBike />} color="orange" disabled={!stravaActivityData} title={"strava"} variant={needToViewTable ? 'warning' : (pathname==='/paceTable/ '?'filled':'default')} />
                             </NavLink>
                         }
@@ -132,7 +128,7 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
                     <Route path="/map/" element={<MapLoader maps_api_key={props.mapsApiKey} />} />
                     <Route path="/forecastTable/" element={<Suspense fallback={<div>Loading forecast table...</div>}><ForecastTable/></Suspense>} />
                     <Route path="/paceTable/" element={<Suspense fallback={<div>Loading pace table...</div>}><PaceTable/></Suspense>} />
-                    <Route path="/faq" element={<Suspense fallback={<div>Loading pace table...</div>}><ShowFaq/></Suspense>} />
+                    <Route path="/faq/" element={<Suspense fallback={<div>Loading pace table...</div>}><ShowFaq/></Suspense>} />
                 </Routes>
                 <DonationRequest wacky={false}/>
             </>
