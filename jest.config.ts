@@ -19,11 +19,10 @@ const config: Config.InitialOptions = {
     '^uuid$': '<rootDir>/__mocks__/uuid.js',
     '^query-string$': '<rootDir>/__mocks__/query-string.js',
     '^p-limit$': '<rootDir>/__mocks__/p-limit.js',
-    '^./stravaRouteParser$': '<rootDir>/__mocks__/stravaRouteParser.js',
     '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async)/)'
+    'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv)/)'
   ],
   transform: {
     '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',

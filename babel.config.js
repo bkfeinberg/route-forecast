@@ -1,5 +1,3 @@
-const { debug } = require("node:console");
-
 module.exports = {
   presets: [
     ['@babel/preset-env', {debug: false}],
@@ -14,35 +12,11 @@ module.exports = {
   plugins: [
     "@babel/plugin-transform-runtime",
     "react-html-attrs",
-    // "@babel/plugin-syntax-dynamic-import",
-    // "@babel/plugin-syntax-import-meta",
-//    "@babel/plugin-transform-json-strings",
-  //  [
-    //  "@babel/plugin-proposal-decorators",
-      //{
-        //"legacy": true
-      //}
-    //],
-    // "@babel/plugin-proposal-function-sent",
-    // "@babel/plugin-transform-export-namespace-from",
-    // "@babel/plugin-transform-numeric-separator",
-    // "@babel/plugin-proposal-throw-expressions",
-    // "@babel/plugin-proposal-export-default-from",
-    // "@babel/plugin-transform-logical-assignment-operators",
-    // "@babel/plugin-transform-optional-chaining",
-    // [
-    //   "@babel/plugin-proposal-pipeline-operator",
-    //   {
-    //     "proposal": "minimal"
-    //   }
-    // ],
-    // "@babel/plugin-transform-nullish-coalescing-operator",
-    // "@babel/plugin-proposal-do-expressions",
-    // "@babel/plugin-proposal-function-bind"
   ],
   env: {
     test: {
       "plugins": [
+        "@babel/plugin-transform-modules-commonjs",
         "dynamic-import-node"
       ]
     }

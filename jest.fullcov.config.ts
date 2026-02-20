@@ -21,14 +21,13 @@ const config: Config.InitialOptions = {
     moduleNameMapper: {
         "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|htm)(\\?.*)?$": "<rootDir>/__mocks__/fileMock.js",
         '^Images/(.*)$': '<rootDir>/src/static/$1',
-        '^./stravaRouteParser$': '<rootDir>/__mocks__/stravaRouteParser.js',
         '^uuid$': '<rootDir>/__mocks__/uuid.js',
         '^query-string$': '<rootDir>/__mocks__/query-string.js',
         '^p-limit$': '<rootDir>/__mocks__/p-limit.js',
         '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async)/)'
+        'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv)/)'
     ],
     transform: {
         '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
