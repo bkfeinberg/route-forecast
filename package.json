@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.8.8",
+  "version": "5.8.9",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -111,6 +111,7 @@
     "@babel/plugin-transform-export-namespace-from": "^7.22.11",
     "@babel/plugin-transform-json-strings": "^7.22.11",
     "@babel/plugin-transform-logical-assignment-operators": "^7.22.11",
+    "@babel/plugin-transform-modules-commonjs": "^7.28.6",
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.11",
     "@babel/plugin-transform-numeric-separator": "^7.22.11",
     "@babel/plugin-transform-optional-chaining": "^7.23.0",
