@@ -1,4 +1,4 @@
-import ReactGA from "react-ga4";i18n
+import ReactGA from "react-ga4";
 import {useTranslation} from 'react-i18next'
 import  MediaQuery, {useMediaQuery} from 'react-responsive';
 import { maxWidthForMobile } from '../../utils/util';
@@ -16,7 +16,6 @@ import RidingPace from "./RidingPace";
 import { TimeFields } from "./TimeFields";
 import WeatherProviderSelector from "./WeatherProviderSelector"
 import Segment from './Segment'
-import i18n from '../app/i18n';
 import { Button, Notification, Checkbox, Collapse, Stack, CheckboxGroup, Paper } from '@mantine/core';
 
 import { IconSettings} from "@tabler/icons-react"
