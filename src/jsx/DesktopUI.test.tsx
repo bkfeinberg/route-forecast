@@ -130,17 +130,36 @@ describe('DesktopUI sidePaneOptions', () => {
         {
           preloadedState: {
             forecast: {
-              forecast: [{ id: 1 }]
+              forecast: [{
+                "time": "2026-02-20T07:00:00.000-08:00",
+                "zone": "America/Los_Angeles",
+                "distance": 0,
+                "summary": "Mainly clear, partly cloudy, and overcast",
+                "precip": "1.0%",
+                "humidity": 76,
+                "cloudCover": "100.0%",
+                "windSpeed": "6",
+                "lat": 37.37564,
+                "lon": -122.11944,
+                "temp": "40",
+                "relBearing": 130.10084533691406,
+                "rainy": false,
+                "windBearing": 230,
+                "vectorBearing": 0,
+                "gust": "6",
+                "feel": 34,
+                "isControl": false
+              }]
             },
-          uiInfo: {
-            routeParams: {
-              startTimestamp: futureTimestamp,
-              zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: false,
-              pace: 'D',
-              interval: 1,
-              segment: [0,0]
+            uiInfo: {
+              routeParams: {
+                startTimestamp: futureTimestamp,
+                zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: false,
+                pace: 'D',
+                interval: 1,
+                segment: [0, 0]
+              }
             }
-          }
           }
         });
     });
