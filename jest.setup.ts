@@ -21,6 +21,8 @@ jest.mock('react-i18next', () => ({
 // Mock Sentry
 jest.mock('@sentry/react', () => ({
   __esModule: true,
+  // ErrorBoundary is used in several components; provide a passthrough for tests
+  ErrorBoundary: ({ children }: any) => children,
   createReduxEnhancer: jest.fn(() => (createStore: any) => createStore),
   metrics: {count: jest.fn()},
   startSpan: jest.fn(() => ({finish: jest.fn()})),
