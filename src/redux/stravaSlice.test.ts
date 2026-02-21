@@ -43,7 +43,10 @@ describe('stravaSlice reducer', () => {
     });
 
     test('stravaActivitySet normalizes value and clears dependent data', () => {
-        const mod = { ...initial, activity: 'old', activityData: {}, activityStream: {}, subrange: [1,2] as any };
+        const mod = { ...initial, activity: 'old', activityData: {message:'begin', total_elevation_gain: 500}, 
+            activityStream: {message:'stream', 
+                distance:{data:[]}, time: {data:[]}, altitude: {data:[]}, 
+                latlng: {data:[]}, moving: {data:[]}}, subrange: [1,2] as any };
         const state = stravaReducer(mod, stravaActivitySet('https://strava.com/activities/45'));
         expect(state.activity).toBe('45');
         expect(state.activityData).toBeNull();
@@ -103,7 +106,10 @@ describe('stravaSlice reducer', () => {
 
     describe('extra reducers', () => {
         test('rwgpsRouteSet with payload clears activity-related fields', () => {
-            const mod = { ...initial, activity: 'a', route: 'r', activityData: {}, activityStream: {}, subrange: [1,2] as any };
+            const mod = { ...initial, activity: 'a', route: 'r', activityData: {message:'begin', total_elevation_gain: 500}, 
+            activityStream: {message:'stream', 
+                distance:{data:[]}, time: {data:[]}, altitude: {data:[]}, 
+                latlng: {data:[]}, moving: {data:[]}}, subrange: [1,2] as any };
             const state = stravaReducer(mod, rwgpsRouteSet('123'));
             expect(state.activity).toBe('');
             expect(state.route).toBe('');
