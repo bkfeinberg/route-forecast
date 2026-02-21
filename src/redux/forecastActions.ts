@@ -34,7 +34,7 @@ const getRouteId = (routeData : RwgpsRoute|RwgpsTrip) => {
     }
 };
 
-export const msgFromError = (error : {reason:{data:{details:string}} | {reason:string, data: never}}, provider : string, context?: string ) => {
+export const msgFromError = (error : {reason:{data:{details:string, which:number}} | {reason:string, data: never}}, provider : string, context?: string ) => {
     if (error.reason.data) {
         warn(error.reason.data.details, {provider:provider, context:context, error: error} );
         if (/^\s*$/.test(error.reason.data.details)) {
@@ -43,7 +43,7 @@ export const msgFromError = (error : {reason:{data:{details:string}} | {reason:s
         Sentry.metrics.count("forecast_errors", 1, {attributes:{provider:provider, details:error.reason.data.details, context:context}});
         return error.reason.data.details
     } else {
-        // warn(JSON.stringify(error.reason), {provider:provider, context:context}  );
+        warn(JSON.stringify(error.reason), {provider:provider, context:context, error:error} );
         if (/^\s*$/.test(JSON.stringify(error.reason))) {
             Sentry.captureMessage("Error string from reason was all whitespace", {extra: {error: JSON.stringify(error)}})
         }
@@ -157,7 +157,7 @@ const doForecastByParts = async (forecastFunc : MutationWrapper, aqiFunc : Mutat
         getState().forecast.fetchAqi, lang)
 }
 
-export const removeDuplicateForecasts = (results : Array<{forecast:Forecast}>) => {
+export const removeDuplicateForecasts = (results : Array<{forecast:Forecast, which:number}>) => {
     let deduplicatedResults = []
     let resultsToRemove = []
     for (let i = 0; i < results.length-1; ++i) {
@@ -177,8 +177,12 @@ export const removeDuplicateForecasts = (results : Array<{forecast:Forecast}>) =
     return deduplicatedResults
 }
 
-export function extractRejectedResults<T>(results: PromiseSettledResult<T>[]): PromiseRejectedResult[] {
-    return results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+// filter out rejected results that were for parts that ultimately succeeded on retry, 
+// so we don't show errors for failed attempts that were transparently retried with the alternate provider
+export function extractRejectedResults<T>(results: PromiseSettledResult<T>[], succeededParts: number[]): PromiseRejectedResult[] {
+    return results.filter((result): result is PromiseRejectedResult => result.status === 'rejected').filter(result => {
+        return !succeededParts.includes(result.reason?.data?.which)
+    });
 }    
 
 export const getDaysInFuture = (forecastedTime : number) => {
@@ -220,12 +224,14 @@ export const forecastWithHook = async (forecastFunc: MutationWrapper, aqiFunc: M
     const forecastAndAqiResults = await doForecastByParts(forecastFunc, aqiFunc, dispatch, getState, lang, provider);
     const forecastResults = await forecastAndAqiResults[0]
     const aqiResults = await forecastAndAqiResults[1]
-    let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast}>).value)
+    let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast, which:number}>).value)
     filteredResults.sort((l, r) => l.forecast.distance - r.forecast.distance)
     filteredResults = removeDuplicateForecasts(filteredResults)
     let filteredAqi = aqiResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{aqi:{aqi:number}}>).value)
     const firstForecastResult = filteredResults.shift()
+    let succeededParts = [];
     if (firstForecastResult) {
+        succeededParts.push(firstForecastResult.which)
         const firstForecast = { ...firstForecastResult.forecast }
         if (filteredAqi.length > 0) {
             firstForecast.aqi = filteredAqi.shift()!.aqi.aqi
@@ -242,6 +248,6 @@ export const forecastWithHook = async (forecastFunc: MutationWrapper, aqiFunc: M
     fetchAbortMethod = null;
 
     // handle any errors
-    dispatch(errorMessageListSet(extractRejectedResults(forecastResults).map(result => msgFromError(result, getState().forecast.weatherProvider, "forecast"))))
-    dispatch(errorMessageListAppend(extractRejectedResults(aqiResults).map(result => msgFromError(result, getState().forecast.weatherProvider, "aqi"))))
+    dispatch(errorMessageListSet(extractRejectedResults(forecastResults, succeededParts).map(result => msgFromError(result, getState().forecast.weatherProvider, "forecast"))))
+    dispatch(errorMessageListAppend(extractRejectedResults(aqiResults,[]).map(result => msgFromError(result, getState().forecast.weatherProvider, "aqi"))))
 }

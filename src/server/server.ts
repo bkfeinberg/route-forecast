@@ -406,14 +406,14 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
             warn(`Forecast processing finished, but request already timed out. Not sending response.`);
             return;
         }        
-        res.status(200).json({ 'forecast': result });
+        res.status(200).json({ 'forecast': result, which: req.body.which });
     } catch (err) {
         if (!process.env.NO_LOGGING) {
             logger.info(`Error with request @ ${forecastPoints.lat},${forecastPoints.lon} at ${forecastPoints.time} from ${req.ip} ${err}`);
         }
-        error(`callWeatherService @ ${forecastPoints.lat},${forecastPoints.lon} ${forecastPoints.time} using ${service} failed with ${err}`);
+        error(`callWeatherService # ${req.body.which} @ ${forecastPoints.lat},${forecastPoints.lon} ${forecastPoints.time} using ${service} failed with ${err}`);
         res.status(502).json(
-            { 'details': `Error calling weather service @ ${forecastPoints.lat},${forecastPoints.lon} ${forecastPoints.time}: ${err}` });
+            { details: `Error calling weather service @ ${forecastPoints.lat},${forecastPoints.lon} ${forecastPoints.time}: ${err}`, which: req.body.which });
     }
 });
 

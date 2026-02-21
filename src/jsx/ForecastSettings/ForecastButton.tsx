@@ -155,7 +155,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
         const routeData = rwgpsRouteData && rwgpsRouteData || gpxRouteData
         const forecastAndAqiResults = doForecastByParts(provider, routeData)
         const forecastResults = await forecastAndAqiResults[0]
-        let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast}>).value)
+        let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast, which:number}>).value)
         filteredResults.sort((l,r) => l.forecast.distance-r.forecast.distance)
         filteredResults = removeDuplicateForecasts(filteredResults)
         const firstForecastResult = filteredResults.shift()
@@ -236,13 +236,15 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                 return
             }
             const aqiResults = await forecastAndAqiResults[1]
-            let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast}>).value)
+            let filteredResults = forecastResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{forecast:Forecast, which:number}>).value)
             filteredResults.sort((l, r) => l.forecast.distance - r.forecast.distance)
             filteredResults = removeDuplicateForecasts(filteredResults)            
             let filteredAqi = aqiResults.filter(result => result.status === "fulfilled").map(result => (result as PromiseFulfilledResult<{aqi:{aqi:number}}>).value)
             const firstForecastResult = filteredResults.shift()
+            let succeededParts = [];
             if (firstForecastResult) {
                 const firstForecast = { ...firstForecastResult.forecast }
+                succeededParts.push(firstForecastResult.which)
                 if (filteredAqi.length > 0) {
                     firstForecast.aqi = filteredAqi.shift()!.aqi.aqi
                 }
@@ -257,8 +259,8 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
             }
             
             // handle any errors
-            dispatch(errorMessageListSet(extractRejectedResults(forecastResults).map(result => msgFromError(result, forecastProvider, 'forecast'))))
-            dispatch(errorMessageListAppend(extractRejectedResults(aqiResults).map(result => msgFromError(result, forecastProvider, 'aqi'))))
+            dispatch(errorMessageListSet(extractRejectedResults(forecastResults, succeededParts).map(result => msgFromError(result, forecastProvider, 'forecast'))))
+            dispatch(errorMessageListAppend(extractRejectedResults(aqiResults,[]).map(result => msgFromError(result, forecastProvider, 'aqi'))))
         // })
         const url = generateUrl(startTimestamp, routeNumber, pace, interval, metric, controls,
             strava_activity, strava_route, provider, origin, true, zone, rusaRouteId,
