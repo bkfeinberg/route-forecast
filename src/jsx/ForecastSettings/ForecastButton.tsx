@@ -250,7 +250,9 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                 }
                 dispatch(forecastFetched({ forecastInfo: { forecast: [firstForecast] }, timeZoneId: zone }))
                 while (filteredResults.length > 0) {
-                    const nextForecast = { ...filteredResults.shift()!.forecast }
+                    const nextForecastResult = filteredResults.shift()!
+                    const nextForecast = { ...nextForecastResult.forecast }
+                    succeededParts.push(nextForecastResult.which) 
                     if (filteredAqi.length > 0) {
                         nextForecast.aqi = filteredAqi.shift()!.aqi.aqi
                     }
