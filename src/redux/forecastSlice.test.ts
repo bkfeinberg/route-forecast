@@ -10,7 +10,8 @@ import { forecastReducer,
     zoomToRangeSet,
     zoomToRangeToggled,
     fetchAqiSet,
-    fetchAqiToggled
+    fetchAqiToggled,
+    ForecastInfo
 } from './forecastSlice';
 import { rwgpsRouteSet, reset as routeParamsReset } from './routeParamsSlice';
 import { gpxRouteLoaded } from './routeInfoSlice';
@@ -92,7 +93,7 @@ describe('forecastSlice reducer', () => {
 
     describe('extra reducers', () => {
         test('rwgpsRouteSet resets many fields', () => {
-            const modified = { ...initial, valid: true, tableViewed: true, mapViewed: true, range: [1,1], forecast: [{temp:'a'} as any] };
+            const modified : ForecastInfo = { ...initial, valid: true, tableViewed: true, mapViewed: true, range: [1,1], forecast: [{temp:'a'} as any] };
             const state = forecastReducer(modified, rwgpsRouteSet('123'));
             expect(state.valid).toBe(false);
             expect(state.tableViewed).toBe(false);

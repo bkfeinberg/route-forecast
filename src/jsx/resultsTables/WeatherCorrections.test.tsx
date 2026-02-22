@@ -12,7 +12,7 @@ jest.mock('react-i18next', () => ({
 // simplify Mantine Popover so that its children are always rendered, but keep other exports intact
 jest.mock('@mantine/core', () => {
   const React = require('react');
-  const actual = jest.requireActual('@mantine/core');
+  const actual: object = jest.requireActual('@mantine/core');
   const MockPopover = ({ children }: any) => <div>{children}</div>;
   MockPopover.Target = ({ children }: any) => <div>{children}</div>;
   MockPopover.Dropdown = ({ children }: any) => <div>{children}</div>;
@@ -24,7 +24,7 @@ jest.mock('@mantine/core', () => {
 });
 
 // stub out forecast hook and chart component
-const mockedUseForecastDependentValues = jest.fn<ForecastDepValues, []>();
+const mockedUseForecastDependentValues = jest.fn<() => ForecastDepValues>();
 jest.mock('../../utils/forecastValuesHook', () => ({
   useForecastDependentValues: () => mockedUseForecastDependentValues()
 }));
