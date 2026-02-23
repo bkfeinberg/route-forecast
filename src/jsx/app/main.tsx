@@ -342,9 +342,7 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     setupBrowserForwardBack(dispatch, origin, cookies)
     dispatch(updateUserControls(queryParams.controlPoints?parseControls(queryParamsAsObj.controlPoints, true):[]))
     const zoomToRange = cookies.get('zoomToRange');
-    if (zoomToRange) {
-        dispatch(zoomToRangeSet(zoomToRange==="true"))
-    }
+    dispatch(zoomToRangeSet(zoomToRange!==false))
     const fetchAqi = cookies.get('fetchAqi');
     if (fetchAqi) {
         dispatch(fetchAqiSet(fetchAqi==="true"))
