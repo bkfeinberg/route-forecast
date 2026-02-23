@@ -344,9 +344,7 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     const zoomToRange = cookies.get('zoomToRange');
     dispatch(zoomToRangeSet(zoomToRange!==false))
     const fetchAqi = cookies.get('fetchAqi');
-    if (fetchAqi) {
-        dispatch(fetchAqiSet(fetchAqi==="true"))
-    }
+    dispatch(fetchAqiSet(fetchAqi))
     ReactGA.event('language_detected', {rp_language:i18n.resolvedLanguage});
     if (i18n.resolvedLanguage?.startsWith('fr')) {
         ReactGA.event('tutorial_begin')
