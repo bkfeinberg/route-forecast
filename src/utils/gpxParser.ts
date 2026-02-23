@@ -244,13 +244,15 @@ class AnalyzeRoute {
             distance:this.findPoiDistance(poi, routeData, routeAsLineString)}
     )
 
+    // specifically look for POIs of type control, aid station, rest stop, or food, 
+    // which are the ones that would be relevant for time adjustments, and assign them a distance based on their nearest point on the route stream
     extractControlsFromPois = (routeData : RwgpsRoute|RwgpsTrip) => {
         // create GeoJson LineString for later POI analysis
         const coordinates = this.parseRwgpsRouteStream(routeData).map( point => [point.lon, point.lat])
         const routeAsLineString = lineString(coordinates)
         const cleanedLine = cleanCoords(routeAsLineString)
         return routeData[routeData.type]?.points_of_interest.filter((poi: RwgpsPoi) =>
-             (poi.t===31||poi.t===13||poi.t===27)).map((poi: RwgpsPoi) => this.controlFromPoi(poi, routeData, cleanedLine))
+             (poi.t===31||poi.t===13||poi.t===27||poi.t===20)).map((poi: RwgpsPoi) => this.controlFromPoi(poi, routeData, cleanedLine))
     }
 
     parseGpxRouteStream ( routeData : GpxRouteData) : Array<Point> {
