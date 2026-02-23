@@ -105,7 +105,8 @@
                 "distanceKilometers":"Kilometers",
                 "duration":"Expected Time Spent",
                 "arrival":"Estimated Arrival Time",
-                "delete":"Delete"
+                "delete":"Delete",
+                "loadPOIs":"Load POIs as controls"
             },
             "analysis": {
                 "overallPace":"Overall climb-adjusted pace was",

@@ -83,9 +83,9 @@ const compareControls = (a: ExtractedControl, b: ExtractedControl) => {
     return a.distance - b.distance
 }
 
-export const extractControlsFromRoute = (routeData: RwgpsRoute | RwgpsTrip) => {
+export const extractControlsFromRoute = (routeData: RwgpsRoute | RwgpsTrip, loadPOIs: boolean = true) => {
   const controlsPointControls = gpxParser.extractControlPoints(routeData)
-  const poiControls = gpxParser.extractControlsFromPois(routeData)
+  const poiControls = loadPOIs ? gpxParser.extractControlsFromPois(routeData) : undefined
   if (poiControls) {
     const deduplicatedControls = removeDuplicateControl(controlsPointControls.
       concat(poiControls).sort(compareControls))

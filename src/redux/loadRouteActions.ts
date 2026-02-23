@@ -34,7 +34,7 @@ const mergeControls = (oldCtrls : Array<UserControl>, newCtrls : Array<UserContr
     return merged.concat(oldCtrlsCopy).sort((control1, control2) => control1.distance - control2.distance)
 }
 
-export const loadFromRideWithGps = function (routeNumber? : string, isTrip? : boolean) {
+export const loadFromRideWithGps = function (routeNumber? : string, isTrip? : boolean, loadPOIs : boolean = true) {
     return function (dispatch : AppDispatch, getState: () => RootState) {
         return Sentry.startSpan({ name: "loadingRwgpsRoute" }, () => {
             routeNumber = routeNumber || getState().uiInfo.routeParams.rwgpsRoute
@@ -55,7 +55,7 @@ export const loadFromRideWithGps = function (routeNumber? : string, isTrip? : bo
                 })                
                 dispatch(rwgpsRouteLoaded(routeData));
                 import ("../utils/routeUtils").then(({extractControlsFromRoute}) => {
-                    const extractedControls = extractControlsFromRoute(routeData);
+                    const extractedControls = extractControlsFromRoute(routeData, loadPOIs);
                     if (extractedControls.length !== 0) {
                         const oldControls = getState().controls.userControlPoints
                         if (oldControls.length === 0) {
