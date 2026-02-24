@@ -180,13 +180,18 @@ class AnalyzeRoute {
         }
     }
 
-    parseCoursePoints = (routeData : RwgpsRoute|RwgpsTrip) =>
-        routeData.type === "route" ? routeData[routeData.type]['course_points'] : routeData[routeData.type]['course_points']
+    // @ts-ignore we should not need to do this, by my reading of the types, but for some reason typescript 
+    // // is not recognizing that the type of routeData is narrowed by the check on routeData.type
+    parseCoursePoints = (routeData : RwgpsRoute|RwgpsTrip) => routeData[routeData.type].course_points
 
-    isControl = (coursePoint : RwgpsCoursePoint) => {
+    isControlType = (coursePoint : RwgpsCoursePoint) => {
+        return coursePoint.d !== undefined && coursePoint.t === 'Control'
+    }
+
+    isControlString = (coursePoint : RwgpsCoursePoint) => {
         const controlRegexp = /^control|rest stop|regroup|lunch/i;
         const exclusionRegexp = /(^Depart)|(^Exit)/i 
-        return coursePoint.d !== undefined && coursePoint.t === 'Control' || (coursePoint.n && coursePoint.n.match(controlRegexp) && !coursePoint.n.match(exclusionRegexp))
+        return (coursePoint.n && coursePoint.n.match(controlRegexp) && !coursePoint.n.match(exclusionRegexp))
     }
 
     businessFromText = (coursePoint : RwgpsCoursePoint) => {
@@ -212,10 +217,18 @@ class AnalyzeRoute {
             lat: coursePoint.y, lon: coursePoint.x,
             distance:Math.min(Math.round((coursePoint.d*kmToMiles)/1000),Math.trunc(distanceInMiles))})
 
+    // TODO: search the list of controls first for any that are of type control, if so, simply use those and only those, 
+    // if not, then fall back to the search regexp on the description and name fields
     extractControlPoints = (routeData : RwgpsRoute|RwgpsTrip) => {
         const distanceInMiles = ((routeData.route ? routeData.route.distance : routeData.trip.distance) * kmToMiles) / 1000
-        return this.parseCoursePoints(routeData).filter((point : RwgpsCoursePoint) => this.isControl(point)).
-            map((point : RwgpsCoursePoint) => this.controlFromCoursePoint(point, distanceInMiles))
+        if (this.parseCoursePoints(routeData).find((point : RwgpsCoursePoint) => point.t === 'Control')) {
+            // if controls are explicitly marked as such, use those and only those, ignoring the name and description fields which can be unreliable
+            return this.parseCoursePoints(routeData).filter((point : RwgpsCoursePoint) => this.isControlType(point)).
+                map((point : RwgpsCoursePoint) => this.controlFromCoursePoint(point, distanceInMiles))
+        } else {
+            return this.parseCoursePoints(routeData).filter((point : RwgpsCoursePoint) => this.isControlString(point)).
+                map((point : RwgpsCoursePoint) => this.controlFromCoursePoint(point, distanceInMiles))
+        }
     }
 
     findPoiDistance = (poi : RwgpsPoi, routeData : RwgpsRoute|RwgpsTrip, routeDataAsLineString: LineString | Feature<LineString, GeoJsonProperties>) => {

@@ -122,7 +122,7 @@ describe('AnalyzeRoute', () => {
             const controlPoint: any = {
                 d: 100, t: 'Control', n: 'Rest Stop', x: 1, y: 2, i: 0, description: undefined
             };
-            const result = AnalyzeRoute['isControl'](controlPoint);
+            const result = AnalyzeRoute['isControlType'](controlPoint);
             expect(result).toBeTruthy();
         });
 
@@ -130,7 +130,7 @@ describe('AnalyzeRoute', () => {
             const controlPoint: any = {
                 d: 100, t: 'Other', n: 'Control: Main Street', x: 1, y: 2, i: 0, description: undefined
             };
-            const result = AnalyzeRoute['isControl'](controlPoint);
+            const result = AnalyzeRoute['isControlString'](controlPoint);
             expect(result).toBeTruthy();
         });
 
@@ -138,7 +138,7 @@ describe('AnalyzeRoute', () => {
             const departPoint: any = {
                 d: 100, t: 'Other', n: 'Depart: Starting Point', x: 1, y: 2, i: 0, description: undefined
             };
-            const result = AnalyzeRoute['isControl'](departPoint);
+            const result = AnalyzeRoute['isControlString'](departPoint);
             expect(result).toBeFalsy();
         });
 
@@ -146,7 +146,7 @@ describe('AnalyzeRoute', () => {
             const regularPoint: any = {
                 d: 100, t: 'Regular', n: 'Random Point', x: 1, y: 2, i: 0, description: undefined
             };
-            const result = AnalyzeRoute['isControl'](regularPoint);
+            const result = AnalyzeRoute['isControlString'](regularPoint);
             expect(result).toBeFalsy();
         });
     });
@@ -967,28 +967,28 @@ describe('AnalyzeRoute', () => {
             const restStop: any = {
                 d: 100, t: 'Other', n: 'Rest Stop: Main St', x: 1, y: 2, i: 0, description: undefined
             };
-            expect(AnalyzeRoute['isControl'](restStop)).toBeTruthy();
+            expect(AnalyzeRoute['isControlString'](restStop)).toBeTruthy();
         });
 
         it('should identify regroup points', () => {
             const regroup: any = {
                 d: 100, t: 'Other', n: 'Regroup: Intersection', x: 1, y: 2, i: 0, description: undefined
             };
-            expect(AnalyzeRoute['isControl'](regroup)).toBeTruthy();
+            expect(AnalyzeRoute['isControlString'](regroup)).toBeTruthy();
         });
 
         it('should identify lunch points', () => {
             const lunch: any = {
                 d: 100, t: 'Other', n: 'Lunch: Cafe', x: 1, y: 2, i: 0, description: undefined
             };
-            expect(AnalyzeRoute['isControl'](lunch)).toBeTruthy();
+            expect(AnalyzeRoute['isControlString'](lunch)).toBeTruthy();
         });
 
         it('should exclude exit points', () => {
             const exit: any = {
-                d: 100, t: 'Other', n: 'Exit: Highway', x: 1, y: 2, i: 0, description: undefined
+                d: 100, t: 'Generic', n: 'Exit: Highway', x: 1, y: 2, i: 0, description: undefined
             };
-            expect(AnalyzeRoute['isControl'](exit)).toBeFalsy();
+            expect(AnalyzeRoute['isControlString'](exit)).toBeFalsy();
         });
     });
 
