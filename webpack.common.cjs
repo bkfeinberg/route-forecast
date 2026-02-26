@@ -19,7 +19,39 @@ var webpack = require('webpack');
 
 module.exports = (env, argv) => {
     const mode = argv === undefined ? 'development' : argv.mode;
-    const devMode = process.env.NODE_ENV !== "production"
+    const devMode = mode !== "production"
+    const reactCompilerOptions = devMode ? { 
+        logger: {
+            logEvent(filename, event) {
+                switch (event.kind) {
+                    case 'CompileSuccess': {
+                        console.log(`✅ Compiled: ${filename}`);
+                        break;
+                    }
+                    case 'CompileError': {
+                        console.error(`\nCompilation failed: ${filename}`);
+                        console.error(`Reason: ${event.detail.reason}`);
+                        if (event.detail.description) {
+                            console.error(`Details: ${event.detail.description}`);
+                        }
+                        if (event.detail.loc) {
+                            const { line, column } = event.detail.loc.start;
+                            console.error(`Location: Line ${line}, Column ${column}`);
+                        }
+
+                        if (event.detail.suggestions) {
+                            console.error('Suggestions:', event.detail.suggestions);
+                        }
+                        break;
+                    }
+                    default: { }
+                }
+            }
+        }
+    } : { 
+    /* Production options, if any, or default behavior */ 
+    };
+
     return {
         mode: mode,
         cache: {
@@ -42,37 +74,9 @@ module.exports = (env, argv) => {
                         { loader: 'ts-loader', options: { transpileOnly: true } },
                         {
                             loader: reactCompilerLoader,
-                            /* options: {
-                                logger: {
-                                    logEvent(filename, event) {
-                                        switch (event.kind) {
-                                            case 'CompileSuccess': {
-                                                console.log(`✅ Compiled: ${filename}`);
-                                                break;
-                                            }
-                                            case 'CompileError': {
-                                                console.error(`\nCompilation failed: ${filename}`);
-                                                console.error(`Reason: ${event.detail.reason}`);      
-                                                if (event.detail.description) {
-                                                    console.error(`Details: ${event.detail.description}`);
-                                                }              
-                                                if (event.detail.loc) {
-                                                    const { line, column } = event.detail.loc.start;
-                                                    console.error(`Location: Line ${line}, Column ${column}`);
-                                                }
-
-                                                if (event.detail.suggestions) {
-                                                    console.error('Suggestions:', event.detail.suggestions);
-                                                }                                                                                                                            
-                                                break;
-                                            }
-                                            default: { }
-                                        }
-                                    }
-                                }
-                            }, */
+                            options: reactCompilerOptions
                         }
-``                    ].reverse(),
+                    ].reverse(),
                     exclude: [
                         /node_modules/,
                         /\.test\.tsx$/,
