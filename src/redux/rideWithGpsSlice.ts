@@ -31,11 +31,11 @@ const rideWithGpsInfoSlice = createSlice({
         loadingPinnedSet(state, action:PayloadAction<boolean>) {
             state.loadingRoutes = action.payload
         },
-        usePinnedRoutesSet(state, action:PayloadAction<boolean>) {
+        usingPinnedRoutesSet(state, action:PayloadAction<boolean>) {
             state.usePinnedRoutes = action.payload
         }
     }
 })
 
-export const {rwgpsTokenSet,pinnedRoutesSet,loadingPinnedSet,usePinnedRoutesSet} = rideWithGpsInfoSlice.actions
+export const {rwgpsTokenSet,pinnedRoutesSet,loadingPinnedSet,usingPinnedRoutesSet} = rideWithGpsInfoSlice.actions
 export const rwgpsInfoReducer = rideWithGpsInfoSlice.reducer

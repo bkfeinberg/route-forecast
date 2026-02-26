@@ -1,5 +1,4 @@
 import { DateTime, Interval } from "luxon";
-import { useMemo } from "react";
 import { useGetForecastRequestDependencies } from "./hooks";
 import { getForecastRequest } from "./routeUtils";
 
@@ -21,7 +20,7 @@ export const useForecastRequestData = () => {
       segment, routeUUID);
     return { length: forecastRequest.length, last: forecastRequest[forecastRequest.length - 1].time };
   };
-  const forecastData = useMemo(getForecastRequestData, [routeData, interval, startTimestamp]);
+  const forecastData = getForecastRequestData();
   const daysInFuture = Interval.fromDateTimes(DateTime.now(), DateTime.fromISO(forecastData.last)).length('days');
 
   return { length: forecastData.length, daysInFuture: daysInFuture };

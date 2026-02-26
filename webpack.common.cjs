@@ -5,6 +5,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
+const { reactCompilerLoader } = require('react-compiler-webpack');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const APP_DIR = path.resolve(__dirname, 'src/jsx');
 const TEMPLATE_DIR = path.resolve(__dirname, 'src/templates');
@@ -36,7 +38,41 @@ module.exports = (env, argv) => {
                 },
                 {
                     test: /\.(t|j)sx?$/,
-                    use: { loader: 'ts-loader' },
+                    use: [
+                        { loader: 'ts-loader', options: { transpileOnly: true } },
+                        {
+                            loader: reactCompilerLoader,
+                            /* options: {
+                                logger: {
+                                    logEvent(filename, event) {
+                                        switch (event.kind) {
+                                            case 'CompileSuccess': {
+                                                console.log(`✅ Compiled: ${filename}`);
+                                                break;
+                                            }
+                                            case 'CompileError': {
+                                                console.error(`\nCompilation failed: ${filename}`);
+                                                console.error(`Reason: ${event.detail.reason}`);      
+                                                if (event.detail.description) {
+                                                    console.error(`Details: ${event.detail.description}`);
+                                                }              
+                                                if (event.detail.loc) {
+                                                    const { line, column } = event.detail.loc.start;
+                                                    console.error(`Location: Line ${line}, Column ${column}`);
+                                                }
+
+                                                if (event.detail.suggestions) {
+                                                    console.error('Suggestions:', event.detail.suggestions);
+                                                }                                                                                                                            
+                                                break;
+                                            }
+                                            default: { }
+                                        }
+                                    }
+                                }
+                            }, */
+                        }
+``                    ].reverse(),
                     exclude: [
                         /node_modules/,
                         /\.test\.tsx$/,
@@ -121,6 +157,7 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new CleanWebpackPlugin({}),
+            new ForkTsCheckerWebpackPlugin(),
             // new webpack.DefinePlugin({SENTRY_RELEASE: JSON.stringify(env.sentryRelease), "process.env": "{}"}),
             new webpack.ProvidePlugin({
                 Buffer: [

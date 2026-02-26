@@ -51,7 +51,7 @@ import type { AppDispatch } from "../../redux/store";
 import  {useMediaQuery} from 'react-responsive';
 import {useTranslation} from 'react-i18next'
 import { stravaErrorSet, viewingControls } from "../../redux/dialogParamsSlice";
-import { usePinnedRoutesSet, rwgpsTokenSet } from "../../redux/rideWithGpsSlice";
+import { usingPinnedRoutesSet, rwgpsTokenSet } from "../../redux/rideWithGpsSlice";
 import { stravaActivitySet, stravaRefreshTokenSet, stravaRouteSet, stravaTokenSet } from "../../redux/stravaSlice";
 import { apiKeysSet, querySet, actionUrlAdded } from "../../redux/paramsSlice";
 import { fetchAqiSet, zoomToRangeSet } from "../../redux/forecastSlice";
@@ -305,7 +305,7 @@ const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams
     if (queryParams.rwgpsToken !== undefined) {
         dispatch(rwgpsTokenSet(queryParams.rwgpsToken))
         // if we have just received an auth token then we previously clicked show pinned routes
-        dispatch(usePinnedRoutesSet(true))
+        dispatch(usingPinnedRoutesSet(true))
         saveRwgpsCredentials(queryParams.rwgpsToken, cookies);
     }
     dispatch(viewingControls(queryParams.viewControls))
@@ -323,10 +323,10 @@ interface RouteWeatherUIProps {
 }
 
 const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, bitly_token, origin} : RouteWeatherUIProps) => {
-    const cookies = new Cookies(null, { path: '/' });
     const dispatch = useAppDispatch()
     const { i18n } = useTranslation()
     // const isDesktop = useMediaQuery({ minWidth: 1224 })
+    const cookies = new Cookies(null, { path: '/' });
     let queryParams = queryString.parse(search, {parseBooleans: true, parseNumbers:false, types:{viewControls:'boolean'}});
     // temporarily log query params as received by DuckDuckGo
     if (window.navigator.userAgent.indexOf('Ddg') !== -1) {
@@ -434,9 +434,12 @@ const FunAppWrapperThingForHooksUsability = ({maps_api_key, queryParams, lang} :
     )
     const rwgpsRoute = useAppSelector(state => state.uiInfo.routeParams.rwgpsRoute)
     const stravaRoute = useAppSelector(state => state.strava.route)
-    if (window.screen.orientation) {
-        window.screen.orientation.onchange = screenChangeListener
-    }
+    useEffect(() => {
+        if (window.screen.orientation) {
+            window.screen.orientation.onchange = screenChangeListener
+        }
+    }, [screenChangeListener])
+    
     useSetPageTitle()
     useLoadRouteFromURL(queryParams, forecast, getAqi, lang, rwgpsRoute, stravaRoute)
     useLoadControlPointsFromURL(queryParams)

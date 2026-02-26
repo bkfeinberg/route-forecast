@@ -1,7 +1,6 @@
-import {logger} from "@sentry/react";
+import { logger } from "@sentry/react";
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 import { routeLoadingModes } from "../data/enums";
-import { useMemo } from "react";
 import gpxParser, { type Point } from "./gpxParser";
 import { useAppSelector } from "./hooks";
 import stravaRouteParser from "./stravaRouteParser";
@@ -29,29 +28,29 @@ export const usePointsAndBounds = (): PointsAndBounds => {
 
   if (stravaMode) {
     if (stravaActivityStream !== null) {
-      pointsAndBounds = useMemo(() => stravaRouteParser.computePointsAndBounds(stravaActivityStream), [stravaActivityStream]);
+      pointsAndBounds = stravaRouteParser.computePointsAndBounds(stravaActivityStream), [stravaActivityStream];
     } else if ((stravaRoute !== '') && gpxRouteData) {
       // we import strava routes as gpx - so we expect the second half of the above condition to 
       // always be true
-      pointsAndBounds = useMemo(() => gpxParser.computePointsAndBounds(
-        gpxParser.parseGpxRouteStream(gpxRouteData)), [gpxRouteData]);
+      pointsAndBounds = gpxParser.computePointsAndBounds(
+        gpxParser.parseGpxRouteStream(gpxRouteData)), [gpxRouteData];
     }
   } else if (rwgpsRouteData !== null) {
-    pointsAndBounds = useMemo(() => gpxParser.computePointsAndBounds(gpxParser.parseRwgpsRouteStream(rwgpsRouteData)), [rwgpsRouteData]);
+    pointsAndBounds = gpxParser.computePointsAndBounds(gpxParser.parseRwgpsRouteStream(rwgpsRouteData)), [rwgpsRouteData];
     // pointsAndBounds = gpxParser.computePointsAndBounds(gpxParser.parseRwgpsRouteStream(rwgpsRouteData))
     if (!pointsAndBounds) {
       warn(`no points and bounds from RWGPS data with ${rwgpsRouteData[rwgpsRouteData.type].track_points.length} points`);
     }
   } else if (gpxRouteData !== null) {
-    pointsAndBounds = useMemo(() => gpxParser.computePointsAndBounds(gpxParser.parseGpxRouteStream(gpxRouteData)), [gpxRouteData]);
+    pointsAndBounds = gpxParser.computePointsAndBounds(gpxParser.parseGpxRouteStream(gpxRouteData)), [gpxRouteData];
   }
   if (pointsAndBounds.pointList.length === 0) {
     Sentry.captureMessage(
       `Empty points and bounds :Strava activity empty=${stravaActivityStream === null} Strava route: ${stravaRoute} RWGPS:${rwgpsRoute} RWGPS empty:${rwgpsRouteData === null} GPX empty:${gpxRouteData === null}`);
   }
   if (pointsAndBounds.pointList.length > 0) {
-    pointsAndBounds.points = useMemo(() => pointsAndBounds.pointList
-      .map(point => ({ lat: point.lat, lng: point.lon, dist: point.dist })), [pointsAndBounds.pointList]);
+    pointsAndBounds.points = pointsAndBounds.pointList
+      .map(point => ({ lat: point.lat, lng: point.lon, dist: point.dist })), [pointsAndBounds.pointList];
   }
 
   return pointsAndBounds;
@@ -142,4 +141,3 @@ export const calculateWindResult = (inputs: WindResultInputs): WindAdjustResults
   lastWindResult = { result, dependencyValues: inputs };
   return result;
 };
-

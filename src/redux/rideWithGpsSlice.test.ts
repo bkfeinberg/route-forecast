@@ -2,7 +2,7 @@ import { rwgpsInfoReducer,
     rwgpsTokenSet,
     pinnedRoutesSet,
     loadingPinnedSet,
-    usePinnedRoutesSet,
+    usingPinnedRoutesSet,
     Favorite } from './rideWithGpsSlice';
 
 describe('rideWithGpsSlice reducer', () => {
@@ -49,9 +49,9 @@ describe('rideWithGpsSlice reducer', () => {
     });
 
     test('usePinnedRoutesSet toggles usePinnedRoutes flag', () => {
-        const on = rwgpsInfoReducer(initialState, usePinnedRoutesSet(true));
+        const on = rwgpsInfoReducer(initialState, usingPinnedRoutesSet(true));
         expect(on.usePinnedRoutes).toBe(true);
-        const off = rwgpsInfoReducer(on, usePinnedRoutesSet(false));
+        const off = rwgpsInfoReducer(on, usingPinnedRoutesSet(false));
         expect(off.usePinnedRoutes).toBe(false);
     });
 });

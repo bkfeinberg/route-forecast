@@ -65,6 +65,12 @@
     <ul>If you have the forecast for a regularly scheduled ride, you can click the calendar icon and it will update
         the start day with the current day.
     </ul>
+    <li><strong>How does randoplan detect controls in a route file</strong></li>
+    <ul>First it looks for cuesheet entries of type control or food. If those are not found, it looks through the list
+        of cues for those containing 'control', 'rest stop', 'regroup', or 'lunch'.
+        It will then add to that list POIs of type control, aid station, rest stop, and food,
+        unless the option to add POIs is turned off.
+    </ul>
     <li><strong>Only some of the rest stops or controls in my route are showing up in the list in randoplan</strong></li>
     <ul>Out of caution, <em>randoplan</em> won't extract controls from the route file if there are already some in the list. Delete the controls in the list in randoplan and reload the route.
     All of them should appear now.</ul>
@@ -84,6 +90,4 @@
         (e.g. out at sea). Another is that the forecast time is too far in the future for that provider to give
         a forecast for. Another is that the provider is temporarily unavailable (e.g. rate limited or down for maintenance).
     </ul>
-    <li><strong>What types of POI are detected and added to the list of controls?</strong></li>
-    <ul>POIs of type control, aid station, rest stop, and food are detected and added to the list of controls.</ul>
 </UL>

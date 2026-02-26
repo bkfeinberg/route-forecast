@@ -185,13 +185,13 @@ class AnalyzeRoute {
     parseCoursePoints = (routeData : RwgpsRoute|RwgpsTrip) => routeData[routeData.type].course_points
 
     isControlType = (coursePoint : RwgpsCoursePoint) => {
-        return coursePoint.d !== undefined && coursePoint.t === 'Control'
+        return coursePoint.d !== undefined && (coursePoint.t === 'Control' || coursePoint.t === 'Food')
     }
 
     isControlString = (coursePoint : RwgpsCoursePoint) => {
         const controlRegexp = /^control|rest stop|regroup|lunch/i;
         const exclusionRegexp = /(^Depart)|(^Exit)/i 
-        return (coursePoint.n && coursePoint.n.match(controlRegexp) && !coursePoint.n.match(exclusionRegexp))
+        return (coursePoint.d !== undefined) && (coursePoint.n && coursePoint.n.match(controlRegexp) && !coursePoint.n.match(exclusionRegexp))
     }
 
     businessFromText = (coursePoint : RwgpsCoursePoint) => {
@@ -221,7 +221,7 @@ class AnalyzeRoute {
     // if not, then fall back to the search regexp on the description and name fields
     extractControlPoints = (routeData : RwgpsRoute|RwgpsTrip) => {
         const distanceInMiles = ((routeData.route ? routeData.route.distance : routeData.trip.distance) * kmToMiles) / 1000
-        if (this.parseCoursePoints(routeData).find((point : RwgpsCoursePoint) => point.t === 'Control')) {
+        if (this.parseCoursePoints(routeData).find((point : RwgpsCoursePoint) => this.isControlType(point))) {
             // if controls are explicitly marked as such, use those and only those, ignoring the name and description fields which can be unreliable
             return this.parseCoursePoints(routeData).filter((point : RwgpsCoursePoint) => this.isControlType(point)).
                 map((point : RwgpsCoursePoint) => this.controlFromCoursePoint(point, distanceInMiles))
@@ -299,7 +299,7 @@ class AnalyzeRoute {
     analyzeRoute(stream : Array<Point>, userStartTime : DateTime, pace : string, 
         intervalInHours : number, controls : Array<UserControl>, timeZoneId : string, 
         segment : Segment, totalDistMeters : number) : RouteAnalysisResults {
-
+        "use memo";
         let nextControl = 0;
 
         const checkAndUpdateControls = function(distanceInKm : number, startTime : DateTime, 
@@ -455,6 +455,7 @@ class AnalyzeRoute {
 
     walkRwgpsRoute(routeData : RwgpsRoute|RwgpsTrip, startTime : DateTime, pace : string, interval : number, 
         controls : Array<UserControl>, timeZoneId : string, segment : Segment) {
+        "use memo";
         let modifiedControls = controls.slice();
         modifiedControls.sort((a,b) => a['distance']-b['distance']);
         const stream = this.parseRwgpsRouteStream(routeData)
@@ -553,6 +554,7 @@ class AnalyzeRoute {
     adjustForWind = (forecastInfo : ForecastInfo, stream : Array<Point>, pace : string, controls : Array<UserControl>, 
         previouslyCalculatedValues : Array<CalculatedValue>, start : DateTime, 
         finishTime : string, timeZoneId : string, totalDistMeters : number) : WindAdjustResults => {
+        "use memo";
         if (forecastInfo.length===0) {
             return {weatherCorrectionMinutes:0,calculatedControlPointValues:previouslyCalculatedValues,maxGustSpeed:0, adjustedTimes:[], finishTime:finishTime, chartData:[]};
         }

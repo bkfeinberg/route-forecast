@@ -39,13 +39,18 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
     const dispatch = useAppDispatch()
     const location = useLocation()
     const { pathname } = location
-    try {
+    // try {
         const navigate = useNavigate()
         const type = useAppSelector(state => state.routeInfo.type)
         const routeData = useAppSelector(state => state.routeInfo[type === "rwgps" ? "rwgpsRouteData" : "gpxRouteData"])
         const stravaActivityData = useAppSelector(state => state.strava.activityData)
         const forecastData = useAppSelector(state => state.forecast.forecast)
         const viewingControls = useAppSelector(state => state.uiInfo.dialogParams.viewControls)
+        const [showVersion, setShowVersion] = React.useState(false);
+        const needToViewTable = useAppSelector(state => state.forecast.valid && !state.forecast.tableViewed)
+        const needToViewMap = useAppSelector(state => state.forecast.valid && !state.forecast.mapViewed)
+        const hasForecast = useAppSelector(state => state.forecast.valid)
+        const errorMessageList = useAppSelector(state => state.uiInfo.dialogParams.errorMessageList)
 
         useWhenChanged(routeData, () => navigate("/controlPoints", { replace: true }), routeData !== null)
         useWhenChanged(forecastData, () => navigate("/forecastTable/", { replace: true }), forecastData.length > 0 && !viewingControls)
@@ -75,7 +80,6 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
             }
         }, [props.orientationChanged])
 
-        const [showVersion, setShowVersion] = React.useState(false);
         const fontSize = showVersion ? "16px" : "18px";
         const version = useContext(VersionContext)
         const title = showVersion ? 'Randoplan v' + version : 'Randoplan';
@@ -84,15 +88,9 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
             setShowVersion(!showVersion)
         }
 
-        const errorMessageList = useAppSelector(state => state.uiInfo.dialogParams.errorMessageList)
-
         const closeErrorList = () => {
             dispatch(lastErrorCleared())
         }
-
-        const needToViewTable = useAppSelector(state => state.forecast.valid && !state.forecast.tableViewed)
-        const needToViewMap = useAppSelector(state => state.forecast.valid && !state.forecast.mapViewed)
-        const hasForecast = useAppSelector(state => state.forecast.valid)
         
         return (
             <>
@@ -133,7 +131,7 @@ const MobileUITabs = (props : MobileUIPropTypes) => {
                 <DonationRequest wacky={false}/>
             </>
         )
-    } catch (err : any) {
-        dispatch(errorDetailsSet(err.message))
-    }
+    // } catch (err : any) {
+        // dispatch(errorDetailsSet(err.message))
+    // }
 }

@@ -18,7 +18,7 @@ import { weatherProviderSet } from './forecastSlice';
 import { providerValues } from './providerValues';
 import { routeLoadingModes } from '../data/enums';
 import { rwgpsRouteLoaded, gpxRouteLoaded } from './routeInfoSlice';
-import { usePinnedRoutesSet } from './rideWithGpsSlice';
+import { usingPinnedRoutesSet } from './rideWithGpsSlice';
 
 // we'll need luxon for constructing dates
 import { DateTime } from 'luxon';
@@ -163,7 +163,7 @@ describe('routeParamsSlice reducer', () => {
         });
 
         test('usePinnedRoutesSet false resets rwgpsRouteIsTrip', () => {
-            const modified = routeParamsReducer({ ...initialState, rwgpsRouteIsTrip: true }, usePinnedRoutesSet(false));
+            const modified = routeParamsReducer({ ...initialState, rwgpsRouteIsTrip: true }, usingPinnedRoutesSet(false));
             expect(modified.rwgpsRouteIsTrip).toBe(initialState.rwgpsRouteIsTrip);
         });
     });

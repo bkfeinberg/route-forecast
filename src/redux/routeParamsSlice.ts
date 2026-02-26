@@ -7,7 +7,7 @@ import { stravaRouteSet } from './stravaSlice';
 import { weatherProviderSet } from './forecastSlice';
 import { getRouteNumberFromValue } from '../utils/util';
 import { rwgpsRouteLoaded, gpxRouteLoaded } from './routeInfoSlice';
-import { usePinnedRoutesSet } from './rideWithGpsSlice';
+import { usingPinnedRoutesSet } from './rideWithGpsSlice';
 
 const defaultIntervalInHours = 1;
 const defaultPace = 'D';
@@ -183,7 +183,7 @@ const routeParamsSlice = createSlice({
                 if (action.payload && action.payload !== '') {
                     state.rwgpsRoute = routeParamsInitialState.rwgpsRoute
                 }
-            }).addCase(usePinnedRoutesSet, (state, action) => {
+            }).addCase(usingPinnedRoutesSet, (state, action) => {
                 if (!action.payload) {
                     state.rwgpsRouteIsTrip = routeParamsInitialState.rwgpsRouteIsTrip;
                 }
