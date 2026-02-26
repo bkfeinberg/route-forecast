@@ -77,8 +77,6 @@ describe('DateSelect', () => {
     });
     expect(pastButton).toBeDisabled();
     const presentDate = futureTime.toFormat('d MMMM yyyy');
-    screen.logTestingPlaygroundURL();
-    console.log('Present date is', presentDate);
     const presentButton = screen.getByRole('button', {
       name: new RegExp(`^${presentDate}`, 'i')
     });
