@@ -33,6 +33,7 @@ class StravaActivityParser {
     }
 
     fetchStravaActivity(activityId : string, token : string) {
+        "use memo";
         if (token === null) {
             this.authenticate(activityId);
             return new Promise<{activity: StravaActivityData;
@@ -73,6 +74,7 @@ class StravaActivityParser {
 
     computeControlPointArrivalTimes = (activityData : StravaActivityData, activityStream : StravaActivityStream, 
         controlPoints : Array<UserControl>) => {
+            "use memo";
         let arrivalTimes : Array<{time:string,val:number}>= [];
         let modifiedControls = controlPoints.slice();
         modifiedControls.sort((a,b) => a['distance']-b['distance']);

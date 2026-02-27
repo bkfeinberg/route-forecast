@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.10.0",
+  "version": "5.10.1",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -89,7 +89,7 @@
     "reselect": "^5.0.1",
     "rest-api-handler": "^2.20.0",
     "source-map-support": "^0.5.19",
-    "strava-v3": "^3.1.0",
+    "strava-v3": "^4.0.1",
     "universal-cookie": "^8.0.1",
     "url": "^0.11.0",
     "uuid": "^13.0.0",

@@ -102,7 +102,7 @@ const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper
             );
             forecastResults.push(result)
             if (fetchAqi) {
-                const aqiRequest = { locations: locations }
+                const aqiRequest = { locations: locations, service: 'AQI' }
                 const aqiResult = aqiFunc(aqiRequest).unwrap()
                 aqiResult.catch((err) => { warn(`AQI fetch failed for part ${which} ${aqiRequest.locations.lat} with error ${errorDetails(err)}`) });
                 aqiResults.push(aqiResult)
