@@ -126,7 +126,7 @@ const doForecastByParts = async (forecastFunc : MutationWrapper, aqiFunc : Mutat
     const routeData = rwgpsRouteData ? rwgpsRouteData : (gpxRouteData ? gpxRouteData : null)
     if (!routeData) {
         return [Promise.allSettled([new Promise<{result: "error"}>((resolve, reject) => {
-            reject({data:{details:"Missing any route data, cannot perform forecast"}})
+            reject({data:{details:`Missing any route data for ${type} ${routeNumber}, cannot perform forecast`}})
         })
 
         ]),[]]
