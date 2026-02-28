@@ -63,7 +63,8 @@
                 "bearingHeader":"Click to toggle between absolute and relative wind bearing",
                 "copyTable":"Copy forecast table",
                 "scrollToRain":"Bring first forecast line with change of rain into view",
-                "banked": "Show how many minutes remain to be within ACP/RUSA brevet finishing times"
+                "banked": "Show how many minutes remain to be within ACP/RUSA brevet finishing times",
+                "settings":"Advanced forecast settings"
             },
             "data": {
                 "noForecastPlaceholder":"Find forecast to create",

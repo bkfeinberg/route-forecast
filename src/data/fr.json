@@ -63,7 +63,8 @@
                 "bearingHeader":"Cliquez pour basculer entre le relèvement du vent absolu et relatif",
                 "copyTable":"Copier le tableau de prévisions",
                 "scrollToRain":"Afficher la première ligne de prévision avec changement de pluie",
-                "banked": "Affichez le nombre de minutes restant pour être dans les temps d'arrivée du brevet ACP/RUSA"
+                "banked": "Affichez le nombre de minutes restant pour être dans les temps d'arrivée du brevet ACP/RUSA",
+                "settings":"Paramètres de prévision avancés"
             },
             "data":{
                 "noForecastPlaceholder":"Cliquez sur « Prévisions »",
@@ -105,7 +106,8 @@
                 "distanceKilometers":"Kilomètres",
                 "duration":"Temps passé prévu",
                 "arrival":"Heure d'arrivée estimée",
-                "delete":"Supprimer"
+                "delete":"Supprimer",
+                "loadPOIs":"Charger les points d'intérêt comme commandes"
             },
             "analysis": {
                 "overallPace":"Le rythme global ajusté en fonction de la montée était",

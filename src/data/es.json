@@ -62,7 +62,8 @@
       "bearingHeader": "Haga clic para alternar entre rumbo de viento absoluto y relativo",
       "copyTable": "Copiar tabla de pronóstico",
       "scrollToRain": "Traer a la vista la primera línea de pronóstico con cambio de lluvia",
-      "banked": "Muestra cuántos minutos quedan para llegar a los tiempos de finalización del brevet ACP/RUSA"
+      "banked": "Muestra cuántos minutos quedan para llegar a los tiempos de finalización del brevet ACP/RUSA",
+      "settings":"configuración avanzada de pronóstico"
     },
     "data": {
       "noForecastPlaceholder": "Buscar pronóstico para crear",
@@ -104,7 +105,8 @@
       "distanceKilometers": "Kilómetros",
       "duration": "Tiempo estimado empleado",
       "arrival": "Hora estimada de llegada",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "loadPOIs": "Cargar POI como controles"
     },
     "analysis": {
       "overallPace": "El ritmo general ajustado a la subida fue",
