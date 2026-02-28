@@ -376,13 +376,13 @@ interface MapMarkerProps {
     controlNames: string[]
     subrange: [number, number] | []
 }
-const MapMarkers = ({ forecast, controls, controlNames, subrange, metric} : MapMarkerProps) => {
+const MapMarkers = ({ forecast, controls, controlNames, subrange, metric }: MapMarkerProps) => {
     const { i18n } = useTranslation()
     const celsius = useAppSelector(state => state.controls.celsius)
 
-    const validForecastPoints = forecast.filter(point => 
-        point && 
-        typeof point.lat === 'number' && 
+    const validForecastPoints = forecast.filter(point =>
+        point &&
+        typeof point.lat === 'number' &&
         typeof point.lon === 'number' &&
         point.time &&
         point.zone &&
@@ -392,16 +392,16 @@ const MapMarkers = ({ forecast, controls, controlNames, subrange, metric} : MapM
         point.windSpeed
     );
 
-    const validControls = Array.isArray(controls) ? controls.filter(control => 
-        control && 
-        typeof control.lat === 'number' && 
+    const validControls = Array.isArray(controls) ? controls.filter(control =>
+        control &&
+        typeof control.lat === 'number' &&
         typeof control.lon === 'number'
     ) : [];
 
     // Filter rainy forecast points
-    const validRainPoints = Array.isArray(forecast) ? forecast.filter(point => 
-        point && 
-        typeof point.lat === 'number' && 
+    const validRainPoints = Array.isArray(forecast) ? forecast.filter(point =>
+        point &&
+        typeof point.lat === 'number' &&
         typeof point.lon === 'number' &&
         typeof point.distance === 'number' &&
         point.time !== undefined &&
@@ -412,40 +412,38 @@ const MapMarkers = ({ forecast, controls, controlNames, subrange, metric} : MapM
 
     // marker title now contains both temperature and mileage
     return (validForecastPoints.map((point) =>
-        <Sentry.ErrorBoundary fallback={<h2>Cannot render temperature marker</h2>} >
-            <TempMarker latitude={point.lat}
-                longitude={point.lon}
-                value={cvtDistance(point.distance.toString(), metric)}
-                title={`${DateTime.fromISO(point.time, { zone: point.zone, locale: i18n.language }).toFormat('EEE MMM d h:mma yyyy')}\n${formatTemperature(point.temp, celsius)}`}
-                bearing={point.windBearing}
-                relBearing={point.relBearing}
-                windSpeed={point.windSpeed}
-                key={`${point.lat}${point.lon}_${cvtDistance(point.distance.toString(), metric)}_temp_${Math.random().toString(10)}`}
-            />
-        </Sentry.ErrorBoundary>
-            )
-        ).concat(
-            validControls
-                .map((control, index) =>
-                    <ControlMarker
-                        latitude={control.lat}
-                        longitude={control.lon}
-                        value={index < controlNames.length ? controlNames[index] : ''}
-                        key={`${control.lat}${control.lon}_${index < controlNames.length ? controlNames[index] : ''}${index}_control_${Math.random().toString(10)}`}
-                    />
-                )
-        ).concat(
-            validRainPoints.map((point) =>
-                <RainIcon
-                    latitude={point.lat}
-                    longitude={point.lon}
-                    value={parseInt(cvtDistance(point.distance.toString(), metric))}
-                    title={`${DateTime.fromISO(point.time, {zone:point.zone, locale:i18n.language}).toFormat('EEE MMM d h:mma yyyy')}\n${formatTemperature(point.temp, celsius)}`}
-                    isRainy={point.rainy}
-                    key={`${point.lat}${point.lon}_${cvtDistance(point.distance.toString(), metric)}_rain_${Math.random().toString(10)}`}
+        <TempMarker latitude={point.lat}
+            longitude={point.lon}
+            value={cvtDistance(point.distance.toString(), metric)}
+            title={`${DateTime.fromISO(point.time, { zone: point.zone, locale: i18n.language }).toFormat('EEE MMM d h:mma yyyy')}\n${formatTemperature(point.temp, celsius)}`}
+            bearing={point.windBearing}
+            relBearing={point.relBearing}
+            windSpeed={point.windSpeed}
+            key={`${point.lat}${point.lon}_${cvtDistance(point.distance.toString(), metric)}_temp_${Math.random().toString(10)}`}
+        />
+    ).concat(
+        validControls
+            .map((control, index) =>
+                <ControlMarker
+                    latitude={control.lat}
+                    longitude={control.lon}
+                    value={index < controlNames.length ? controlNames[index] : ''}
+                    key={`${control.lat}${control.lon}_${index < controlNames.length ? controlNames[index] : ''}${index}_control_${Math.random().toString(10)}`}
                 />
             )
+    ).concat(
+        validRainPoints.map((point) =>
+            <RainIcon
+                latitude={point.lat}
+                longitude={point.lon}
+                value={parseInt(cvtDistance(point.distance.toString(), metric))}
+                title={`${DateTime.fromISO(point.time, { zone: point.zone, locale: i18n.language }).toFormat('EEE MMM d h:mma yyyy')}\n${formatTemperature(point.temp, celsius)}`}
+                isRainy={point.rainy}
+                key={`${point.lat}${point.lon}_${cvtDistance(point.distance.toString(), metric)}_rain_${Math.random().toString(10)}`}
+            />
         )
+    )
+    )
 }
 
 const RainIcon = ({ latitude, longitude, value, title, isRainy }: { latitude: number, longitude: number, value: number, title: string, isRainy: boolean }) => {
@@ -552,54 +550,62 @@ type TempMarkerProps = {
     relBearing: number
     windSpeed: string
 }
-const TempMarker = ({ latitude, longitude, value, title, bearing, relBearing, windSpeed } : TempMarkerProps ) => {
+const TempMarker = ({ latitude, longitude, value, title, bearing, relBearing, windSpeed }: TempMarkerProps) => {
     const apiIsLoaded = useApiIsLoaded();
     if (!apiIsLoaded) {
-      return <div>API not yet loaded, no temperature marker</div>
+        return <div>API not yet loaded, no temperature marker</div>
     }
     // Add the marker at the specified location
     if (parseInt(windSpeed) > 3) {
         const flippedBearing = (bearing > 180) ? bearing - 180 : bearing + 180;
-        return <SafeAdvancedMarker
-            position={{ lat: latitude, lng: longitude }}
-            title={title}
-            collisionBehavior={CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY}
-        >
-            <>
-            <RotatedArrow rotation={flippedBearing} relBearing={relBearing} windSpeed={parseInt(windSpeed)} distance={value}/>
-            <div style={{
-                    width: 30,
-                    height: 30,
-                    position: 'relative',
-                    top: -2,
-                    left: 0,
-                    background: '#1ee3dc',
-                    border: '2px solid #0e6443',
-                    borderRadius: '40%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}>{value}</div>
-            </>
-        </SafeAdvancedMarker>
+        return (
+            <Sentry.ErrorBoundary fallback={<h2>Cannot render temperature marker</h2>} >
+                <SafeAdvancedMarker
+                    position={{ lat: latitude, lng: longitude }}
+                    title={title}
+                    collisionBehavior={CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY}
+                >
+                    <>
+                        <RotatedArrow rotation={flippedBearing} relBearing={relBearing} windSpeed={parseInt(windSpeed)} distance={value} />
+                        <div style={{
+                            width: 30,
+                            height: 30,
+                            position: 'relative',
+                            top: -2,
+                            left: 0,
+                            background: '#1ee3dc',
+                            border: '2px solid #0e6443',
+                            borderRadius: '40%',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>{value}</div>
+                    </>
+                </SafeAdvancedMarker>
+            </Sentry.ErrorBoundary>
+        )
     }
     else {
-        return <SafeAdvancedMarker position={{ lat: latitude, lng: longitude }} 
-            title={title} collisionBehavior={CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY}>
-            <div style={{
-                width: 30,
-                height: 30,
-                position: 'relative',
-                top: -2,
-                left: 0,
-                background: '#1ee3dc',
-                border: '2px solid #0e6443',
-                borderRadius: '40%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-            }}>{value}</div>
-        </SafeAdvancedMarker>
+        return (
+            <Sentry.ErrorBoundary fallback={<h2>Cannot render temperature marker</h2>} >
+                <SafeAdvancedMarker position={{ lat: latitude, lng: longitude }}
+                    title={title} collisionBehavior={CollisionBehavior.OPTIONAL_AND_HIDES_LOWER_PRIORITY}>
+                    <div style={{
+                        width: 30,
+                        height: 30,
+                        position: 'relative',
+                        top: -2,
+                        left: 0,
+                        background: '#1ee3dc',
+                        border: '2px solid #0e6443',
+                        borderRadius: '40%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}>{value}</div>
+                </SafeAdvancedMarker>
+            </Sentry.ErrorBoundary>
+        )
     }
 }
 
