@@ -45,8 +45,6 @@ const callVisualCrossing = async function (lat : number, lon : number, currentTi
     if (!startTime.isValid) {
         Sentry.captureMessage(`Invalid start time for Visual Crossing request: ${startTime.invalidReason} ${startTime.invalidExplanation} ${startTime.toString()}`)
         throw new Error(`Invalid start time for Visual Crossing request: ${startTime.invalidReason} ${startTime.invalidExplanation} ${startTime.toString()}`)
-    } else {
-        console.log(`Using ${startTime.toString()} for Visual Crossing starting time`)
     }
     const startTimestamp = startTime.toUnixInteger();
     if (isNaN(startTimestamp)) {
