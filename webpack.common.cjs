@@ -76,7 +76,7 @@ module.exports = (env, argv) => {
                             loader: reactCompilerLoader,
                             options: reactCompilerOptions
                         }
-                    ].reverse(),
+                    ]/*.reverse()*/,
                     exclude: [
                         /node_modules/,
                         /\.test\.tsx$/,
