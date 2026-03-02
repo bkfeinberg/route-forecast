@@ -185,7 +185,7 @@ class AnalyzeRoute {
     parseCoursePoints = (routeData : RwgpsRoute|RwgpsTrip) => routeData[routeData.type].course_points
 
     isControlType = (coursePoint : RwgpsCoursePoint) => {
-        return coursePoint.d !== undefined && (coursePoint.t === 'Control' || coursePoint.t === 'Food')
+        return coursePoint.d !== undefined && (coursePoint.t === 'Control')
     }
 
     isControlString = (coursePoint : RwgpsCoursePoint) => {
