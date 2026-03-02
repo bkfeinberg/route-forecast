@@ -35,7 +35,7 @@ describe('forecastSlice reducer', () => {
     });
 
     test('forecastFetched populates and resets flags', () => {
-        const payload = { timeZoneId: 'tz', forecastInfo: { forecast: [{ temp:'0', feel:0, humidity:0, zone:'', distance:0, cloudCover:0, windSpeed:'', gust:'', relBearing:0, windBearing:0, time:'', isControl:false, precip:'', lat:0, lon:0, rainy:false, aqi:0 }] } };
+        const payload = { timeZoneId: 'tz', forecastInfo: { forecast: [{ temp:'0', feel:0, humidity:0, zone:'', distance:0, cloudCover:'72.3%', windSpeed:'', gust:'', relBearing:0, windBearing:0, time:'', isControl:false, precip:'', lat:0, lon:0, rainy:false, aqi:0 }] } };
         const state = forecastReducer(initial, forecastFetched(payload));
         expect(state.forecast).toEqual(payload.forecastInfo.forecast);
         expect(state.timeZoneId).toBe('tz');

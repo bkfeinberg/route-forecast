@@ -22,11 +22,14 @@ import ShortUrl from '../TopBar/ShortUrl'
 import { UserControl } from '../../redux/controlsSlice';
 import { i18n } from 'i18next';
 import ReactGA from "react-ga4";
-import { Button, Tooltip, Table, Card, Title, Text } from '@mantine/core';
+import { Button, Tooltip, Table, Card, Title, Text, Popover } from '@mantine/core';
 
 import { IconClipboard, IconTemperature, IconPercentage } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import Cookies from 'universal-cookie';
+
+import { TemperaturesChart } from './TemperaturesChart';
+import { useDisclosure } from '@mantine/hooks';
 
 type TimeFormats = {
     [index:string]:string
@@ -140,6 +143,10 @@ const ForecastTable = () => {
     const dispatch = useAppDispatch()
     useEffect(() => { dispatch(tableViewedSet()) }, [])
     const { t } = useTranslation()
+    const [chartIsOpen, setChartIsOpen] = useState(false)
+    const [chartIsOpened, { close:closeChart, open:openChart }] = useDisclosure(false);
+    const { i18n } = useTranslation()
+
     const cookies = new Cookies(null, { path: '/' });
 
     const distHeaderText = <span>{metric ? 'KM' : 'Mile'}</span>
@@ -156,8 +163,8 @@ const ForecastTable = () => {
 
     const copyTable = async (event: React.MouseEvent) => {
         ReactGA.event('tutorial_complete')
-        var htmlTable = document.getElementById('forecastTable')
-        var range = document.createRange()
+        const htmlTable = document.getElementById('forecastTable')
+        const range = document.createRange()
         const selection = window.getSelection();
         if (selection && htmlTable) {
             range.selectNode(htmlTable)
@@ -313,7 +320,6 @@ const ForecastTable = () => {
     }
 
     const expandTable = (forecast : Forecast[], metric : boolean, adjustedTimes : AdjustedTimes, finishTime : string|null, hasSummary: boolean) => {
-        const { i18n } = useTranslation()
         if (forecast.length > 0) {
             return (
                 <Table.Tbody>
@@ -357,7 +363,7 @@ const ForecastTable = () => {
     }
 
     const scrollToChanceOfRain = () => {
-        var rowNum = 0
+        let rowNum = 0
         while (rowNum < forecast.length) {
             if (forecast[rowNum].precip !== '0.0%') {
                 const precip_row = document.getElementById(`forecast_row_${rowNum}`);
@@ -450,10 +456,20 @@ const ForecastTable = () => {
                                 </Table.Th>
                                 <MediaQuery minWidth={501}>
                                     <Table.Th><span className={'headerCell'}>{t('tableHeaders.humidity')}</span></Table.Th>
-                                    <Table.Th><span className={'headerCell'}>{t('tableHeaders.cloudCover')}</span></Table.Th>
+                                    <Table.Th>
+                                        <Popover onOpen={() => setChartIsOpen(true)} onClose={() => setChartIsOpen(false)}
+                                            opened={chartIsOpened} withArrow shadow='md' arrowPosition='side' position='right'>
+                                            <Popover.Target>
+                                                <span onMouseEnter={openChart} onMouseLeave={closeChart} className={'headerCell'}>{t('tableHeaders.cloudCover')}</span>
+                                            </Popover.Target>
+                                            <Popover.Dropdown>
+                                                <TemperaturesChart chartData={forecast} metric={metric} popoverIsOpen={chartIsOpen} />
+                                            </Popover.Dropdown>
+                                        </Popover>
+                                    </Table.Th>
                                     <Table.Th className={'clickableHeaderCell'} id={'aqi'}>
                                         <DesktopTooltip label={t('tooltips.aqiHeader')} position='top'>
-                                            <Button style={{padding:'0px'}} size='sm' variant={fetchAqi?"active":"default"} onClick={toggleAqi}><span className={fetchAqi ? 'largerClickableHeaderCell' : 'struckClickableHeaderCell'}>AQI</span></Button></DesktopTooltip>
+                                            <Button style={{ padding: '0px' }} size='sm' variant={fetchAqi ? "active" : "default"} onClick={toggleAqi}><span className={fetchAqi ? 'largerClickableHeaderCell' : 'struckClickableHeaderCell'}>AQI</span></Button></DesktopTooltip>
                                     </Table.Th>
                                 </MediaQuery>
                                 <Table.Th id={'wind'}>{windHeader}</Table.Th>
@@ -463,7 +479,9 @@ const ForecastTable = () => {
                                             <Button className={'clickableHeaderCell'} variant='default' size='compact-xs' onClick={toggleRelBearing} >{showRelativeBearing ? t('tableHeaders.relBearing') : t('tableHeaders.windBearing')}</Button></Tooltip></span></Table.Th>
                                 </MediaQuery>
                             </Table.Tr>
+
                         </Table.Thead>
+                        
                         {expandTable(forecast, metric, ForecastValues, ForecastValues.finishTime, hasSummary)}
                     </Table>
                 </div>

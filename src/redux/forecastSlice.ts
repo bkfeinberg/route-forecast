@@ -10,7 +10,7 @@ export type Forecast = {
     humidity:number
     zone:string
     distance:number
-    cloudCover:number
+    cloudCover:string
     windSpeed:string
     gust:string
     summary?: string
