@@ -17,7 +17,7 @@ const RouteInfoInputRUSA = () => {
 
     const [getRusaPermInfo] = rusaIdLookupApiSlice.useLazyLookupRusaPermIdQuery()
 
-    const lookupRouteId = React.useCallback(() => {
+    const lookupRouteId = () => {
         ReactGA.event('spend_virtual_currency', {virtual_currency_name:'RUSA',value:Number.parseInt(rusaPermRouteId)})
         Sentry.addBreadcrumb({
             category: 'load',
@@ -32,7 +32,7 @@ const RouteInfoInputRUSA = () => {
             dispatch(rwgpsRouteSet(routeInfo[0].rwgps))
             dispatch(loadFromRideWithGps())
         }).catch(error => dispatch(errorDetailsSet(error)))
-    }, [rusaPermRouteId])
+    }
 
     const isReturnKey = function(event : React.KeyboardEvent) {
         const charCode = (event.which) ? event.which : event.keyCode;
