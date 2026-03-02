@@ -61,7 +61,7 @@ const ForecastSettings = () => {
                 {errorDetails !== null && <Notification color='red' onClose={() => dispatch(errorDetailsSet(null))}>{errorDetails}</Notification>}
                 <div style={{ display: "flex", justifyContent: 'space-between' }}>
                     <DesktopTooltip label={t('tooltips.settings')} position="bottom">
-                        <Button size='small' variant='subtle' onClick={toggle} leftSection={<IconSettings />}></Button>
+                        <Button size='small' variant='subtle' onClick={toggle} leftSection={<IconSettings />}><span><em>Settings</em></span></Button>
                     </DesktopTooltip>
                 </div>
                 <Collapse in={settingsOpened}>
