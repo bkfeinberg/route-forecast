@@ -73,7 +73,7 @@ describe('DateSelect', () => {
     await user.click(dateButton);
     const pastDate = DateTime.now().minus({ days: 1 }).toFormat('d MMMM yyyy');
     const pastButton = screen.getByRole('button', {
-      name: new RegExp(pastDate, 'i')
+      name: new RegExp(`^${pastDate}`, 'i')
     });
     expect(pastButton).toBeDisabled();
     const presentDate = futureTime.toFormat('d MMMM yyyy');

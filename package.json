@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.11.1",
+  "version": "5.11.2",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -186,10 +186,11 @@
     "deploy": "./buildRelease.sh",
     "lint": "eslint src --fix",
     "test": "jest",
+    "UTCtest": "TZ=UTC node node_modules/.bin/jest",
     "coverage": "jest --config jest.fullcov.config.ts",
-    "testUTC": "TZ=utc jest",
+    "testUTC": "TZ=UTC jest",
     "testDbg": "node --inspect-brk node_modules/.bin/jest",
-    "testUTCDbg": "TZ=utc node --inspect-brk node_modules/.bin/jest",
+    "testUTCDbg": "TZ=UTC node --inspect-brk node_modules/.bin/jest",
     "start": "node dist/server/index.js",
     "build": "tsc -p tsconfig_server.json && echo 'running webpack' &&  ./node_modules/.bin/webpack --mode production --config webpack.prod_heroku.js --env sentryRelease"
   },
