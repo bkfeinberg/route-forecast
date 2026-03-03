@@ -20,14 +20,14 @@ const FaqButton = () => {
     const [faqVisible, setFaqVisible] = useState(false)
     const cookies = new Cookies(null, { path: '/' });
     const showFaq = () => {
-        cookies.set('clickedFaq', "true", { path: '/' }); 
+        cookies.set('clickedFaq', true, { path: '/' }); 
         setFaqVisible(true)
     }
 
     const hideFaq = () => {
         setFaqVisible(false)
     }
-    const faqWasClicked = cookies.get('clickedFaq') === "true"
+    const faqWasClicked = cookies.get('clickedFaq')
     const isMobile = useMediaQuery({query:'(max-width: 600px)'})
     const drawerSize = isMobile? "sm" : "xl"
 
