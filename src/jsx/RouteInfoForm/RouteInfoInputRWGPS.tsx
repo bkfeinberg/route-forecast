@@ -66,7 +66,8 @@ const RWGPSLoadRouteButton = ({ loadButtonRef, loadPOIs }: { loadButtonRef: RefO
   const dispatch = useAppDispatch()
   return (
     <Button ref={loadButtonRef} variant={'filled'} disabled={loading || (!hasRwgpsRouteId && !hasStravaRouteId)}
-      fullWidth loading={loading} onClick={() => dispatch(loadFromRideWithGps(rwgpsRouteId, false, loadPOIs))}>
+      fullWidth loading={loading} onClick={() => {Sentry.metrics.count("numbered_route_loaded", 1, {attributes: {id: rwgpsRouteId}});
+      dispatch(loadFromRideWithGps(rwgpsRouteId, false, loadPOIs))}}>
       {t('buttons.loadRoute')}
     </Button>
   )

@@ -1,5 +1,6 @@
 import { IconMap } from "@tabler/icons-react";
 import {useState} from 'react';
+import * as Sentry from "@sentry/react"
 
 import { loadFromRideWithGps } from "../../redux/loadRouteActions";
 import { routeIsTripSet, rwgpsRouteSetAsNumber } from "../../redux/routeParamsSlice";
@@ -46,6 +47,7 @@ const RWGPSRouteList = ({ }) => {
         <Combobox
             store={combobox}
             onOptionSubmit={(selected: string, options: ComboboxOptionProps) => {
+                Sentry.metrics.count("pinned_route_selected", 1, {attributes: {selected: selected, value: options.value}});
                 dispatch(routeIsTripSet(options.itemType == "trip"))
                 if (options.children && Array.isArray(options.children)) {
                     dispatch(rwgpsRouteSetAsNumber(options.children[0]))
