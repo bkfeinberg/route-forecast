@@ -2,11 +2,17 @@ import { renderWithProviders, fireEvent, screen } from 'test-utils';
 import { describe, beforeEach, test, expect } from '@jest/globals';
 import StravaActivityIdInput from './StravaActivityIdInput';
 import userEvent from '@testing-library/user-event';
+import {navigate} from '../../redux/loadFromStravaActions'
 
 describe('StravaActivityIdInput Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  jest.mock('../../redux/loadFromStravaActions', () => ({
+    __esModule: true,
+    navigate : jest.fn()
+  }))
 
   test('renders input field with correct id and attributes', () => {
     const { container } = renderWithProviders(<StravaActivityIdInput />, { preloadedState: {

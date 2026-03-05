@@ -45,16 +45,18 @@ const refreshOldToken = (dispatch : AppDispatch, getState: () => RootState, refr
     }
 }
 
+export const navigate = (where : string) => window.location.href = where;
+
 const authenticate = (routeId : string) => {
     let params = queryString.parse(location.search);
     params['strava_route'] = routeId;
-    window.location.href = '/stravaAuthReq?state=' + encodeURIComponent(JSON.stringify(params));
+    navigate('/stravaAuthReq?state=' + encodeURIComponent(JSON.stringify(params)));
 }
 
 const authenticateActivity = (activityId : string) => {
     let params = queryString.parse(location.search);
     params['strava_activity'] = activityId;
-    window.location.href = '/stravaAuthReq?state=' + encodeURIComponent(JSON.stringify(params));
+    navigate('/stravaAuthReq?state=' + encodeURIComponent(JSON.stringify(params)));
 }
 
 export const loadStravaActivity = function() {
