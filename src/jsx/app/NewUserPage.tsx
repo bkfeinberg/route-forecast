@@ -57,8 +57,8 @@ const NewUserPage = ({ isLandscape, isLargeEnough, mapsApiKey,
             // TODO: constrain the size to not fill the full width of the screen and instead be reasonable
     return (
         <div>
-            {!dateSelected || !paceSelected && <h2 style={{ textAlign: "center" }}><em>Randoplan</em></h2>}
-            {!dateSelected || !paceSelected && <h3 style={{ textAlign: "center" }}><strong>Forecast and planning for cycling and hiking routes</strong></h3>}
+            {(!dateSelected || !paceSelected) && <h2 style={{ textAlign: "center" }}><em>Randoplan</em></h2>}
+            {(!dateSelected || !paceSelected) && <h3 style={{ textAlign: "center" }}><strong>Forecast and planning for cycling and hiking routes</strong></h3>}
             {dateSelected ? null : <DatePicker/>}
             {(dateSelected && !paceSelected) ? <SpeedPicker /> : null}
             {(dateSelected && paceSelected) ? <RealUI isLandscape={isLandscape}
