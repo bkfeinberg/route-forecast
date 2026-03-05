@@ -119,9 +119,11 @@ const PaceTable = ({activityData, activityStream, analysisInterval, mapSubrangeS
                         <Table.Thead>
                         <Table.Tr>
                             <Table.Th style={{'fontSize':'80%'}}>Time</Table.Th>
-                            <Table.Th id={'pace'} style={{'fontSize':'80%'}}>
-                                <Tooltip label={t('tooltips.overallPace')} position='top'>Pace</Tooltip>
-                            </Table.Th>
+                            <Tooltip label={t('tooltips.overallPace')} position='top'>
+                                <Table.Th id={'pace'} style={{ 'fontSize': '80%' }}>
+                                    Pace
+                                </Table.Th>
+                            </Tooltip>
                             <Table.Th style={{'fontSize':'80%'}}>WW Pace</Table.Th>
                             <Table.Th style={{'fontSize':'80%'}}>Distance</Table.Th>
                             <Table.Th style={{'fontSize':'80%'}}>Climb</Table.Th>
