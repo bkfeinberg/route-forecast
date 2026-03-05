@@ -56,7 +56,7 @@ const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFutur
     if (startIso===null)
         startIso=undefined
 
-    const shortTimeZoneName = start.toFormat("ZZZZ")
+    const shortTimeZoneName = start.isValid ? start.toFormat("ZZZZ") : ''
     return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span id={"startingTime"} style={{ fontSize: isMobile ? ".7rem" : ".875rem", fontWeight: "bolder", padding: "0px 5px", flex: 1, display:'flex' }}>
@@ -67,7 +67,7 @@ const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFutur
                 <DesktopTooltip label={t('tooltips.startingTime')} >
                     <DateTimePicker
                         dropdownType={isMobile ? "modal" : "popover"}
-                        placeholder="M/D/YYYY"
+                        placeholder="Click here to pick the ride start"
                         styles = {{ input : {fontSize: '16px'} }}
                         rightSection={<span style={{ paddingRight: 4 }}>{shortTimeZoneName}</span>}
                         rightSectionWidth={"max-content"}

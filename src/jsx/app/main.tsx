@@ -345,6 +345,10 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     dispatch(querySet({url:href,search:search}))
     Sentry.setContext("query", {queryString:search})
     updateFromQueryParams(dispatch, queryParamsAsObj, cookies);
+    if (firstTimeUsed) {
+        // clear the timestamp in this case
+        dispatch(startTimestampSet({ start: NaN }));
+    }
     dispatch(actionUrlAdded(action))
     dispatch(apiKeysSet({maps_api_key:maps_api_key,timezone_api_key:timezone_api_key, bitly_token:bitly_token}))
     setupRideWithGps(dispatch, cookies);

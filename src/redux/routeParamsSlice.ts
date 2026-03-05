@@ -103,6 +103,8 @@ const routeParamsSlice = createSlice({
                 if (start.isValid) {
                     state.startTimestamp = checkedStartDate(start, state.canForecastPast).toMillis()
                     state.stopAfterLoad = false
+                } else {
+                    state.startTimestamp = NaN;
                 }
             }
         },
@@ -127,7 +129,9 @@ const routeParamsSlice = createSlice({
                 const start = DateTime.fromSeconds(action.payload.start, { zone: action.payload.zone === undefined ? "local" : action.payload.zone })
                 if (start.isValid) {
                     state.startTimestamp = checkedStartDate(start, state.canForecastPast).toMillis()
-                }    
+                } else {
+                    state.startTimestamp = NaN;
+                }
             }
         },
         timeZoneSet(state,action : PayloadAction<string>) {
