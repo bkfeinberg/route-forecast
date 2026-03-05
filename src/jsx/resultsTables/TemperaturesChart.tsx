@@ -31,7 +31,7 @@ export const TemperaturesChart = ({chartData, metric, popoverIsOpen} : {chartDat
             }}
         >
             <XAxis dataKey="distance" type={'number'} unit={metric ? " km" : " miles"} tickFormatter={(value: number) => formatDistance(value, metric)} domain={[0, 'dataMax']} />
-            <YAxis dataKey={getCloudCover} type={"number"} unit=" %" domain={[0,100]} tickFormatter={(value:number) => {console.log('Cloud cover values',value); return value.toString()}} orientation="right" yAxisId="right" />
+            <YAxis dataKey={getCloudCover} type={"number"} unit=" %" domain={[0,100]} tickFormatter={(value:number) => value.toString()} orientation="right" yAxisId="right" />
             <YAxis dataKey="feel" type="number" unit={metric?" C":" F"}
                 domain={['dataMin', 'dataMax']} tickFormatter={(value:number) => `${ formatTemp(value, metric)}`}/>
             <Tooltip labelFormatter={(value: ReactNode) => formatTipDistance(value as number, metric)} 
