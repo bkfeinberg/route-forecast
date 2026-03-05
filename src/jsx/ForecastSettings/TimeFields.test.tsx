@@ -5,19 +5,23 @@ import { TimeFields, finishTimeFormat } from './TimeFields';
 import { DateTime } from 'luxon';
 
 jest.mock('../../utils/hooks', () => ({
-  useActualFinishTime: jest.fn()
+  useActualFinishTime: jest.fn(),
+  useAppDispatch: jest.fn()
 }));
 jest.mock('../../utils/forecastValuesHook', () => ({
   useForecastDependentValues: jest.fn()
 }));
 
-import { useActualFinishTime } from '../../utils/hooks';
+import { useActualFinishTime, useAppDispatch } from '../../utils/hooks';
 import { useForecastDependentValues } from '../../utils/forecastValuesHook';
 
 describe('TimeFields component', () => {
   const mockedUseActualFinishTime = useActualFinishTime as unknown as jest.Mock;
   const mockedUseForecastDependentValues = useForecastDependentValues as unknown as jest.Mock;
   const mockedDateTime = DateTime as unknown as any;
+  const mockedUseAppDispatch = useAppDispatch as unknown as jest.Mock;
+  const mockDispatch = jest.fn();
+  mockedUseAppDispatch.mockReturnValue(mockDispatch);
 
   beforeEach(() => {
     jest.clearAllMocks();
