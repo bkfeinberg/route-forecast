@@ -2,11 +2,12 @@ import "./RidingPace.css"
 
 import {connect, ConnectedProps} from 'react-redux';
 import { setPace } from "../../redux/actions";
-import { useActualPace, useFormatSpeed } from '../../utils/hooks';
+import { useActualPace, useFormatSpeed, useAppDispatch } from '../../utils/hooks';
 import { inputPaceToSpeed, metricPaceToSpeed, paceToSpeed, milesToMeters } from '../../utils/util';
 import { DesktopTooltip } from '../shared/DesktopTooltip';
 import {useTranslation} from 'react-i18next'
 import type { RootState } from "../../redux/store";
+import { paceWasSetByUser } from "../../redux/routeParamsSlice";
 import { Combobox, useCombobox, Flex, Button } from '@mantine/core';
 
 import { maxWidthForMobile } from '../../utils/util';
@@ -99,6 +100,7 @@ const correctPaceValue = (paceAlpha : string, setPace : (pace:string) => void) :
 }
 
 const RidingPace = ({ pace, setPace, metric }: PropsFromRedux) => {
+    const dispatch = useAppDispatch()
     const combobox = useCombobox()
     const { t } = useTranslation()
     const actualPace = useActualPace()
@@ -140,6 +142,7 @@ const RidingPace = ({ pace, setPace, metric }: PropsFromRedux) => {
                 onOptionSubmit={(selected: string) => {
                     cookies.set("pace", selected)
                     setPace(selected)
+                    dispatch(paceWasSetByUser());
                     combobox.closeDropdown();
                 }}
             >

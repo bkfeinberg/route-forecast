@@ -28,7 +28,8 @@ jest.mock('react-responsive', () => ({
 jest.mock('../../utils/hooks', () => ({
   __esModule: true,
   useActualPace: jest.fn(),
-  useFormatSpeed: jest.fn()
+  useFormatSpeed: jest.fn(),
+  useAppDispatch: jest.fn()
 }));
 
 // Simple wrapper for DesktopTooltip to expose label & className for assertions
@@ -49,7 +50,7 @@ jest.mock('../../redux/actions', () => ({
 
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
-import { useActualPace, useFormatSpeed } from '../../utils/hooks';
+import { useAppDispatch, useActualPace, useFormatSpeed } from '../../utils/hooks';
 import { RidingPace } from './RidingPace';
 
 describe('RidingPace', () => {
@@ -57,6 +58,9 @@ describe('RidingPace', () => {
   const mockedUseMedia = useMediaQuery as unknown as jest.Mock;
   const mockedUseActualPace = useActualPace as unknown as jest.Mock;
   const mockedUseFormatSpeed = useFormatSpeed as unknown as jest.Mock;
+  const mockedUseAppDispatch = useAppDispatch as unknown as jest.Mock;
+  const mockDispatch = jest.fn();
+  mockedUseAppDispatch.mockReturnValue(mockDispatch);
 
   beforeEach(() => {
     jest.clearAllMocks();

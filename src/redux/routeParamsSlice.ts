@@ -25,10 +25,12 @@ export type RouteParamsState = {
     interval: number
     min_interval: number
     canForecastPast: boolean
-    pace: string
+    pace: string,
+    paceSetByUser: boolean,
     rwgpsRoute: string
     rwgpsRouteIsTrip: boolean
-    startTimestamp: number
+    startTimestamp: number,
+    timeSetByUser: boolean,
     zone: string
     routeLoadingMode: number
     maxDaysInFuture: number
@@ -53,9 +55,11 @@ const routeParamsInitialState : RouteParamsState = {
     min_interval:providerValues[defaultProvider].min_interval,
     canForecastPast:providerValues[defaultProvider].canForecastPast,
     pace: defaultPace,
+    paceSetByUser: false,
     rwgpsRoute: '',
     rwgpsRouteIsTrip: false,
     startTimestamp: initialStartTime().toMillis(),
+    timeSetByUser: false,
     // eslint-disable-next-line new-cap
     zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     routeLoadingMode: routeLoadingModes.RWGPS,
@@ -102,6 +106,12 @@ const routeParamsSlice = createSlice({
                 }
             }
         },
+        timeWasSetByUser(state, action : PayloadAction<void>) {
+            state.timeSetByUser = true;
+        },
+        paceWasSetByUser(state, action: PayloadAction<void>) {
+            state.paceSetByUser = true;
+        },
         initialStartTimeSet(state,action : PayloadAction<{start:string, zone:string}>) {
             if (action.payload) {
                 const start =  DateTime.fromISO(action.payload.start, {zone:!action.payload.zone?"local":action.payload.zone})
@@ -140,14 +150,14 @@ const routeParamsSlice = createSlice({
                 state.segment = routeParamsInitialState.segment
             }
         },
-        segmentSet(state,action) {
+        segmentSet(state,action:PayloadAction<[number,number]>) {
             // start and end are in meters
             state.segment = action.payload
         },
-        routeIsTripSet(state,action) {
+        routeIsTripSet(state,action : PayloadAction<boolean>) {
             state.rwgpsRouteIsTrip = action.payload
         },
-        routeLoadingModeSet(state,action) {
+        routeLoadingModeSet(state,action:PayloadAction<number>) {
             if (action.payload === routeLoadingModes.RWGPS || action.payload === routeLoadingModes.STRAVA || action.payload === routeLoadingModes.RUSA_PERM) {
                 state.routeLoadingMode = action.payload
             }
@@ -195,4 +205,4 @@ export const routeParamsReducer = routeParamsSlice.reducer
 export const {stopAfterLoadSet,rwgpsRouteSet,startTimeSet,initialStartTimeSet,
         startTimestampSet,paceSet,intervalSet,routeIsTripSet,
         routeLoadingModeSet,reset, timeZoneSet, rusaPermRouteIdSet,
-        segmentSet, rwgpsRouteSetAsNumber} = routeParamsSlice.actions
+        segmentSet, rwgpsRouteSetAsNumber, timeWasSetByUser, paceWasSetByUser} = routeParamsSlice.actions

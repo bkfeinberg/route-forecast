@@ -33,12 +33,13 @@ const RouteInfoForm = ({ errorDetails, errorDetailsSet, routeLoadingMode, routeL
     const dispatch = useDispatch()
     const {t} = useTranslation()
 
-    const modeSwitched = (item : Event, newValue: number | number[]) => {
+    const modeSwitched = (item : Event, newValue: number) => {
         routeLoadingModeSet(newValue);
         if (newValue === routeLoadingModes.STRAVA) {ReactGA.event('select_content', {content_type:'strava'})}
     }
     return (
         <div style={{ padding: "14px" }}>
+            <span style={{textAlign:"center"}}><h4>Select the route you will be riding</h4></span>
             <RouteLoadingModeSelector mode={mode} modeSwitched={modeSwitched} />
             <div className='spacer' />
             {getInputForMode(mode)}
@@ -66,7 +67,7 @@ const sliderLabelRenderer = (value : number, index : number) : ReactNode => {
     return <div style={{position:'relative', left:`${offset}px`, backgroundColor:'#757575', color:'white'}}>{routeLoadingModeProps[value].name}</div>
 }
 
-const RouteLoadingModeSelector = ({ mode, modeSwitched } : {mode:RouteLoadingModes, modeSwitched: (item: Event, value: number|number[]) => void}) => {
+const RouteLoadingModeSelector = ({ mode, modeSwitched } : {mode:RouteLoadingModes, modeSwitched: (item: Event, value: number) => void}) => {
     return (
         <div style={{ display: "flex", justifyContent: "center", margin:'10px', padding:'40px' }}>
             <Slider

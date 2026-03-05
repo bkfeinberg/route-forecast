@@ -59,6 +59,7 @@ import { stopAfterLoadSet, rusaPermRouteIdSet, routeLoadingModeSet, startTimesta
 import { metricSet, displayControlTableUiSet } from "../../redux/controlsSlice";
 import { defaultProvider, providerValues } from "../../redux/providerValues";
 import type { DesktopUIProps } from "../DesktopUI";
+const NewUserPage = React.lazy(() => import(/* webpackChunkName: "NewUserPage" */'./NewUserPage'));
 import { Notifications } from '@mantine/notifications';
 
 import Cookies from 'universal-cookie';
@@ -322,11 +323,19 @@ interface RouteWeatherUIProps {
     origin: string
 }
 
+const firstUse = (cookies: Cookies) => {
+    return !(cookies.get("pace") || cookies.get("provider") || cookies.get("zoomToRange"));
+}
+
 const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, bitly_token, origin} : RouteWeatherUIProps) => {
     const dispatch = useAppDispatch()
     const { i18n } = useTranslation()
     // const isDesktop = useMediaQuery({ minWidth: 1224 })
     const cookies = new Cookies(null, { path: '/' });
+    const firstTimeUsed = firstUse(cookies);
+    if (firstTimeUsed) {
+        ReactGA.event('first_use');
+    }
     let queryParams = queryString.parse(search, {parseBooleans: true, parseNumbers:false, types:{viewControls:'boolean'}});
     // temporarily log query params as received by DuckDuckGo
     if (window.navigator.userAgent.indexOf('Ddg') !== -1) {
@@ -357,7 +366,7 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     }
     return (
         <MantineProvider theme={theme}>
-            <FunAppWrapperThingForHooksUsability maps_api_key={maps_api_key} queryParams={queryParamsAsObj} lang={i18n.language}/>
+            <FunAppWrapperThingForHooksUsability maps_api_key={maps_api_key} queryParams={queryParamsAsObj} lang={i18n.language} firstUse={firstTimeUsed}/>
         </MantineProvider>
     )
 
@@ -414,9 +423,10 @@ const useSetPageTitle = () => {
 interface FunWrapperProps {
     maps_api_key: string
     queryParams: QueryParams,
-    lang: string
+    lang: string,
+    firstUse: boolean
 }
-const FunAppWrapperThingForHooksUsability = ({maps_api_key, queryParams, lang} : FunWrapperProps) => {
+const FunAppWrapperThingForHooksUsability = ({maps_api_key, queryParams, lang, firstUse} : FunWrapperProps) => {
     const [forecast] = useForecastMutation()
     const [getAqi] = useGetAqiMutation()
     const [orientationChanged, setOrientationChanged] = React.useState<boolean>(false)
@@ -445,6 +455,13 @@ const FunAppWrapperThingForHooksUsability = ({maps_api_key, queryParams, lang} :
     useLoadControlPointsFromURL(queryParams)
     const isLandscape = useMediaQuery({query:'(orientation:landscape)'})
     const isLargeEnough = useMediaQuery({query:'(min-width: 950px)'})
+    if (firstUse) {
+        return <Suspense fallback={<div>Loading new user UI</div>}>
+            <NewUserPage isLandscape={isLandscape} isLargeEnough={isLargeEnough}
+                mapsApiKey={maps_api_key} orientationChanged={orientationChanged} setOrientationChanged={setOrientationChanged}
+            />
+        </Suspense>
+    }
     return (
         <div>
             <Notifications autoClose={2000}/>

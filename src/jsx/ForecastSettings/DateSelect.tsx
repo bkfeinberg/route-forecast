@@ -7,13 +7,14 @@ import { DateTimePicker } from '@mantine/dates';
 import  {useMediaQuery} from 'react-responsive'
 import {setStart} from "../../redux/actions";
 import { setTimeFromIso } from "../../redux/actions";
-import { initialStartTimeSet } from "../../redux/routeParamsSlice";
+import { initialStartTimeSet, timeWasSetByUser } from "../../redux/routeParamsSlice";
 import {useTranslation} from 'react-i18next'
 import type { RootState } from "../../redux/store";
 import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 type PropsFromRedux = ConnectedProps<typeof connector>
 import { IconCalendar } from '@tabler/icons-react';
 import { DesktopTooltip } from '../shared/DesktopTooltip';
+import { useAppDispatch } from '../../utils/hooks';
 
 export const setDateOnly = (start : DateTime, setInitialStart : ActionCreatorWithPayload<{
     start: string;
@@ -26,10 +27,10 @@ export const setDateOnly = (start : DateTime, setInitialStart : ActionCreatorWit
 
 const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFuture, canForecastPast, setTimeFromIso } : PropsFromRedux) => {
     const { t, i18n } = useTranslation()
-    const setDateFromPicker = (dateTimeString : string|null) => {
-        if (dateTimeString) {
-            setStart(DateTime.fromFormat(dateTimeString, "yyyy-MM-dd HH:mm:ss", {zone:zone}).toMillis());
-        }
+    const dispatch = useAppDispatch();
+    
+    const pickerDismissed = () => {
+        dispatch((timeWasSetByUser()));
     }
 
     const isMobile = useMediaQuery({query:'(max-width: 600px)'})
@@ -38,6 +39,11 @@ const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFutur
     let later = new Date();
     const daysToAdd = maxDaysInFuture;
     later.setDate(now.getDate() + daysToAdd);
+    const setDateFromPicker = (dateTimeString : string|null) => {
+        if (dateTimeString) {
+            setStart(DateTime.fromFormat(dateTimeString, "yyyy-MM-dd HH:mm:ss", {zone:zone}).toMillis());
+        }
+    }
     interface OtherAttributes {
         minDate? : Date
     }
@@ -53,7 +59,7 @@ const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFutur
     const shortTimeZoneName = start.toFormat("ZZZZ")
     return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span id={"startingTime"} style={{ fontSize: isMobile ? ".7rem" : ".875rem", fontWeight: "bolder", padding: "0px 5px", flex: 1 }}>
+            <span id={"startingTime"} style={{ fontSize: isMobile ? ".7rem" : ".875rem", fontWeight: "bolder", padding: "0px 5px", flex: 1, display:'flex' }}>
                 <IconCalendar onClick={() => setDateOnly(start, initialStartTimeSet)} style={{ cursor: "pointer", marginRight: "3px" }} />
                 {t('labels.startingTime')}
             </span>
@@ -75,6 +81,7 @@ const DateSelect = ({ start, zone, setStart, initialStartTimeSet, maxDaysInFutur
                         locale={i18n.language}
                         value={startIso}
                         onChange={setDateFromPicker}
+                        onDropdownClose={pickerDismissed}
                         highlightToday={false}
                         valueFormat='MMMM DD, YYYY h:mma'
                         timePickerProps={{ minutesStep: 5, format: "12h", styles: {input: {fontSize:'16px'}} }}
