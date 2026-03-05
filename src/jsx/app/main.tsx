@@ -332,7 +332,7 @@ const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, b
     const { i18n } = useTranslation()
     // const isDesktop = useMediaQuery({ minWidth: 1224 })
     const cookies = new Cookies(null, { path: '/' });
-    const firstTimeUsed = firstUse(cookies);
+    const firstTimeUsed = firstUse(cookies) && search === '';
     if (firstTimeUsed) {
         ReactGA.event('first_use');
     }
