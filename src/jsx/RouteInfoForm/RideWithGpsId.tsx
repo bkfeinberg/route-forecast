@@ -12,10 +12,8 @@ const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 export const decideValidationStateFor = (type : string, methodUsed : string|null, loadingSuccess : boolean) => {
     if (type === methodUsed) {
-        if (loadingSuccess) {
-            return {'valid':null};
-        } else {
-            return {'invalid':null};
+        if (!loadingSuccess) {
+            return {'error':'Invalid route'};
         }
     } else {
         return null;
@@ -59,7 +57,7 @@ const RideWithGpsId = ({rwgpsRouteSet,loadingSource,loadingSuccess,rwgpsRoute,ro
                 }
             }} className={'glowing_input'} autoComplete='on'
                 autoFocus tabIndex={0} type="text" rightSection={<CloseButton onClick={clearRoute}></CloseButton>}
-                inputSize='md' w='10rem'
+                inputSize='xs' w='10rem' size='xs'
                 label={<span style={{ fontSize: "75%" }}><b>{t('titles.rwgpsId')}</b></span>}
                 {...decideValidationStateFor('rwgps', loadingSource, loadingSuccess)}
                 onKeyDown={isNumberKey}
