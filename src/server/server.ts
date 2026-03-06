@@ -906,6 +906,17 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
         associated_object_id: string,
         associated_object_type: string
     }
+    interface RouteType {
+        id: number,
+        user_id: number,
+        url: string,
+        html_url: string,
+        name: string
+    }
+    type RouteListType = {
+        routes: Array<RouteType>;
+    };
+
     let options = {headers: customHeaders};
     let syncUrl = `https://ridewithgps.com/api/v1/sync.json?since=1970-01-01&assets=routes,trips`;
     const syncResponse = await axiosInstance.get<RwgpsSync>(syncUrl, options).catch(((error : AxiosError) => {
@@ -943,7 +954,6 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
             };
             status: number;
         }
-        //@ts-ignore
         const response = await axiosInstance.get<RwgpsUserInfo>(url, userInfoOptions).catch((error: AxiosError) => {
             if (error.response && isAxiosError(error) && error.response.data) {
                 Sentry.captureMessage(`Error fetching pinned routes for ${req.query.token} ${(error.response.data as ErrorResponse).error}`);
@@ -980,7 +990,28 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
                 }
             }
         });
-        res.status(200).json(favorites);
+        if (favorites.length === 0) {
+            // try getting the user's own routes instead
+            const userRoutesReply = await axiosInstance.get<RouteListType>('https://ridewithgps.com/api/v1/routes.json', options).catch(((error: AxiosError) => {
+                if (error.response && isAxiosError(error) && error.response.data) {
+                    Sentry.captureMessage(`Error fetching user routes for ${req.query.token} ${(error.response.data as ErrorResponse).error}`);
+                    res.status(error.response.status).json((error.response.data as ErrorResponse).error);
+                } else {
+                    Sentry.captureMessage(`Error fetching user routes for ${req.query.token} ${error.response}`);
+                    res.status(500).json(error.response)
+                }
+                return;
+            }));
+            if (userRoutesReply) {
+                const userRoutes = userRoutesReply.data.routes.map( route =>
+                    {return {id:route.id, 
+                        associated_object_id:route.html_url.replace('https://ridewithgps.com/routes/', ''),
+                        name:route.name}})
+                res.status(200).json(userRoutes);
+            }
+        } else {
+            res.status(200).json(favorites);
+        }
     } catch (err : any) {
         if (err !== undefined) {
             Sentry.captureException(err, {tags: {where:'Fetching pinned routes'}})
