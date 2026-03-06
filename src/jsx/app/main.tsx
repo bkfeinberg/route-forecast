@@ -324,7 +324,7 @@ interface RouteWeatherUIProps {
 }
 
 const firstUse = (cookies: Cookies) => {
-    return !(cookies.get("pace") || cookies.get("provider") || cookies.get("zoomToRange"));
+    return !(cookies.get("pace") || cookies.get("provider") || cookies.get("zoomToRange") || cookies.get('_ga'));
 }
 
 const RouteWeatherUI = ({search, href, action, maps_api_key, timezone_api_key, bitly_token, origin} : RouteWeatherUIProps) => {
