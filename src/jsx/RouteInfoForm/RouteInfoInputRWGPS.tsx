@@ -7,9 +7,10 @@ import PinnedRouteLoader from './PinnedRouteLoader';
 import RideWithGpsId from './RideWithGpsId';
 import { useTranslation } from 'react-i18next'
 import type { RefObject } from 'react';
-import { Button, Checkbox } from '@mantine/core';
+import { Button, Checkbox, Divider, Text } from '@mantine/core';
 import { useAppSelector, useAppDispatch } from '../../utils/hooks';
 import Cookies from 'universal-cookie';
+import '@mantine/core/styles/Divider.css';
 
 export const RouteInfoInputRWGPS = () => {
   const usingPinnedRoutes = useAppSelector(state => state.rideWithGpsInfo.usePinnedRoutes)
@@ -33,14 +34,7 @@ export const RouteInfoInputRWGPS = () => {
   
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "10px" }}>
-        {showPinnedRoutes ?
-          null :
-          <>
-            <div style={{ flex: 1 }}><RideWithGpsId loadButtonRef={loadButtonRef} /></div>
-            <div className="or-divider" style={{ flex: 0.3, fontSize: "13px", textAlign: "center" }}>- OR -</div>
-          </>
-        }
+      <div style={{ display: "flex", flexDirection:'column', justifyContent: "center", alignItems: "center", padding: "10px" }}>
         <Sentry.ErrorBoundary fallback={<h2>Something went wrong.</h2>}>
           <div style={{ flex: 1, padding: "5px" }}>
             <PinnedRouteLoader
@@ -49,6 +43,16 @@ export const RouteInfoInputRWGPS = () => {
             />
           </div>
         </Sentry.ErrorBoundary>
+        {showPinnedRoutes ?
+          null :
+          <>
+            <Divider my='md' style={{ width: '100%' }} size={'xl'} 
+              label={<span><Text size="sm">Paste in a url such as </Text>
+                <Text size="sm" fs={'italic'}>https://ridewithgps.com/routes/53327352</Text></span>}>
+              </Divider>
+            <div style={{ flex: 1 }}><RideWithGpsId loadButtonRef={loadButtonRef} /></div>
+          </>
+        }
       </div>
       <Checkbox size="xs" label={t('controls.loadPOIs')} checked={loadPOIs} onChange={(event) => setLoadPOIs(event.currentTarget.checked)} />
       <RWGPSLoadRouteButton loadButtonRef={loadButtonRef} loadPOIs={loadPOIs} />
