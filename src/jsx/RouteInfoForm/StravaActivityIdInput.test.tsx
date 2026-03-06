@@ -9,10 +9,10 @@ describe('StravaActivityIdInput Component', () => {
     jest.clearAllMocks();
   });
 
-  jest.mock('../../redux/loadFromStravaActions', () => ({
-    __esModule: true,
-    navigate : jest.fn()
-  }))
+  // jest.mock('../../redux/loadFromStravaActions', () => ({
+  //   __esModule: true,
+  //   navigate : jest.fn()
+  // }))
 
   test('renders input field with correct id and attributes', () => {
     const { container } = renderWithProviders(<StravaActivityIdInput />, { preloadedState: {

@@ -4,7 +4,8 @@ import { stravaActivitySet } from '../../redux/stravaSlice';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import type { RootState } from "../../redux/store";
 import { Flex, Input } from '@mantine/core';
-
+import {logger} from "@sentry/react";
+const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
 type StravaActivityIdProps = {
     canAnalyze: boolean
@@ -30,7 +31,7 @@ const StravaActivityIdInput = ({ stravaActivitySet, strava_activity, canAnalyze 
                                     }
                                 });
                             } else {
-                                console.log('vetoing drop of', i, dt.items[i].kind);
+                                warn(`vetoing drop of ${i} of type ${dt.items[i].kind}`);
                                 return false;
                             }
                         }
@@ -55,7 +56,7 @@ const StravaActivityIdInput = ({ stravaActivitySet, strava_activity, canAnalyze 
                         // should think about better ways of doing this
                         //updateExpectedTimes(strava_activity)
                     } else {
-                        console.log('gained focus but not acting')
+                        warn('gained focus but not acting because there is no Strava activity or access token set')
                     }
                 }}
                 onBlur={() => { if (strava_activity !== '') { /*updateExpectedTimes(strava_activity)*/ } }} />

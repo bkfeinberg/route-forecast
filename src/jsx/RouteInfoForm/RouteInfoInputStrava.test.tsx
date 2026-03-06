@@ -1,13 +1,22 @@
 import { renderWithProviders, fireEvent, screen } from 'test-utils';
 import { describe, beforeEach, test, expect } from '@jest/globals';
 import RouteInfoInputStrava from './RouteInfoInputStrava';
-import userEvent from '@testing-library/user-event';
 import ReactGA from 'react-ga4';
+import * as stravaLoadActions from '../../redux/loadFromStravaActions'
 
 describe('RouteInfoInputStrava Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  })
+
+  jest.mock('../../redux/loadFromStravaActions', () => ({
+    __esModule: true,
+    navigate : jest.fn()
+  }))
 
   test('shows Login to Strava when access token is null', () => {
     const { container } = renderWithProviders(<RouteInfoInputStrava />, { preloadedState: { strava: { access_token: null, activity: '' } } });
@@ -52,6 +61,7 @@ describe('RouteInfoInputStrava Component', () => {
   test('clicking Analyze Ride calls ReactGA.event with activity id', () => {
     // ensure ReactGA.event mock exists
     (ReactGA as any).event = jest.fn();
+    const navigateSpy = jest.spyOn(stravaLoadActions, "navigate").mockReturnValue('url')
 
     renderWithProviders(<RouteInfoInputStrava />, { preloadedState: { strava: { access_token: 'tok', activity: '300', fetching: false } } });
     const analyzeBtn = screen.getByRole('button', { name: /Analyze Ride/i }) as HTMLButtonElement;
