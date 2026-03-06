@@ -128,12 +128,12 @@ const PinnedRouteLoader = ({ rwgpsToken, rwgpsTokenSet, credentialsValid,
     return (
         <>
             <Button
-                size='xs'
-                variant='default' ///{usingPinnedRoutes ? 'outline' : 'filled'}
+                size='lg'
+                variant='default'
                 autoContrast
                 loading={loadingPinnedRoutes}
                 className={button_class}
-                style={{ fontSize: "12px" }}
+                // style={{ fontSize: "12px" }}
                 onClick={() => { setDisplayRoutesError(true); togglePinnedRoutes(usingPinnedRoutesSet, setShowPinnedRoutes, usingPinnedRoutes) }}
             >
                 <RideWithGpsLogo style={{ width: 64, height: 32, marginRight: 4 }} />
