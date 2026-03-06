@@ -53,8 +53,9 @@ const NewUserPage = ({ isLandscape, isLargeEnough, mapsApiKey,
     
     if (dateSelected && paceSelected) {
         ReactGA.event("new_user");
+    } else if (dateSelected) {
+        ReactGA.event('new_user_date_only');
     }
-            // TODO: constrain the size to not fill the full width of the screen and instead be reasonable
     return (
         <div>
             {(!dateSelected || !paceSelected) && <h2 style={{ textAlign: "center" }}><em>Randoplan</em></h2>}
