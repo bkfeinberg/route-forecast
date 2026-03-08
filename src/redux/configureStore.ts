@@ -11,6 +11,7 @@ import { routeInfoReducer } from './routeInfoSlice';
 import { controlsReducer } from './controlsSlice';
 import {routeParamsReducer} from './routeParamsSlice'
 import { forecastReducer } from './forecastSlice';
+import { stravaApiSlice } from './stravaApiSlice';
 export const loggerMiddleware = createLogger();
 
 /**
@@ -43,14 +44,17 @@ export default function configureReduxStore({ _preloadedState, mode }: { _preloa
             params: paramsReducer, 
             rideWithGpsInfo: rwgpsInfoReducer,
             [forecastApiSlice.reducerPath]: forecastApiSlice.reducer,
-            [rusaIdLookupApiSlice.reducerPath]: rusaIdLookupApiSlice.reducer
+            [rusaIdLookupApiSlice.reducerPath]: rusaIdLookupApiSlice.reducer,
+            [stravaApiSlice.reducerPath]: stravaApiSlice.reducer
         },
         preloadedState:_preloadedState,
         middleware: getDefaultMiddleware => {
             if (mode === 'development') {
-                return getDefaultMiddleware().concat(forecastApiSlice.middleware,rusaIdLookupApiSlice.middleware,loggerMiddleware)
+                return getDefaultMiddleware().concat(forecastApiSlice.middleware,
+                    rusaIdLookupApiSlice.middleware,stravaApiSlice.middleware,loggerMiddleware)
             } else {
-                return getDefaultMiddleware().concat(forecastApiSlice.middleware,rusaIdLookupApiSlice.middleware)
+                return getDefaultMiddleware().concat(forecastApiSlice.middleware,
+                    rusaIdLookupApiSlice.middleware,stravaApiSlice.middleware)
             }
         },
         enhancers: getDefaultEnhancers => {

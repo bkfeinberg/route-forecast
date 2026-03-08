@@ -33,6 +33,7 @@ import {Client} from "pg";
 
 import RateLimit from 'express-rate-limit'
 import { DateTime } from 'luxon';
+import { number } from 'mathjs';
 var limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
@@ -610,6 +611,47 @@ const getStravaToken = async (code : string) => {
         throw error;
     }
 };
+interface ErrorResponse {
+    error: string
+}
+
+interface StravaTokens {
+    access: string,
+    refresh: string,
+    expires_at: number|null
+}
+
+app.get('/stravaActivities', async (req: Request, res : Response) => {
+    let access_token = req.query.token;
+    if (!access_token || typeof access_token !== 'string') {
+        return res.status(400).json({details:'Missing access token'})
+    }
+
+    const activitiesHeaders: AxiosRequestConfig['headers'] = {
+    'Authorization':`Bearer ${access_token}`
+    };
+    let activitiesOptions = {headers: activitiesHeaders};
+
+    interface StravaActivity {
+        id: number,
+        name: string
+    }
+    const activitiesResult = await axiosInstance.get<StravaActivity[]>(`https://www.strava.com/api/v3/athlete/activities?per_page=20`, activitiesOptions
+    ).catch(((error: AxiosError) => {
+        if (error.response && isAxiosError(error) && error.response.data) {
+            Sentry.captureMessage(`Error fetching user activities for ${access_token} ${(error.response.data as ErrorResponse).error}`);
+            res.status(error.response.status).json((error.response.data as ErrorResponse).error);
+        } else {
+            Sentry.captureMessage(`Error fetching user activities for ${access_token} ${error.response}`);
+            res.status(500).json(error.response)
+        }
+        return;
+    }));
+    if (activitiesResult) {
+        const activities = activitiesResult.data.map(activity => {return {id:activity.id, name:activity.name}});
+        return res.status(200).json({activities:activities});
+    }
+})
 
 /* const insertFeatureRecord = (record, featureName, user : string) => {
     return datastore.save({
@@ -897,9 +939,6 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
     type RwgpsSync = {
         items: RwgpsSyncType[],
         meta: RwgpsSyncMeta
-    }
-    interface ErrorResponse {
-        error: string
     }
     interface FavoriteMapValue {
         id: number,

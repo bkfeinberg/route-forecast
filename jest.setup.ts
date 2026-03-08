@@ -79,6 +79,12 @@ const handlers = [
       return HttpResponse.json<MockPerm[]>([]);
     }
   }),
+  http.get('http://localhost/refreshStravaToken', ({}) => {
+    return HttpResponse.json({token:'aaaa', expires_at:777})
+  }),
+  http.get('http://localhost/stravaActivities', ({}) => {
+    return HttpResponse.json<{activities:Array<{id:number,name:string}>}>({activities:[{id:1,name:'First'},{id:2,name:'Second'}]})
+  })
 ];
 
 const server = setupServer(...handlers);

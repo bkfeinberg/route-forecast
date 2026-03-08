@@ -1,4 +1,5 @@
 import { ResponsiveContainer, LineChart, XAxis, YAxis, Tooltip, Legend, Line, CartesianGrid } from 'recharts';
+import type { ValueType, NameType, Formatter } from 'recharts/types/component/DefaultTooltipContent';
 import ReactGA from "react-ga4";
 import { ReactNode } from 'react';
 import { Forecast } from '../../redux/forecastSlice';
@@ -12,8 +13,8 @@ export const TemperaturesChart = ({chartData, metric, popoverIsOpen} : {chartDat
 
     const formatDistance = (value: number, isMetric: boolean) => isMetric ? (value * milesToKm).toFixed(0) : value.toFixed(0);
     const formatTipDistance = (value: number, isMetric: boolean) => isMetric ? (value * kmToMiles).toFixed(0) + " km" : value.toFixed(0) + " miles";
-    const formatTooltipValue = (value: number|undefined, name: string|undefined, isMetric: boolean) => 
-        (name === 'Cloud cover') ? value : isMetric ? [(value! / kmToMiles)?.toFixed(0), "feels like (C)"] : [value?.toFixed(0), "feels like (F)"]
+    const formatTooltipValue = (value: ValueType|undefined, name: NameType|undefined, isMetric: boolean) => 
+        (name === 'Cloud cover') ? value : isMetric ? [(Number(value) / kmToMiles)?.toFixed(0), "feels like (C)"] : [value, "feels like (F)"]
     const formatTemp = (value: number|undefined, isMetric: boolean) => 
         isMetric ? (value! / kmToMiles).toFixed(0) : value!.toFixed(0)
 
@@ -35,7 +36,7 @@ export const TemperaturesChart = ({chartData, metric, popoverIsOpen} : {chartDat
             <YAxis dataKey="feel" type="number" unit={metric?" C":" F"}
                 domain={['dataMin', 'dataMax']} tickFormatter={(value:number) => `${ formatTemp(value, metric)}`}/>
             <Tooltip labelFormatter={(value: ReactNode) => formatTipDistance(value as number, metric)} 
-                formatter={(value: number|undefined, name: string|undefined) => formatTooltipValue(value, name, metric)} />
+                formatter={(value: ValueType|undefined, name: NameType|undefined) => formatTooltipValue(value, name, metric)} />
             <Legend />
             <Line type="monotone" dataKey="feel" dot={false} />
             <Line type="monotone" yAxisId={'right'} dataKey={getCloudCover} stroke={"#32a852"} dot={false} name={"Cloud cover"}/>

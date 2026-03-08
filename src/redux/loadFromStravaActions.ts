@@ -8,7 +8,7 @@ import { stravaFetchBegun, stravaFetched, stravaFetchFailed, stravaActivitySet, 
 import { stravaErrorSet, errorDetailsSet, gpxRouteLoadingFailed } from "./dialogParamsSlice";
 import { Api } from 'rest-api-handler';
 import queryString from 'query-string'
-import { stravaAuthApiSlice } from '../redux/stravaAuthApiSlice'
+import { stravaApiSlice } from './stravaApiSlice'
 
 const getStravaParser = async function() {
     const parser = await import(/* webpackChunkName: "StravaRouteParser" */ '../utils/stravaRouteParser');
@@ -28,7 +28,7 @@ const refreshOldToken = (dispatch : AppDispatch, getState: () => RootState, refr
                 }
             }).then(response => {
                 if (response === undefined) {
-                    dispatch(stravaErrorSet(Error("Received undefined response from Strava auth service")));
+                    dispatch(stravaErrorSet("Received undefined response from Strava auth service"));
                     reject(Error("Received undefined response from Strava auth service"));
                 }
                 else {
@@ -36,7 +36,7 @@ const refreshOldToken = (dispatch : AppDispatch, getState: () => RootState, refr
                     resolve(response.access_token);
                 }
             }, error => {
-                dispatch(stravaErrorSet(error));
+                dispatch(stravaErrorSet(error.message));
                 reject(error);
             });
         });
