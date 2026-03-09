@@ -24,7 +24,7 @@ window.addEventListener('online', (event) => {
                 metrics.count("install_successes", 1, { attributes: { registration: registration } });
                 serviceWorkerInstalled = true;
             }).catch((error) => {
-                warn(`Error registering service worker on reconnect: ${error}`);
+                warn(`Error registering service worker ${process.env.SW_VERSION} on reconnect: ${error}`);
                 metrics.count("install_failures", 1, { attributes: { error: error } });
             });
         }
@@ -180,13 +180,13 @@ else {
                         if (navigator.serviceWorker.controller) {
                             navigator.serviceWorker.controller.postMessage({ command: 'GET_VERSION' });
                         }
-                        warn(`Service worker did not install correctly, was redundant`);
+                        warn(`Service worker version ${process.env.SW_VERSION} did not install correctly, was redundant`);
                         serviceWorkerInstallationFailed = true;
                         metrics.count("install_failures", 1, { attributes: { error: 'Redundant' } });
                     }
                 });
             }).catch((error) => {
-                warn(`Error registering service worker: ${error}`);
+                warn(`Error registering service worker ${process.env.SW_VERSION}: ${error}`);
                 serviceWorkerInstallationFailed = true;
                 metrics.count("install_failures", 1, { attributes: { error: error } });
                 setTag("serviceWorkerInstalled", false);
