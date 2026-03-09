@@ -642,7 +642,7 @@ app.get('/stravaActivities', async (req: Request, res : Response) => {
             Sentry.captureMessage(`Error fetching user activities for ${access_token} ${(error.response.data as ErrorResponse).error}`);
             res.status(error.response.status).json((error.response.data as ErrorResponse).error);
         } else {
-            Sentry.captureMessage(`Error fetching user activities for ${access_token} ${error.response}`);
+            Sentry.captureMessage(`Error fetching user activities for ${access_token} ${error.message}`);
             res.status(500).json(error.response)
         }
         return;
@@ -963,7 +963,7 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
             Sentry.captureMessage(`Error fetching pinned routes for ${req.query.token} ${(error.response.data as ErrorResponse).error}`);
             res.status(error.response.status).json((error.response.data as ErrorResponse).error);    
         } else {
-            Sentry.captureMessage(`Error fetching pinned routes for ${req.query.token} ${error.response}`);
+            Sentry.captureMessage(`Error fetching pinned routes for ${req.query.token} ${error.message}`);
             res.status(500).json(error.response)
         }
     }));
@@ -1036,7 +1036,7 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
                     Sentry.captureMessage(`Error fetching user routes for ${req.query.token} ${(error.response.data as ErrorResponse).error}`);
                     res.status(error.response.status).json((error.response.data as ErrorResponse).error);
                 } else {
-                    Sentry.captureMessage(`Error fetching user routes for ${req.query.token} ${error.response}`);
+                    Sentry.captureMessage(`Error fetching user routes for ${req.query.token} ${error.message}`);
                     res.status(500).json(error.response)
                 }
                 return;
