@@ -205,6 +205,9 @@ const getAndCachePOST = async (request) => {
             if (!cachedResponse) {
                 sendLogMessage(`No cache entry, returning 503 for POST to ${request.url} with ${cacheKey}`, 'warning');
                 if (response) {     // but presumably it's not ok
+                    if ((await response.clone().text()).startsWith('<!DOCTYPE html>')) {
+                        return Response.json({details:`Server returning error page`}, {status:503, statusText: 'Service Unavailable'});
+                    }
                     try {
                         const json = await response.json();
                         return Response.json(json, {status:503, statusText: 'Service Unavailable'});

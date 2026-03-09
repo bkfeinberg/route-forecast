@@ -1,7 +1,7 @@
 import { connect, ConnectedProps, useSelector } from 'react-redux';
 
 import { stravaActivitySet } from '../../redux/stravaSlice';
-import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import { ActionCreatorWithPayload, SerializedError } from '@reduxjs/toolkit';
 import type { RootState } from "../../redux/store";
 import { Flex, Group, Input, Button } from '@mantine/core';
 import {logger} from "@sentry/react";
@@ -14,6 +14,7 @@ import '@mantine/core/styles/Alert.css';
 import { IconMap } from "@tabler/icons-react";
 import stravaImage from 'Images/api_logo_pwrdBy_strava_stack_light.png';
 import { useSearchParams } from 'react-router-dom';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 type MinimalActivity = {
     id: number,
     name: string
@@ -39,15 +40,33 @@ function SelectOption({ name, id }: MinimalActivity) {
   );
 }
 
+const apiErrorToString = (errorObject: FetchBaseQueryError | SerializedError | undefined) => {
+  if (errorObject) {
+    if ('status' in errorObject) {
+      // This is a FetchBaseQueryError
+      const errMsg = 'error' in errorObject ? errorObject.error : JSON.stringify(errorObject.data);
+      return errMsg;
+    } else {
+      // This is a SerializedError
+      return errorObject.message;
+    }
+  } else {
+    return '';
+  }
+}
+
 const StravaActivityIdInput = ({ access_token }: { access_token: string }) => {
     const combobox = useCombobox()
-    const { data: activities, isLoading, isError } = useLoadActivitiesQuery({ access: access_token });
+    const { data: activities, isLoading, isError, error:loadActivitiesError } = useLoadActivitiesQuery({ access: access_token });
     const routeName = useAppSelector(state => state.routeInfo.name);
     const [selectedName, setSelectedName] = useState(routeName);
     const dispatch = useAppDispatch();
 
     if (isLoading) return <div>Loading activities...</div>;
-    if (isError || !activities) return <Alert variant="light" color="red" radius="xl" title="Strava error">An error occurred loading activities</Alert>;
+    if (isError || !activities) {
+      error(`An error ${JSON.stringify(apiErrorToString(loadActivitiesError))} occurred loading Strava activities using key ${access_token}`);
+      return <Alert variant="light" color="red" radius="xl" title="Strava error">An error occurred loading activities</Alert>;
+    }
 
     const options = activities.activities.map((item) => (
         <Combobox.Option value={item.id.toString()} key={item.id}>

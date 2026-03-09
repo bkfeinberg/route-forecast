@@ -82,6 +82,9 @@ const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper
     let which = 0;
     const limit = pLimit(providerValues[service].maxRequests);
 
+    if (!zone) {
+        error(`Missing timezone key in forecast request for ${routeName}/${routeNumber}`);
+    }
     while (requestCopy.length >= 0 && locations) {
         try {
             const request = { locations: locations, timezone: zone, service: service, routeName: routeName, routeNumber: routeNumber, lang: lang, which }
@@ -214,7 +217,7 @@ export const forecastWithHook = async (forecastFunc: MutationWrapper, aqiFunc: M
             currency: getRouteNumberFromValue(routeInfo.gpxRouteData.tracks[0].link?routeInfo.gpxRouteData.tracks[0].link.href:''),
             items: [{ item_id: '', item_name: '' }], daysInFuture: daysInFuture
         });
-    }
+    } else error(`forecastWithHook called with no route data`)
 
     const fetchController = new AbortController()
     const abortMethod = fetchController.abort.bind(fetchController)

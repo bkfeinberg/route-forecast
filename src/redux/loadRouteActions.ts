@@ -76,6 +76,7 @@ export const loadFromRideWithGps = function (routeNumber? : string, isTrip? : bo
                     DateTime.fromMillis(getState().uiInfo.routeParams.startTimestamp, { zone: getState().uiInfo.routeParams.zone }),
                     getState().params.timezone_api_key)
                 if (timeZoneResults.result === "error") {
+                    error(`Failed to load RWGPS route because of error ${timeZoneResults.error} fetching time zone`)
                     dispatch(rwgpsRouteLoadingFailed(timeZoneResults.error?timeZoneResults.error:"Unknown error fetching time zone"))
                 } else {
                     Sentry.addBreadcrumb({category:'timezone',level:'info',message:`TimeZone API call returned ${timeZoneResults.result}`})
@@ -110,7 +111,7 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         } else if (getState().uiInfo.routeParams.rusaPermRouteId !== '') {
             
         }
-        const error = getState().uiInfo.dialogParams.errorDetails
+        const errorDetails = getState().uiInfo.dialogParams.errorDetails
         if (getState().uiInfo.routeParams.stopAfterLoad) {
             ReactGA.event('search', {search_term:getState().uiInfo.routeParams.rwgpsRoute})
         }
@@ -120,7 +121,12 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         const provider = filterProvider(requestedProvider, country, providerValues, alternateProvider);
         dispatch(setWeatherProvider(provider));
 
-        if (error === null && !getState().uiInfo.routeParams.stopAfterLoad) {
+        if (errorDetails === null && !getState().uiInfo.routeParams.stopAfterLoad) {
+            // do we actually have a route
+            if (!getState().routeInfo.rwgpsRouteData && !getState().routeInfo.gpxRouteData) {
+                error(`Invoking forecast with no route data loaded for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`)
+                return
+            }
             await forecastWithHook(forecastFunc, aqiFunc, dispatch, getState, lang)
             const queryString = getState().params.queryString
             const searchString = getState().params.searchString
