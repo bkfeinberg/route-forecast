@@ -65,7 +65,7 @@ const StravaActivityIdInput = ({ access_token }: { access_token: string }) => {
     if (isLoading) return <Text fw={500}>Loading activities...</Text>;
     if (isError || !activities) {
       error(`An error ${JSON.stringify(apiErrorToString(loadActivitiesError))} occurred loading Strava activities using key ${access_token}`);
-      return <Alert variant="light" color="red" radius="xl" title="Strava error">An error occurred loading activities</Alert>;
+      return <Alert variant="light" color="red" radius="xl" title="Strava error">An error {apiErrorToString(loadActivitiesError)} occurred loading activities</Alert>;
     }
 
     const options = activities.activities.map((item) => (

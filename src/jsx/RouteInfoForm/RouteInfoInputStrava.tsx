@@ -11,6 +11,7 @@ import { Button } from "@mantine/core"
 import React, { useState, useEffect } from "react";
 import { stravaApiSlice } from '../../redux/stravaApiSlice';
 import { stravaTokenSet } from '../../redux/stravaSlice';
+import Cookies from 'universal-cookie';
 
 const RouteInfoInputStrava = () => {
   const dispatch = useAppDispatch()
@@ -22,16 +23,24 @@ const RouteInfoInputStrava = () => {
   const expires_at = useAppSelector(state => state.strava.expires_at);
   const [refreshStravaToken, refreshedTokenResults] = stravaApiSlice.useLazyRefreshStravaTokenQuery()
 
+  const cookies = new Cookies(null, { path: '/' });
+
   useEffect(() => {
     if ((expires_at! < Math.round(Date.now()/1000))) {
+      refreshedTokenResults.isSuccess = false;
       refreshStravaToken(refreshToken);
     }
+  }, [refreshToken, expires_at])
+
+  useEffect(() => {
     if (refreshedTokenResults.isSuccess) {
       dispatch(stravaTokenSet({
         token:refreshedTokenResults.data.access_token, 
-        expires_at:refreshedTokenResults.data.expires_at}))
+        expires_at:refreshedTokenResults.data.expires_at}));
+        cookies.set('strava_access_token', refreshedTokenResults.data.access_token);
+        cookies.set('strava_token_expires_at', refreshedTokenResults.data.expires_at.toString());
     }
-  }, [accessToken, refreshToken, expires_at, refreshedTokenResults])
+  }, [refreshedTokenResults.isLoading, refreshedTokenResults.isSuccess])
 
   const fetchRoute = () => {
     ReactGA.event('earn_virtual_currency', {virtual_currency_name:strava_activity_id});

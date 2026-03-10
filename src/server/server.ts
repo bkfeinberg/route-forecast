@@ -614,11 +614,9 @@ const getStravaToken = async (code : string) => {
 interface ErrorResponse {
     error: string
 }
-
-interface StravaTokens {
-    access: string,
-    refresh: string,
-    expires_at: number|null
+interface ErrorResponses {
+    errors: [{resource:string, field:string, code:string}]
+    message: string
 }
 
 app.get('/stravaActivities', async (req: Request, res : Response) => {
@@ -639,8 +637,8 @@ app.get('/stravaActivities', async (req: Request, res : Response) => {
     const activitiesResult = await axiosInstance.get<StravaActivity[]>(`https://www.strava.com/api/v3/athlete/activities?per_page=20`, activitiesOptions
     ).catch(((error: AxiosError) => {
         if (error.response && isAxiosError(error) && error.response.data) {
-            Sentry.captureMessage(`Error fetching user activities for ${access_token} ${(error.response.data as ErrorResponse).error}`);
-            res.status(error.response.status).json((error.response.data as ErrorResponse).error);
+            Sentry.captureMessage(`Error fetching user activities for ${access_token} with ${JSON.stringify((error.response.data as ErrorResponses).errors[0])}`);
+            res.status(error.response.status).json((error.response.data as ErrorResponses).message);
         } else {
             Sentry.captureMessage(`Error fetching user activities for ${access_token} ${error.message}`);
             res.status(500).json(error.response)
