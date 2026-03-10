@@ -62,7 +62,7 @@ const StravaActivityIdInput = ({ access_token }: { access_token: string }) => {
     const [selectedName, setSelectedName] = useState(routeName);
     const dispatch = useAppDispatch();
 
-    if (isLoading) return <div>Loading activities...</div>;
+    if (isLoading) return <Text fw={500}>Loading activities...</Text>;
     if (isError || !activities) {
       error(`An error ${JSON.stringify(apiErrorToString(loadActivitiesError))} occurred loading Strava activities using key ${access_token}`);
       return <Alert variant="light" color="red" radius="xl" title="Strava error">An error occurred loading activities</Alert>;
