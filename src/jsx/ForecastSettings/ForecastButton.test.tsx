@@ -114,7 +114,7 @@ describe('ForecastButton', () => {
 
   test('shows disabled tooltip and has disabled button when submitDisabled prop true', () => {
     const { getByTestId, container } = render(<ForecastButton fetchingForecast={false} submitDisabled={true} routeNumber={'1'} startTimestamp={0} pace={"A"} interval={1} metric={false} controls={[]} strava_activity={""} strava_route={""} provider={"weatherKit"} origin={""} queryString={null} 
-      querySet={jest.fn() as any} zone={""} computeStdDev={false} downloadAll={false} />);
+      querySet={jest.fn() as any} zone={"American/Los_Angeles"} computeStdDev={false} downloadAll={false} />);
     const tooltip = getByTestId('desktop-tooltip');
     expect(tooltip.getAttribute('data-label')).toBe('tooltips.forecast.disabled');
 
@@ -139,7 +139,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -180,7 +180,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -210,7 +210,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={true}
     />);
@@ -254,7 +254,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -298,7 +298,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -340,7 +340,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -387,7 +387,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -429,7 +429,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={true}
     />);
@@ -474,7 +474,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={true}
     />);
@@ -517,7 +517,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={true}
     />);
@@ -568,7 +568,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -619,7 +619,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -672,7 +672,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={false}
       downloadAll={false}
     />);
@@ -714,7 +714,7 @@ describe('ForecastButton', () => {
       origin={""}
       queryString={null}
       querySet={jest.fn() as any}
-      zone={""}
+      zone={"American/Los_Angeles"}
       computeStdDev={true}
       downloadAll={false}
     />);
