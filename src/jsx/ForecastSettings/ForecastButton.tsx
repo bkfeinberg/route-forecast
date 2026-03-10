@@ -287,7 +287,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                     onKeyDown={keyIsDown as unknown as (ev:React.KeyboardEvent)=>void}
                     onKeyUp={keyIsUp as unknown as (ev:React.KeyboardEvent)=>void}
                     style={{ ...buttonStyle, width: "100%", backgroundColor: "#137cbd", borderColor: "#137cbd", }}
-                    disabled={submitDisabled || fetchingForecast}
+                    disabled={submitDisabled || fetchingForecast || !zone}
                     size={smallScreen?'sm':'lg'}
                     fullWidth
                     loading={forecastFetchResult.isLoading || aqiFetchResult.isLoading || fetchingForecast}
