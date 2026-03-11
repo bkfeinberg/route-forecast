@@ -103,7 +103,8 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
         let maxSimultaneousRequests = providerValues[service] ? providerValues[service].maxRequests : 1;
 
         const limit = pLimit(maxSimultaneousRequests);
-        while (requestCopy.length >= 0 && locations) {
+        for (let which = 0; which < forecastRequest.length; ++which) {
+            if (requestCopy.length < 0 || !locations) break;
             const request = {
                 locations: locations, timezone: zone, service: service, routeName: routeName,
                 routeNumber: routeNumber, lang: i18n.language, which
@@ -130,7 +131,6 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                 aqiResults.push(aqiResult)
             }
             locations = requestCopy.shift();
-            ++which
         }
 
         return [Promise.allSettled(forecastResults), fetchAqi ? Promise.allSettled(aqiResults) : []]

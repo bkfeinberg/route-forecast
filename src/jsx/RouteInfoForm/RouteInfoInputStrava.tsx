@@ -27,13 +27,12 @@ const RouteInfoInputStrava = () => {
 
   useEffect(() => {
     if ((expires_at! < Math.round(Date.now()/1000))) {
-      refreshedTokenResults.isSuccess = false;
       refreshStravaToken(refreshToken);
     }
   }, [refreshToken, expires_at])
 
   useEffect(() => {
-    if (refreshedTokenResults.isSuccess) {
+    if (refreshedTokenResults.isSuccess && !refreshedTokenResults.isFetching && !refreshedTokenResults.isFetching) {
       dispatch(stravaTokenSet({
         token:refreshedTokenResults.data.access_token, 
         expires_at:refreshedTokenResults.data.expires_at}));
