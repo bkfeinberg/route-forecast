@@ -11,7 +11,7 @@
     "not dead"
   ],
   "dependencies": {
-    "@babel/runtime": "^7.14.0",
+    "@babel/runtime": "^7.29.2",
     "@babel/traverse": "^7.28.4",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
