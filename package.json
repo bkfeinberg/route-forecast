@@ -125,7 +125,7 @@
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@tsconfig/node22": "^22.0.0",
-    "@types/chrome": "^0.1.24",
+    "@types/chrome": "^0.1.38",
     "@types/express": "^5.0.6",
     "@types/google.maps": "^3.58.1",
     "@types/jest": "^30.0.0",
