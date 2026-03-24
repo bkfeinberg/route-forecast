@@ -124,7 +124,9 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         if (errorDetails === null && !getState().uiInfo.routeParams.stopAfterLoad) {
             // do we actually have a route
             if (!getState().routeInfo.rwgpsRouteData && !getState().routeInfo.gpxRouteData) {
-                error(`Invoking forecast with no route data loaded for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`)
+                error(
+                    `Invoking forecast with no route data loaded for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`,
+                    {url:window.location.href})
                 return
             }
             if (!getState().uiInfo.routeParams.zone) {
