@@ -71,12 +71,22 @@ module.exports = (env, argv) => {
                 {
                     test: /\.(t|j)sx?$/,
                     use: [
-                        { loader: 'ts-loader', options: { transpileOnly: true } },
+                        // { loader: 'ts-loader', options: { transpileOnly: true } },
+                        {
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [
+                                    '@babel/preset-env',
+                                    ['@babel/preset-react', { "runtime": "automatic" }],
+                                    '@babel/preset-typescript'
+                                ],
+                            }
+                        },                     
                         {
                             loader: reactCompilerLoader,
                             options: reactCompilerOptions
                         }
-                    ]/*.reverse()*/,
+                    ].reverse(),
                     exclude: [
                         /node_modules/,
                         /\.test\.tsx$/,

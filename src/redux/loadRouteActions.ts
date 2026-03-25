@@ -133,7 +133,7 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
                 error(`Invoking forecast with no time zone for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`)
                 return
             }
-            await forecastWithHook(forecastFunc, aqiFunc, dispatch, getState, lang)
+            await forecastWithHook (forecastFunc, aqiFunc, dispatch, getState, lang)
             const queryString = getState().params.queryString
             const searchString = getState().params.searchString
             if (queryString && searchString) {
