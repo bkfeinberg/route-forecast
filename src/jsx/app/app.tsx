@@ -205,7 +205,7 @@ else {
                     // Place code here that depends on the service worker being functional
                     // (e.g., using postMessage or enabling offline features in your UI)
                     if (serviceWorkerInstallationFailed) {
-                        info('Service Worker installed after previously failing to install.');
+                        info(`Service Worker ${version} installed after previously failing to install.`);
                         metrics.count("install_successes", 1, { attributes: { registration: JSON.stringify(registration) } });
                         metrics.count("install_failures", -1);
                         setContext("serviceWorker", { installed: true });
