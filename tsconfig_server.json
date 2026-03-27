@@ -29,8 +29,9 @@
     // "module": "ES2022",                                /* Specify what module code is generated. */
     "explainFiles": true,
     // "rootDir": "./",                                  /* Specify the root folder within your source files. */
-    "moduleResolution": "node16",
-    "paths": {"Images/*": ["./src/static/*"]},               /* Specify a set of entries that re-map imports to additional lookup locations. */
+    "moduleResolution": "node16",                     /* Specify how TypeScript looks up a file from a given module specifier. */
+    "baseUrl": "src",                                  /* Specify the base directory to resolve non-relative module names. */
+    "paths": {"Images/*": ["static/*"]},               /* Specify a set of entries that re-map imports to additional lookup locations. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
     "types": [
@@ -88,8 +89,7 @@
     /* Type Checking */
     // "strict": true,                                      /* Enable all strict type-checking options. */
     // "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
-    "strictNullChecks": true,                             /* When type checking, take into account 'null' and 'undefined'. */
-    "rootDir": "./src",
+    "strictNullChecks": true                             /* When type checking, take into account 'null' and 'undefined'. */
     // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
     // "strictBindCallApply": true,                      /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */
     // "strictPropertyInitialization": true,             /* Check for class properties that are declared but not set in the constructor. */

@@ -28,10 +28,11 @@
     "module": "CommonJS",                                /* Specify what module code is generated. */
     "explainFiles": false,
     // "rootDir": "./",                                  /* Specify the root folder within your source files. */
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler",                     /* Specify how TypeScript looks up a file from a given module specifier. */
+    "baseUrl": "src",                                  /* Specify the base directory to resolve non-relative module names. */
     "paths": {
-      "Images/*": ["./src/static/*"], 
-      "*": ["./src/utils/*"]
+      "Images/*": ["static/*"], 
+      "*": ["utils/*"]
     },            
        /* Specify a set of entries that re-map imports to additional lookup locations. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
@@ -113,8 +114,7 @@
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
-    "rootDir": "./src"
+    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
   "include": ["src/@types/*.ts", "src/**/*"],
   "exclude": ["__enzyme_tests__/", "node_modules/", "dist", "__mocks__", "__test__"]
