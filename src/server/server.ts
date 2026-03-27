@@ -8,8 +8,8 @@ const apicache = require('node-cache-32')
 require('source-map-support').install();
 const expressStaticGzip = require("express-static-gzip");
 
-const path = require('path');
-const bodyParser = require('body-parser');
+import path from 'path';
+import bodyParser from 'body-parser';
 const multer = require('multer'); // v1.0.5
 const upload = multer({
     limits: { fieldSize: 2 * 1024 * 1024 }
@@ -22,9 +22,9 @@ import querystring from 'querystring';
 import * as Sentry from "@sentry/node"
 import type { NextFunction } from 'express';
 const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
-import axios, { AxiosError, isAxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
-const http = require('http');
-const https = require('https');
+import axios, { type AxiosError, isAxiosError, type AxiosResponse, type AxiosRequestConfig } from 'axios';
+import http from 'http';
+import https from 'https';
 
 const httpAgent = new http.Agent({
   keepAlive: true,
@@ -40,7 +40,7 @@ const httpsAgent = new https.Agent({
   timeout: 60000,
 });
 
-const axiosRetry = require('axios-retry').default
+import axiosRetry from 'axios-retry';
 const axiosInstance = axios.create({
     httpAgent,
     httpsAgent,
@@ -55,6 +55,7 @@ import {Client} from "pg";
 import RateLimit from 'express-rate-limit'
 import { DateTime } from 'luxon';
 import { number } from 'mathjs';
+import { time } from 'console';
 var limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
@@ -298,33 +299,31 @@ let cache = apicache.options(
     })
 
 
-const stdDevPrecip = (forecastPoint: { lat: number; lon: number; time: string; distance: number; bearing: number; isControl: boolean; }, 
-    zone: string, services: string, req: RequestWithTimeout, res: Response, ip? : string) => {
+const stdDevPrecip = (forecastPoint: { lat: number; lon: number; time: string; distance: number; bearing: number; isControl: boolean; },
+    zone: string, services: string, req: RequestWithTimeout, res: Response, ip?: string) => {
     const serviceList = services.split(",").filter(service => service != "climacell")
     try {
-        const multipleResults = serviceList.map((service: string) => {
-            const result = callWeatherService(service, forecastPoint.lat,
-                 forecastPoint.lon, forecastPoint.time, forecastPoint.distance, 
-                 zone, forecastPoint.bearing, forecastPoint.isControl, 'en').catch((error: Error) => {
-                throw error;
-            })
+        const multipleResults = serviceList.map(async (service: string) => {
+            const result = await callWeatherService(service, forecastPoint.lat,
+                forecastPoint.lon, forecastPoint.time, forecastPoint.distance,
+                zone, forecastPoint.bearing, forecastPoint.isControl, 'en')
             if (!process.env.NO_LOGGING) {
                 logger.info(`Done with request to ${service} from ${ip}`);
             }
             return result
         })
         Promise.all(multipleResults).then(awaitedResults => {
-            const tempArray = awaitedResults.map(result => parseInt(result.temp)).sort((a, b) => a - b)
+            const tempArray = awaitedResults.map(result => parseInt(result ? result.temp : '0')).sort((a, b) => a - b)
             // total the results
             const stdDev = std(tempArray)
             const resultsWithStdDev = {
-                ...awaitedResults[0], 
+                ...awaitedResults[0],
                 stdDev: stdDev
             }
             if (req.timedout) {
                 warn(`Standard deviation processing finished, but request already timed out. Not sending response.`);
                 return;
-            }        
+            }
             res.status(200).json({ 'forecast': resultsWithStdDev });
         })
     } catch (error) {
@@ -420,7 +419,8 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
     }
     try {
         const point = forecastPoints
-        const result = await callWeatherService(service, point.lat, point.lon, point.time, point.distance, zone, point.bearing, point.isControl, lang);
+        const result = await callWeatherService(service, point.lat, point.lon,
+             point.time, point.distance, zone, point.bearing, point.isControl, lang);
         if (!process.env.NO_LOGGING) {
             logger.info(`Done with request from ${req.ip}`);
         }
@@ -909,11 +909,11 @@ interface FavoritesReply {
 axiosRetry(axiosInstance, {
     retries: 5,
     retryDelay: axiosRetry.exponentialDelay,
-    retryCondition: (error: { response: { status: any; }, message: string, code:string }) => {
+    retryCondition: (error: AxiosError) => {
         const isNetworkError = error.message === 'Network Error' || (error.code && error.code === 'ECONNABORTED') || !error.response;
         return isNetworkError;    
     },
-    onRetry: (retryCount: number, error: any, requestConfig: { url: string; }) => {
+    onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
         warn(`pinned route axios retry count ${retryCount} for ${requestConfig.url}`);
     },
     onMaxRetryTimesExceeded: (err: any) => {

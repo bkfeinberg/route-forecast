@@ -104,8 +104,6 @@ const callOpenMeteo = async function (lat : number, lon : number, currentTime : 
     // const longitude = response.longitude();
     const timezone = response.timezone();
     const hourly = response.hourly()!;
-    const hourStart = hourly.time();
-    const hourEnd = hourly.timeEnd();
 
     // Note: The order of weather variables in the URL query and the indices below need to match!
     const weatherData = {

@@ -1,16 +1,37 @@
-import { AxiosError } from "axios";
+import type { AxiosError, AxiosRequestConfig } from "axios";
 import { WeatherFunc } from "./weatherForecastDispatcher";
 
-const { DateTime } = require("luxon");
+import { DateTime } from "luxon";
 import axios from 'axios'
-const Sentry = require("@sentry/node")
-const axiosInstance = axios.create()
-const axiosRetry = require('axios-retry').default
+import * as Sentry from "@sentry/node";
+import http from 'http';
+import https from 'https';
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const axiosInstance = axios.create({
+    httpAgent,
+    httpsAgent,
+    timeout: 30000
+})
+import axiosRetry from "axios-retry";
 
 axiosRetry(axiosInstance, {
     retries: 5,
     retryDelay: axiosRetry.exponentialDelay,
-    retryCondition: (error: { response: { status: any; }; }) => {
+    retryCondition: (error: AxiosError) => {
         // in the weird case that we don't get a response field in the error then report to Sentry and fail the request
         if (!error.response) {
             Sentry.captureMessage(`Error object reported to OneCall was missing the response`)
@@ -25,7 +46,7 @@ axiosRetry(axiosInstance, {
             return false;
         }
     },
-    onRetry: (retryCount: number, error: any, requestConfig: { url: string; }) => {
+    onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
         console.log(`OneCall axios retry count ${retryCount} for ${requestConfig.url}`);
     },
     onMaxRetryTimesExceeded: (err: any) => {

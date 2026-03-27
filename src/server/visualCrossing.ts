@@ -3,7 +3,7 @@
 import axios from "axios";
 import { DateTime } from "luxon";
 import { WeatherFunc } from "./weatherForecastDispatcher";
-const Sentry = require('@sentry/node')
+import * as Sentry from "@sentry/node";
 
 const convertToValidStart = (currentTime : string) => {
     let startTime = DateTime.fromISO(currentTime, { zone: 'utc' });

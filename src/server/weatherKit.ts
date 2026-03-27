@@ -1,11 +1,33 @@
-import { WeatherFunc } from "./weatherForecastDispatcher";
+import type { AxiosError, AxiosRequestConfig } from "axios";
+import type { WeatherFunc } from "./weatherForecastDispatcher";
 
-const { DateTime } = require("luxon");
+import { DateTime } from "luxon";
 const jwt = require("jsonwebtoken");
-const Sentry = require("@sentry/node")
-const axios = require('axios');
-const axiosInstance = axios.create()
-const axiosRetry = require('axios-retry').default
+import * as Sentry from "@sentry/node";
+import axios from "axios";
+import http from 'http';
+import https from 'https';
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const axiosInstance = axios.create({
+    httpAgent,
+    httpsAgent,
+    timeout: 30000
+})
+import axiosRetry from "axios-retry";
 
 const milesToMeters = 1609.34;
 
@@ -35,7 +57,7 @@ const makeJwt = () => {
 axiosRetry(axiosInstance, {
     retries: 5,
     retryDelay: axiosRetry.exponentialDelay, // (...arg) => axiosRetry.exponentialDelay(...arg, 200),
-    retryCondition: (error: { response: { status: any; }; }) => {
+    retryCondition: (error: AxiosError) => {
         // in the weird case that we don't get a response field in the error then report to Sentry and fail the request
         if (!error.response) {
             Sentry.captureMessage(`Error object reported to Apple WeatherKit was missing the response`)
@@ -50,7 +72,7 @@ axiosRetry(axiosInstance, {
             return false;
         }
     },
-    onRetry: (retryCount: number, error: any, requestConfig: { url: string; }) => {
+    onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
         console.log(`weatherKit axios retry count ${retryCount} for ${requestConfig.url}`);
     },
     onMaxRetryTimesExceeded: (err: any) => {
@@ -117,4 +139,4 @@ const callWeatherKit = async function (lat, lon, currentTime, distance, zone, be
     }
 } as WeatherFunc
 
-module.exports = callWeatherKit;
+export default callWeatherKit;

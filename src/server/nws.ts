@@ -1,13 +1,30 @@
 import { WeatherFunc } from "./weatherForecastDispatcher";
 
 import { DateTime, Interval } from "luxon"
-const axios = require('axios');
+import axios from "axios";
+import http from 'http';
+import https from 'https';
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
 const axiosInstance = axios.create()
 import * as Sentry from "@sentry/node"
 const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 const milesToMeters = 1609.34;
 import axiosRetry from "axios-retry";
-import { AxiosError, AxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosRequestConfig } from "axios";
 
 axiosRetry(axiosInstance, {
     retries: 3,

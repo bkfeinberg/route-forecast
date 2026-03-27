@@ -1,12 +1,12 @@
-const callTomorrowIo = require('./tomorrowio');
+import callTomorrowIo from './tomorrowio';
 import callWeatherApi from './weatherApi'
 import callVisualCrossing from './visualCrossing'
 import callNWS from './nws'
 const callMeteomatics = require('./meteomatics');
-const callWeatherKit = require('./weatherKit');
+import callWeatherKit from './weatherKit';
 import callOpenMeteo from './openmeteo';
 import callOneCall from './oneCall'
-const Sentry = require('@sentry/node')
+import * as Sentry from "@sentry/node";
 const { error } = Sentry.logger;
 
 const getBearingDifference = function (bearing : number,windBearing : number) {

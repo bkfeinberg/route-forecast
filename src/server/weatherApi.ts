@@ -4,7 +4,7 @@
 import axios, { AxiosError } from "axios";
 import { DateTime } from "luxon";
 import { WeatherFunc } from "./weatherForecastDispatcher";
-const Sentry = require('@sentry/node')
+import * as Sentry from "@sentry/node";
 
 /**
  *

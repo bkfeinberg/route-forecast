@@ -1,11 +1,31 @@
 import { AxiosError } from "axios";
 import { WeatherFunc } from "./weatherForecastDispatcher";
 
-const { DateTime } = require("luxon");
-const axios = require('axios');
-const axiosInstance = axios.create()
-const Sentry = require("@sentry/node")
-const axiosRetry = require('axios-retry').default
+import { DateTime } from "luxon";
+import http from 'http';
+import https from 'https';
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+import axios from "axios";
+const axiosInstance = axios.create({
+    httpAgent,
+    httpsAgent,
+    timeout: 30000
+})
+import * as Sentry from "@sentry/node";
+import axiosRetry from "axios-retry";
 const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 
 const weatherCodes  : {[index: string]: any} = {
@@ -139,4 +159,4 @@ const callTomorrowIo = async function callTomorrowIo (lat, lon, currentTime, dis
     }
 } as WeatherFunc;
 
-module.exports = callTomorrowIo
+export default callTomorrowIo
