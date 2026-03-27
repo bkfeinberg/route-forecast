@@ -23,8 +23,29 @@ import * as Sentry from "@sentry/node"
 import type { NextFunction } from 'express';
 const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 import axios, { AxiosError, isAxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
+const http = require('http');
+const https = require('https');
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  timeout: 60000,
+});
+
 const axiosRetry = require('axios-retry').default
-const axiosInstance = axios.create()
+const axiosInstance = axios.create({
+    httpAgent,
+    httpsAgent,
+    timeout: 30000
+});
 const timeout = require('connect-timeout');
 
 // import {std} from "mathjs";
