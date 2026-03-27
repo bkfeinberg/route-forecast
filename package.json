@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.13.6",
+  "version": "5.13.7",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -172,7 +172,7 @@
     "ts-jest": "^29.4.6",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
+    "typescript": "^5.9.3",
     "webpack-cli": "^7.0.1",
     "webpack-merge": "^6.0.1",
     "webpack-node-externals": "^3.0.0",

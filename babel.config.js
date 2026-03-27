@@ -13,6 +13,7 @@ module.exports = {
     "@babel/plugin-transform-runtime",
     "react-html-attrs",
   ],
+  "sourceMaps": "both" ,
   env: {
     test: {
       "plugins": [

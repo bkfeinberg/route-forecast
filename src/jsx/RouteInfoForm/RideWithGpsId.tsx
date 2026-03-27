@@ -4,7 +4,7 @@ import { routeDataCleared} from '../../redux/routeInfoSlice';
 import { rwgpsRouteSet } from '../../redux/routeParamsSlice';
 import { querySet } from '../../redux/paramsSlice';
 import type { RootState } from "../../redux/store";
-import { ChangeEvent, RefObject } from 'react';
+import type { ChangeEvent, RefObject } from 'react';
 import { CloseButton, Flex, TextInput } from '@mantine/core';
 import { updateHistory } from '../../jsx/app/updateHistory';
 import {logger} from "@sentry/react";
