@@ -56,7 +56,7 @@ const RouteInfoInputStrava = () => {
           {(!accessToken || !refreshToken) ?
             <StravaLoginButton/> :
             <div>
-              <StravaActivityIdInput access_token={accessToken}/>
+              {(expires_at! >= Math.round(Date.now()/1000))?<StravaActivityIdInput access_token={accessToken}/>:null}
               <Button
                 id='analyze'
                 tabIndex={0}
