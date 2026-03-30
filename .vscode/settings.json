@@ -1,4 +1,5 @@
 {
     "jest.jestCommandLine": "/usr/local/bin/npm run test --",
-    "jest.runMode": "on-demand"
+    "jest.runMode": "on-demand",
+    "jest.nodeEnv": {"TZ": "UTC"}
 }

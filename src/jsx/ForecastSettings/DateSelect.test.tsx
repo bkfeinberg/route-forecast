@@ -54,7 +54,7 @@ describe('DateSelect', () => {
   test('disables past dates if canForecastPast is false', async () => {
 
     const user = userEvent.setup();
-    const futureTime = DateTime.now().plus({ days: 2 }).set({hour:7, minute:0});
+    const futureTime = DateTime.now().plus({ days: 4 }).set({hour:7, minute:0});
     const futureTimestamp = futureTime.toMillis();
     renderWithProviders(
       <DateSelect />,
@@ -71,11 +71,11 @@ describe('DateSelect', () => {
     );
     const dateButton = screen.getByRole('button');
     await user.click(dateButton);
-    const pastDate = DateTime.now().minus({ days: 1 }).toFormat('d MMMM yyyy');
-    const pastButton = screen.getByRole('button', {
-      name: new RegExp(`^${pastDate}`, 'i')
-    });
-    expect(pastButton).toBeDisabled();
+    
+    const buttons: any[] = screen.getAllByRole('button').filter((btn) => btn.ariaLabel && DateTime.now() > DateTime.fromFormat(btn.ariaLabel, 'd MMMM yyyy'))
+    .filter(btn => DateTime.now().day !== DateTime.fromFormat(btn.ariaLabel!, 'd MMMM yyyy').day);
+    expect(buttons.filter(btn => btn.disabled).length).toBe(buttons.length);
+    
     const presentDate = futureTime.toFormat('d MMMM yyyy');
     const presentButton = screen.getByRole('button', {
       name: new RegExp(`^${presentDate}`, 'i')
