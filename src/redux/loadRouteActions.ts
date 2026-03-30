@@ -70,6 +70,7 @@ export const loadFromRideWithGps = function (routeNumber? : string, isTrip? : bo
 
                 const routeInfo = getState().routeInfo
                 if (routeInfo.type === null) {
+                    warn(`Route ${routeNumber} loaded with no type, cannot fetch time zone`);
                     return
                 }
                 const timeZoneResults = await requestTimeZoneForRoute(routeInfo,
@@ -109,7 +110,7 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         } else if (getState().strava.route !== '') {
             await dispatch(loadStravaRoute(getState().strava.route))
         } else if (getState().uiInfo.routeParams.rusaPermRouteId !== '') {
-            
+            warn("RUSA perm route loaded but with no RideWithGPS route specified, cannot load", {route:getState().uiInfo.routeParams.rusaPermRouteId})
         }
         const errorDetails = getState().uiInfo.dialogParams.errorDetails
         if (getState().uiInfo.routeParams.stopAfterLoad) {
@@ -124,9 +125,13 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         if (errorDetails === null && !getState().uiInfo.routeParams.stopAfterLoad) {
             // do we actually have a route
             if (!getState().routeInfo.rwgpsRouteData && !getState().routeInfo.gpxRouteData) {
-                error(
-                    `Invoking forecast with no route data loaded for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`,
-                    {url:window.location.href})
+                if (getState().uiInfo.dialogParams.fetchingRoute) {
+                    warn("Race condition: forecast invoked before route finished loading for " + getState().strava.route);
+                } else {
+                    error(
+                        `Invoking forecast with no route data loaded for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`,
+                        {url:window.location.href})
+                }
                 return
             }
             if (!getState().uiInfo.routeParams.zone) {
