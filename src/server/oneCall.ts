@@ -8,23 +8,21 @@ import http from 'http';
 import https from 'https';
 
 const httpAgent = new http.Agent({
-  keepAlive: true,
-  keepAliveMsecs: 30000,
+  keepAlive: true,  keepAliveMsecs: 30000,
   maxSockets: 50,
-  timeout: 60000,
+  timeout: 15000,
 });
 
 const httpsAgent = new https.Agent({
   keepAlive: true,
-  keepAliveMsecs: 30000,
   maxSockets: 50,
-  timeout: 60000,
+  timeout: 15000,
 });
 
 const axiosInstance = axios.create({
     httpAgent,
     httpsAgent,
-    timeout: 30000
+    timeout: 10000
 })
 import axiosRetry from "axios-retry";
 
