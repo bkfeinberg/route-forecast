@@ -2,6 +2,7 @@ import type { RootState } from "../redux/store";
 import type { AppDispatch } from "../redux/store";
 import ReactGA from "react-ga4";
 import * as Sentry from "@sentry/react";
+const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 import { routeLoadingBegun } from "./dialogParamsSlice";
 import { gpxRouteLoaded } from "./routeInfoSlice";
 import { stravaFetchBegun, stravaFetched, stravaFetchFailed, stravaActivitySet, stravaTokenSet } from "./stravaSlice";
@@ -131,13 +132,16 @@ const getRouteParser = async function () {
 
 const loadGpxRoute = function(gpxFileData : string) {
     return async function (dispatch : AppDispatch) {
+        trace('Loading GPX parser module');
         const parser = await getRouteParser().catch((err) => {dispatch(gpxRouteLoadingFailed(err));return null});
         // handle failed load, error has already been dispatched
         if (parser == null) {
             return Promise.resolve(Error('Cannot load parser'))
         }
+        trace("Beginning to load GPX route from file data");
         const parsedResults = parser.loadGpxFile(gpxFileData)
         if (parsedResults.gpxData) {
+            trace("GPX route loaded successfully, dispatching to store");
             dispatch(gpxRouteLoaded(parsedResults.gpxData));
         } else if (parsedResults.error) {
             dispatch(gpxRouteLoadingFailed(parsedResults.error))
@@ -148,7 +152,6 @@ const loadGpxRoute = function(gpxFileData : string) {
 export const loadStravaRoute = (routeId : string) => {
     return async function (dispatch : AppDispatch, getState: () => RootState) {
         routeId = routeId || getState().strava.route
-        // ReactGA.event('login', {method:routeId});
         ReactGA.event('sign_up', {method:routeId});
         dispatch(routeLoadingBegun('gpx'));
         await Sentry.startSpan({ name: "loadingStravaRoute" }, async () => {
@@ -160,10 +163,11 @@ export const loadStravaRoute = (routeId : string) => {
             }
             const access_token = await refreshOldToken(dispatch, getState, refresh_token, expires_at)
             if (!access_token) {
-                authenticate(routeId)
+                return authenticate(routeId)
             }
             api.setDefaultHeader('Authorization', `Bearer ${access_token}`)
             try {
+                trace(`Fetching Strava route with id ${routeId}`);
                 const routeInfo = await api.get(`routes/${routeId}/export_gpx`)
                 if (!routeInfo || typeof routeInfo !== 'string' || routeInfo.trim().length === 0) {
                     dispatch(errorDetailsSet('Error fetching Strava route: Received empty or invalid data from Strava.'));

@@ -108,7 +108,9 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         if (getState().uiInfo.routeParams.rwgpsRoute !== '') {
             await dispatch(loadFromRideWithGps())
         } else if (getState().strava.route !== '') {
+            trace(`Loading Strava route with id ${getState().strava.route} from URL parameter`);
             await dispatch(loadStravaRoute(getState().strava.route))
+            trace(`Finished loading Strava route with id ${getState().strava.route} from URL parameter`);
         } else if (getState().uiInfo.routeParams.rusaPermRouteId !== '') {
             warn("RUSA perm route loaded but with no RideWithGPS route specified, cannot load", {route:getState().uiInfo.routeParams.rusaPermRouteId})
         }
