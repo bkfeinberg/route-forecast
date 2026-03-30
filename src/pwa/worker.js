@@ -194,7 +194,7 @@ const getAndCachePOST = async (request) => {
         const response = await fetch(request.clone());
         if (response && response.ok) {
             // If it works, put the response into IndexedDB
-            console.info(`inserting item into POST cache with key ${cacheKey}`, response);
+            // console.info(`inserting item into POST cache with key ${cacheKey}`, response);
             localforage.setItem(cacheKey, serializeResponse(response.clone()));
             return response;
         } else {

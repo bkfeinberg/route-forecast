@@ -58,7 +58,7 @@ import { number } from 'mathjs';
 import { time } from 'console';
 var limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per windowMs
+  max: 200, // max 200 requests per windowMs
 });
 
 let logger = console;

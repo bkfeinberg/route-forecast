@@ -405,9 +405,9 @@ class AnalyzeRoute {
                 bearings.push(lastBearing);    
             }
         }
-        if (accumulatedDistanceKm < totalDistMeters) {
-            console.log(`Route added up to ${(accumulatedDistanceKm*1000).toFixed(2)}km rather than stated ${totalDistMeters} meters`)
-        }
+        // if (accumulatedDistanceKm < totalDistMeters) {
+        //     console.log(`Route added up to ${(accumulatedDistanceKm*1000).toFixed(2)}km rather than stated ${totalDistMeters} meters`)
+        // }
         let finishTime = AnalyzeRoute.formatFinishTime(startTime,accumulatedTime,idlingTime);
         // console.info(`setting finish time ${finishTime} from start ${startTime} accumulated ${accumulatedTime} and idling ${idlingTime}`);
         AnalyzeRoute.fillLastControlPoints(finishTime, controls, nextControl, accumulatedTime + idlingTime,
