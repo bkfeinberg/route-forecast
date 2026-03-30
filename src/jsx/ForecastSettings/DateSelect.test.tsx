@@ -54,7 +54,7 @@ describe('DateSelect', () => {
   test('disables past dates if canForecastPast is false', async () => {
 
     const user = userEvent.setup();
-    const futureTime = DateTime.now().plus({ days: 3 }).set({hour:7, minute:0});
+    const futureTime = DateTime.now().plus({ days: 2 }).set({hour:7, minute:0});
     const futureTimestamp = futureTime.toMillis();
     renderWithProviders(
       <DateSelect />,
