@@ -104,7 +104,7 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
     lang: string) => {
     return async function(dispatch : AppDispatch, getState: () => RootState) {
         // ReactGA.event('login', {method:getState().uiInfo.routeParams.rwgpsRoute});
-        await dispatch(loadingFromUrlSet(true))
+        dispatch(loadingFromUrlSet(true))
         if (getState().uiInfo.routeParams.rwgpsRoute !== '') {
             await dispatch(loadFromRideWithGps())
         } else if (getState().strava.route !== '') {

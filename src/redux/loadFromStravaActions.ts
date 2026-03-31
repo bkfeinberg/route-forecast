@@ -10,6 +10,7 @@ import { stravaErrorSet, errorDetailsSet, gpxRouteLoadingFailed } from "./dialog
 import { Api } from 'rest-api-handler';
 import queryString from 'query-string'
 import { stravaApiSlice } from './stravaApiSlice'
+import { cancelForecast } from "./forecastActions";
 
 const getStravaParser = async function() {
     const parser = await import(/* webpackChunkName: "StravaRouteParser" */ '../utils/stravaRouteParser');
@@ -150,11 +151,12 @@ const loadGpxRoute = function(gpxFileData : string) {
 }
 
 export const loadStravaRoute = (routeId : string) => {
-    return async function (dispatch : AppDispatch, getState: () => RootState) {
+    return function (dispatch : AppDispatch, getState: () => RootState) {
         routeId = routeId || getState().strava.route
         ReactGA.event('sign_up', {method:routeId});
         dispatch(routeLoadingBegun('gpx'));
-        await Sentry.startSpan({ name: "loadingStravaRoute" }, async () => {
+        dispatch(cancelForecast())
+        return Sentry.startSpan({ name: "loadingStravaRoute" }, async () => {
             const api = new Api('https://www.strava.com/api/v3', [(response) => Promise.resolve(response.text())])
             const refresh_token = getState().strava.refresh_token
             const expires_at = getState().strava.expires_at
