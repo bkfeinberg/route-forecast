@@ -173,6 +173,7 @@ export const loadStravaRoute = (routeId : string) => {
             trace(`Fetching Strava route with id ${routeId}`);
             const routeInfo = await api.get(`routes/${routeId}/export_gpx`)
             if (!routeInfo || typeof routeInfo !== 'string' || routeInfo.trim().length === 0) {
+                trace('Received empty or invalid response from Strava when fetching route');
                 return dispatch(errorDetailsSet('Error fetching Strava route: Received empty or invalid data from Strava.'));
             } else if (routeInfo.charAt(0) === '{') {
                 try {

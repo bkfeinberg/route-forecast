@@ -128,7 +128,7 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
             // do we actually have a route
             if (!getState().routeInfo.rwgpsRouteData && !getState().routeInfo.gpxRouteData) {
                 if (getState().uiInfo.dialogParams.fetchingRoute) {
-                    warn("Race condition: forecast invoked before route finished loading for " + getState().strava.route);
+                    warn("Race condition: forecast invoked before route finished loading for " + getState().strava.route, {url:window.location.href});
                 } else {
                     error(
                         `Invoking forecast with no route data loaded for ${getState().uiInfo.routeParams.rwgpsRoute} ${getState().strava.route} ${getState().uiInfo.routeParams.rusaPermRouteId}`,
