@@ -151,44 +151,42 @@ const loadGpxRoute = function(gpxFileData : string) {
 }
 
 export const loadStravaRoute = (routeId : string) => {
-    return function (dispatch : AppDispatch, getState: () => RootState) {
+    return async function (dispatch : AppDispatch, getState: () => RootState) {
         routeId = routeId || getState().strava.route
         ReactGA.event('sign_up', {method:routeId});
         dispatch(routeLoadingBegun('gpx'));
         dispatch(cancelForecast())
-        return Sentry.startSpan({ name: "loadingStravaRoute" }, async () => {
-            const api = new Api('https://www.strava.com/api/v3', [(response) => Promise.resolve(response.text())])
-            const refresh_token = getState().strava.refresh_token
-            const expires_at = getState().strava.expires_at
-            if (!refresh_token) {
-                return authenticate(routeId)
-            }
-            const access_token = await refreshOldToken(dispatch, getState, refresh_token, expires_at)
-            if (!access_token) {
-                return authenticate(routeId)
-            }
-            api.setDefaultHeader('Authorization', `Bearer ${access_token}`)
-            try {
-                trace(`Fetching Strava route with id ${routeId}`);
-                const routeInfo = await api.get(`routes/${routeId}/export_gpx`)
-                if (!routeInfo || typeof routeInfo !== 'string' || routeInfo.trim().length === 0) {
-                    dispatch(errorDetailsSet('Error fetching Strava route: Received empty or invalid data from Strava.'));
-                } else if (routeInfo.charAt(0) === '{') {
-                    try {
-                        const errorJson = JSON.parse(routeInfo);
-                        const message = errorJson.message || 'Unknown Strava error';
-                        dispatch(errorDetailsSet(`Error fetching Strava route: ${message}`));
-                    } catch (e) {
-                        dispatch(errorDetailsSet('Error fetching Strava route: Received an unparsable JSON error from Strava.'));
-                    }
-                } else if (routeInfo.includes('<gpx') || routeInfo.includes('<?xml')) {
-                    await dispatch(loadGpxRoute(routeInfo));
-                } else {
-                    dispatch(errorDetailsSet('Error fetching Strava route: Data received from Strava was not recognized as GPX.'));
+        const api = new Api('https://www.strava.com/api/v3', [(response) => Promise.resolve(response.text())])
+        const refresh_token = getState().strava.refresh_token
+        const expires_at = getState().strava.expires_at
+        if (!refresh_token) {
+            return authenticate(routeId)
+        }
+        const access_token = await refreshOldToken(dispatch, getState, refresh_token, expires_at)
+        if (!access_token) {
+            return authenticate(routeId)
+        }
+        api.setDefaultHeader('Authorization', `Bearer ${access_token}`)
+        try {
+            trace(`Fetching Strava route with id ${routeId}`);
+            const routeInfo = await api.get(`routes/${routeId}/export_gpx`)
+            if (!routeInfo || typeof routeInfo !== 'string' || routeInfo.trim().length === 0) {
+                return dispatch(errorDetailsSet('Error fetching Strava route: Received empty or invalid data from Strava.'));
+            } else if (routeInfo.charAt(0) === '{') {
+                try {
+                    const errorJson = JSON.parse(routeInfo);
+                    const message = errorJson.message || 'Unknown Strava error';
+                    return dispatch(errorDetailsSet(`Error fetching Strava route: ${message}`));
+                } catch (e) {
+                    return dispatch(errorDetailsSet('Error fetching Strava route: Received an unparsable JSON error from Strava.'));
                 }
-            } catch (err : any) {
-                dispatch(errorDetailsSet(`Error fetching Strava route: ${err.details}`))
+            } else if (routeInfo.includes('<gpx') || routeInfo.includes('<?xml')) {
+                return dispatch(loadGpxRoute(routeInfo));
+            } else {
+                return dispatch(errorDetailsSet('Error fetching Strava route: Data received from Strava was not recognized as GPX.'));
             }
-        })
+        } catch (err : any) {
+            return dispatch(errorDetailsSet(`Error fetching Strava route: ${err.details}`))
+        }
     }
 }
