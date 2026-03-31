@@ -160,10 +160,12 @@ export const loadStravaRoute = (routeId : string) => {
         const refresh_token = getState().strava.refresh_token
         const expires_at = getState().strava.expires_at
         if (!refresh_token) {
+            trace("No refresh token found for Strava, returning early to authenticate");
             return authenticate(routeId)
         }
         const access_token = await refreshOldToken(dispatch, getState, refresh_token, expires_at)
         if (!access_token) {
+            trace("No Strava authentication token found, returning early to authenticate");
             return authenticate(routeId)
         }
         api.setDefaultHeader('Authorization', `Bearer ${access_token}`)
@@ -181,11 +183,13 @@ export const loadStravaRoute = (routeId : string) => {
                     return dispatch(errorDetailsSet('Error fetching Strava route: Received an unparsable JSON error from Strava.'));
                 }
             } else if (routeInfo.includes('<gpx') || routeInfo.includes('<?xml')) {
+                trace('Returning GPX data from Strava, dispatching load');
                 return dispatch(loadGpxRoute(routeInfo));
             } else {
                 return dispatch(errorDetailsSet('Error fetching Strava route: Data received from Strava was not recognized as GPX.'));
             }
         } catch (err : any) {
+            trace(`Error fetching Strava route: ${err.message}`);
             return dispatch(errorDetailsSet(`Error fetching Strava route: ${err.details}`))
         }
     }
