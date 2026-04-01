@@ -48,7 +48,7 @@ const getPinnedRoutes = async (rwgpsToken : string,
         const response = await axios.get<Favorite[]>(url);
         return response.data;
     } catch (e : any) {
-        Sentry.captureException(e)
+        Sentry.captureException(e, {extra: {url}});
         const errorMessage = e.response ? (e.response.data ? JSON.stringify(e.response.data) : JSON.stringify(e.response)) : e
         setErrorDetails(`Ride with GPS login failure: ${errorMessage}`);
         rwgpsTokenSet(null);
