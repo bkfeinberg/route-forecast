@@ -125,6 +125,10 @@ export const loadRouteFromURL = (forecastFunc : MutationWrapper, aqiFunc : Mutat
         dispatch(setWeatherProvider(provider));
 
         if (errorDetails === null && !getState().uiInfo.routeParams.stopAfterLoad) {
+            if (getState().uiInfo.dialogParams.fetchingRoute && getState().strava.route) {
+                trace("Fetching Strava route, possibly here because authentication is required, waiting for route to load before invoking forecast");
+                return;
+            }
             // do we actually have a route
             if (!getState().routeInfo.rwgpsRouteData && !getState().routeInfo.gpxRouteData) {
                 if (getState().uiInfo.dialogParams.fetchingRoute) {

@@ -69,18 +69,21 @@ export const loadStravaActivity = function() {
         });
         // handle failed load, error has already been dispatched
         if (parser == null) {
+            trace("Failed to load Strava parser");
             return Promise.resolve(Error('Cannot load parser'));
         }
         const refresh_token = getState().strava.refresh_token
         const expires_at = getState().strava.expires_at
         const activityId = getState().strava.activity
         if (!refresh_token) {
+            trace("No refresh token found for Strava, returning early to authenticate activity");
             return authenticateActivity(activityId)
         }
         const access_token = await refreshOldToken(dispatch, getState, refresh_token, expires_at)
         if (!access_token) {
             dispatch(stravaFetchFailed(Error("Failed to get Strava access token")));
             dispatch(stravaActivitySet(''))
+            trace("No Strava authentication token found, returning early to authenticate activity");
             return
         }
         dispatch(stravaFetchBegun());
@@ -88,6 +91,7 @@ export const loadStravaActivity = function() {
         return parser.fetchStravaActivity(activityId, access_token).then(result => {
             dispatch(stravaFetched(result));
         }).catch(error => {
+            error(`Error fetching Strava activity: ${error.message}`);
             dispatch(stravaFetchFailed(error));
             dispatch(stravaActivitySet(''))
         });

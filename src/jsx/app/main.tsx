@@ -397,7 +397,7 @@ const useLoadRouteFromURL = (queryParams : QueryParams, forecastFunc : MutationW
         if ((rwgpsRoute && queryParams.rwgpsRoute && queryParams.rwgpsRoute === rwgpsRoute) || (stravaRoute && queryParams.strava_route)) {
             dispatch(loadRouteFromURL(forecastFunc, aqiFunc, lang))
         }
-    }, [queryParams.rwgpsRoute, rwgpsRoute, queryParams.strava_route, stravaRoute, forecastFunc, aqiFunc, lang])
+    }, [queryParams.rwgpsRoute, rwgpsRoute, queryParams.strava_route, stravaRoute, queryParams.strava_access_token, forecastFunc, aqiFunc, lang])
 }
 
 const useLoadControlPointsFromURL = (queryParams: QueryParams) => {
