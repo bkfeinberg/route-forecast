@@ -27,8 +27,8 @@ import { useDisclosure, useClickOutside } from '@mantine/hooks';
 const ForecastSettings = () => {
     // const [showSettings, setShowSettings] = useState(false)
     const [settingsOpened, { open, close: closeSettings, toggle }] = useDisclosure(false);
-    const [computeStdDev, setComputeStdDEv] = useState(false)
-    const [downloadAll, setDownloadAll] = useState(false)
+    const [computeStdDev, setComputeStdDEv] = useState<boolean>(false)
+    const [downloadAll, setDownloadAll] = useState<boolean>(false)
     const metric = useAppSelector(state => state.controls.metric)
     const celsius = useAppSelector(state => state.controls.celsius)
     const dispatch = useAppDispatch()
@@ -41,15 +41,16 @@ const ForecastSettings = () => {
     const outsideRef = useClickOutside(closeSettings);    
 
     const toggleStdDev = (event: ChangeEvent<HTMLInputElement>) => {
-        if (event.target) setDownloadAll(false)
-        return setComputeStdDEv(event.target.value === 'on')
+        if (event.currentTarget.checked) setDownloadAll(false)
+        return setComputeStdDEv(!computeStdDev)
     }
 
     const toggleDownloadAll = (event: ChangeEvent<HTMLInputElement>) => {
-        if (event.target) setComputeStdDEv(false)
-        return setDownloadAll(event.target.value === 'on')
+        if (event.currentTarget.checked) setComputeStdDEv(false)
+        return setDownloadAll(!downloadAll)
     }
 
+    console.log(`downloadAll: ${downloadAll}, computeStdDev: ${computeStdDev}`)
     return (
         <div style={{ display: "flex", flexFlow: "column", alignItems: "center", marginBottom: "5px" }}>
             <div ref={outsideRef} style={{ padding: "10px" }}>
@@ -64,7 +65,7 @@ const ForecastSettings = () => {
                         <Button size='small' variant='subtle' onClick={toggle} leftSection={<IconSettings />}><span><em>Settings</em></span></Button>
                     </DesktopTooltip>
                 </div>
-                <Collapse in={settingsOpened}>
+                <Collapse expanded={settingsOpened}>
                     <Stack>
                         <Paper withBorder shadow={"md"} radius={3} >
                             <div style={{ padding: "10px" }}>
@@ -96,10 +97,8 @@ const ForecastSettings = () => {
                             <div style={{ display: "flex", margin: "30px 0px" }}>
                                 <ForecastInterval />
                             </div>
-                            <CheckboxGroup>
-                                <Checkbox label={t("buttons.standardDeviation")} checked={computeStdDev} onChange={toggleStdDev} />
-                                <Checkbox label={t("buttons.downloadAll")} labelPosition='right' checked={downloadAll} onChange={toggleDownloadAll} />
-                            </CheckboxGroup>
+                            <Checkbox label={t("buttons.standardDeviation")} checked={computeStdDev} onChange={toggleStdDev} onClick={(e) => e.stopPropagation()} />
+                            <Checkbox label={t("buttons.downloadAll")} labelPosition='right' checked={downloadAll} onChange={toggleDownloadAll} onClick={(e) => e.stopPropagation()} />
                             </div>
                         </Paper>
                     </Stack>

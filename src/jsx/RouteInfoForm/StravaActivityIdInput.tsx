@@ -84,7 +84,9 @@ const StravaActivityIdInput = ({ access_token }: { access_token: string }) => {
                 onOptionSubmit={(selected: string, options: ComboboxOptionProps) => {
                   //@ts-ignore
                     setSelectedName(options.children?.props.name);
-                    dispatch(stravaActivitySet(options.value));
+                    if (typeof options.value === 'string') {
+                        dispatch(stravaActivitySet(options.value));
+                    }
                     combobox.closeDropdown();
                 }}
             >
