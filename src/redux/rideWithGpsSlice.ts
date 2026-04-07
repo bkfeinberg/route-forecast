@@ -4,7 +4,8 @@ export interface Favorite {
     name: string
     id: number
     associated_object_id: number
-    associated_object_type: string
+    associated_object_type: string,
+    dateAdded: string
 }
 
 interface RideWithGpsInfoState {

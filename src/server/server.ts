@@ -962,7 +962,8 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
     interface FavoriteMapValue {
         id: number,
         associated_object_id: string,
-        associated_object_type: string
+        associated_object_type: string,
+        dateAdded: string,
     }
     interface RouteType {
         id: number,
@@ -995,7 +996,7 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
     const favoritesMap = new Map<string,FavoriteMapValue>(filteredResponse.map((fav : RwgpsSyncType) => {
         return [fav.item_id.toString(), {id:fav.item_id,
             associated_object_id:fav.item_url.replace('https://ridewithgps.com/api/v1/routes/', '').replace('https://ridewithgps.com/api/v1/trips/', '').replace('.json',''), 
-            associated_object_type:fav.item_type, key:fav.item_id}]
+            associated_object_type:fav.item_type, key:fav.item_id, dateAdded:fav.datetime}]
         }));
 
     // keep this older code to get the names without having to fetch all the data from every route

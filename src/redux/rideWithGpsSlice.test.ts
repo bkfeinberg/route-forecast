@@ -28,14 +28,14 @@ describe('rideWithGpsSlice reducer', () => {
 
     test('pinnedRoutesSet replaces pinnedRoutes array', () => {
         const favorites: Array<Favorite> = [
-            { name: 'route1', id: 1, associated_object_id: 42, associated_object_type: 'route' }
+            { name: 'route1', id: 1, associated_object_id: 42, associated_object_type: 'route', dateAdded: '2024-01-01T00:00:00Z' }
         ];
         const state = rwgpsInfoReducer(initialState, pinnedRoutesSet(favorites));
         expect(state.pinnedRoutes).toEqual(favorites);
 
         // ensure previous state is overwritten rather than merged
         const more: Array<Favorite> = [
-            { name: 'route2', id: 2, associated_object_id: 43, associated_object_type: 'route' }
+            { name: 'route2', id: 2, associated_object_id: 43, associated_object_type: 'route', dateAdded: '2024-01-02T00:00:00Z' }
         ];
         const after = rwgpsInfoReducer(state, pinnedRoutesSet(more));
         expect(after.pinnedRoutes).toEqual(more);

@@ -13,6 +13,7 @@ import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import Snackbar, {SnackbarCloseReason} from '@mui/material/Snackbar';
 import { Button } from "@mantine/core";
 import RideWithGpsLogo from 'Images/rideWithGps.svg?react';
+import { DateTime } from "luxon";
 
 const addBreadcrumb = (msg : string) => {
     Sentry.addBreadcrumb({
@@ -66,7 +67,7 @@ const setRoutes = async (rwgpsToken : string|null|undefined, setRwgpsToken : Act
     setLoadingPinned(true);
     const user_favorites = await getPinnedRoutes(rwgpsToken, setError, setRwgpsToken);
     if (user_favorites != null) {
-        user_favorites.sort((fava, favb) => fava.name.localeCompare(favb.name));
+        user_favorites.sort((fava, favb) => DateTime.fromISO(favb.dateAdded).toMillis() - DateTime.fromISO(fava.dateAdded).toMillis());
         setPinnedRoutes(user_favorites);
     }
     setLoadingPinned(false);
