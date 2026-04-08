@@ -16,7 +16,7 @@ const config: Config.InitialOptions = {
     preset: "ts-jest",
     testEnvironment: 'jest-fixed-jsdom', // Provides a browser-like environment (Jest 28+ requires separate install)
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Points to the setup file for jest-dom matchers
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'], // Ensures correct file resolution
+    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'mjs', 'json', 'node'], // Ensures correct file resolution
     // Add other options as needed
     moduleNameMapper: {
         "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|htm)(\\?.*)?$": "<rootDir>/__mocks__/fileMock.js",
@@ -27,11 +27,11 @@ const config: Config.InitialOptions = {
         '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv)/)'
+        'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime)/)'
     ],
     transform: {
         '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
-        '^.+\\.(tsx?|jsx?)$': ['ts-jest', {
+        '^.+\\.(tsx?|jsx?|mjs)$': ['ts-jest', {
         tsconfig: 'tsconfig.test.json',
         babelConfig: true,
     }]
