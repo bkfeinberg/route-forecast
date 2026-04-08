@@ -50,7 +50,6 @@ const ForecastSettings = () => {
         return setDownloadAll(!downloadAll)
     }
 
-    console.log(`downloadAll: ${downloadAll}, computeStdDev: ${computeStdDev}`)
     return (
         <div style={{ display: "flex", flexFlow: "column", alignItems: "center", marginBottom: "5px" }}>
             <div ref={outsideRef} style={{ padding: "10px" }}>
