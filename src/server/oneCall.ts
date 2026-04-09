@@ -1,5 +1,5 @@
 import type { AxiosError, AxiosRequestConfig } from "axios";
-import { WeatherFunc } from "./weatherForecastDispatcher";
+import { WeatherFunc } from "./weatherForecastDispatcher.js";
 
 import { DateTime } from "luxon";
 import axios from 'axios'

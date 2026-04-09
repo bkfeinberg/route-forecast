@@ -1,9 +1,7 @@
-const mockGet = jest.fn();
+jest.mock('axios');
+import axios from 'axios';
 
-jest.mock('axios', () => ({
-  get: mockGet,
-  isAxiosError: jest.fn((error: any) => !!error && error.isAxiosError),
-}));
+const mockedAxios = jest.mocked(axios);
 
 jest.mock('@sentry/node', () => ({
   captureMessage: jest.fn(),
@@ -11,7 +9,6 @@ jest.mock('@sentry/node', () => ({
   startSpan: jest.fn(),
 }));
 
-import axios from 'axios';
 import Sentry from '@sentry/node';
 import callWeatherApi from './weatherApi';
 
@@ -21,13 +18,13 @@ describe('callWeatherApi', () => {
   });
 
   beforeEach(() => {
-    mockGet.mockReset();
+    mockedAxios.get.mockReset();
     (Sentry.setContext as jest.Mock).mockClear();
     (Sentry.captureMessage as jest.Mock).mockClear();
   });
 
   test('fetches WeatherAPI forecast and maps the response fields', async () => {
-    mockGet.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         current: {
           air_quality: { pm2_5: 7.3 }
@@ -68,8 +65,8 @@ describe('callWeatherApi', () => {
       'en'
     );
 
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toHaveBeenCalledWith(
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.get).toHaveBeenCalledWith(
       'https://api.weatherapi.com/v1/forecast.json?key=test-key&q=40,-75&days=1&hour=12&lang=en&aqi=yes&dt=2099-06-01'
     );
 
@@ -95,7 +92,7 @@ describe('callWeatherApi', () => {
   });
 
   test('returns <unavailable> for missing wind and gust values', async () => {
-    mockGet.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         current: {
           air_quality: {}
@@ -139,7 +136,7 @@ describe('callWeatherApi', () => {
   });
 
   test('throws a formatted error when WeatherAPI returns an error payload', async () => {
-    mockGet.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         error: { code: 1006, message: 'No location found.' }
       }

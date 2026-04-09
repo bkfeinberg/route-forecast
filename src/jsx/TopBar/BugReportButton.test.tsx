@@ -1,6 +1,5 @@
 // src/jsx/TopBar/BugReportButton.test.tsx
 import { render } from 'test-utils';
-import { describe, beforeEach, jest, test, expect } from '@jest/globals';
 
 jest.mock('Images/gustavorezende_lady_bug-555px.png', () => 'lady-bug.png');
 

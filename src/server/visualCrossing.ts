@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { DateTime } from "luxon";
-import { WeatherFunc } from "./weatherForecastDispatcher";
+import { WeatherFunc } from "./weatherForecastDispatcher.js";
 import * as Sentry from "@sentry/node";
 
 const convertToValidStart = (currentTime : string) => {

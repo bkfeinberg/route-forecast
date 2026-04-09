@@ -1,7 +1,7 @@
 // src/jsx/TopBar/DonationRequest.test.tsx
 import { render, fireEvent, act } from 'test-utils';
-import { describe, beforeEach, jest, test, expect } from '@jest/globals';
 import Cookies from 'universal-cookie';
+import { useMediaQuery } from 'react-responsive';
 
 // Mocks
 const mCookie = {
@@ -28,7 +28,7 @@ jest.mock('react-ga4', () => {
 jest.mock('react-responsive', () => {
   return {
     __esModule: true,
-    useMediaQuery: jest.fn()
+    useMediaQuery: jest.fn().mockReturnValue(false) // default to non-mobile
   };
 });
 jest.mock('react-i18next', () => {
@@ -46,7 +46,6 @@ jest.mock('react-i18next', () => {
 });
 
 import ReactGA from 'react-ga4';
-import { useMediaQuery } from 'react-responsive';
 import { useTranslation } from 'react-i18next';
 import DonationRequest from './DonationRequest';
 
@@ -57,7 +56,7 @@ const spanish_donation_image = 'https://www.paypalobjects.com/es_XC/i/btn/btn_do
 describe('DonationRequest', () => {
   
   const mockedGA = ReactGA as unknown as { event: jest.Mock };
-  const mockedUseMedia = useMediaQuery as unknown as jest.Mock;
+  const mockedUseMedia = jest.mocked(useMediaQuery);
   const mockedUseTranslation = useTranslation as unknown as jest.Mock;
 
   beforeEach(() => {

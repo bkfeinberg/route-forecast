@@ -1,5 +1,4 @@
 // src/jsx/Map/RouteForecastMap.test.tsx
-import { describe, beforeEach, afterEach, jest, test, expect } from '@jest/globals';
 import { findMarkerInfo } from './mapUtils';
 import { milesToMeters } from '../../utils/util';
 

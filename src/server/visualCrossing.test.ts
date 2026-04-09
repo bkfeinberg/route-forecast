@@ -1,8 +1,7 @@
-const mockGet = jest.fn();
+jest.mock('axios');
+import axios from 'axios';
 
-jest.mock('axios', () => ({
-  get: mockGet,
-}));
+const mockedAxios = jest.mocked(axios);
 
 jest.mock('@sentry/node', () => ({
   captureMessage: jest.fn(),
@@ -18,13 +17,13 @@ describe('callVisualCrossing', () => {
   });
 
   beforeEach(() => {
-    mockGet.mockReset();
+    mockedAxios.get.mockReset();
     (Sentry.captureMessage as jest.Mock).mockClear();
     (Sentry.setContext as jest.Mock).mockClear();
   });
 
   test('fetches Visual Crossing data and maps response fields', async () => {
-    mockGet.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         currentConditions: {
           datetimeEpoch: 1748779800,
@@ -57,8 +56,8 @@ describe('callVisualCrossing', () => {
       'en'
     );
 
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toHaveBeenCalledWith(
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(mockedAxios.get).toHaveBeenCalledWith(
       'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/40,-75/1748779800?unitGroup=us&include=current&options=nonulls&lang=en&key=test-key'
     );
 
@@ -83,7 +82,7 @@ describe('callVisualCrossing', () => {
   });
 
   test('uses windspeed as gust when windgust is undefined', async () => {
-    mockGet.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         currentConditions: {
           datetimeEpoch: 1748779800,
@@ -123,7 +122,7 @@ describe('callVisualCrossing', () => {
   });
 
   test('throws when no current conditions are returned', async () => {
-    mockGet.mockResolvedValue({
+    mockedAxios.get.mockResolvedValue({
       data: {
         currentConditions: undefined,
         days: [{ conditions: 'Fog' }]

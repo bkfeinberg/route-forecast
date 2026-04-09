@@ -1,4 +1,5 @@
 import { logger } from "@sentry/react";
+import * as Sentry from "@sentry/react";
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 import { routeLoadingModes } from "../data/enums";
 import gpxParser, { type Point } from "./gpxParser";

@@ -1,23 +1,30 @@
 /* eslint-disable max-lines */
-require('./instrument');
+import './instrument.js';
 import express, { Request, Response } from 'express'
 const app = express();
 app.set('trust proxy', 1 /* number of proxies between user and server */)
 
-const apicache = require('node-cache-32')
-require('source-map-support').install();
-const expressStaticGzip = require("express-static-gzip");
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+//@ts-ignore
+import apicache from 'node-cache-32';
+import expressStaticGzip from 'express-static-gzip';
 
 import path from 'path';
 import bodyParser from 'body-parser';
-const multer = require('multer'); // v1.0.5
+// @ts-ignore
+import multer from 'multer';
 const upload = multer({
     limits: { fieldSize: 2 * 1024 * 1024 }
 }); // for parsing multipart/form-data
-import callWeatherService from './weatherForecastDispatcher'
+import callWeatherService from './weatherForecastDispatcher.js'
 import url from 'url'
-import getPurpleAirAQI from'./purpleAirAQI'
-import getAirNowAQI from './airNowAQI'
+import getPurpleAirAQI from'./purpleAirAQI.js'
+import getAirNowAQI from './airNowAQI.js'
 import querystring from 'querystring';
 import * as Sentry from "@sentry/node"
 import type { NextFunction } from 'express';
@@ -46,23 +53,22 @@ const axiosInstance = axios.create({
     httpsAgent,
     timeout: 30000
 });
-const timeout = require('connect-timeout');
+// @ts-ignore
+import timeout from 'connect-timeout';
 
-// import {std} from "mathjs";
-const {std} = require('mathjs');
+import {std} from "mathjs";
 import {Client} from "pg";
 
 import RateLimit from 'express-rate-limit'
 import { DateTime } from 'luxon';
-import { number } from 'mathjs';
-import { time } from 'console';
 var limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // max 200 requests per windowMs
 });
 
 let logger = console;
-var compression = require('compression');
+// @ts-ignore
+import compression from 'compression';
 
 app.use(compression());
 
@@ -966,11 +972,13 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
         dateAdded: string,
     }
     interface RouteType {
+        [x: string]: any;
         id: number,
         user_id: number,
         url: string,
         html_url: string,
-        name: string
+        name: string,
+        updated_at: string
     }
     type RouteListType = {
         routes: Array<RouteType>;
@@ -1065,7 +1073,9 @@ app.get('/pinned_routes', async (req : Request, res : Response) => {
                 const userRoutes = userRoutesReply.data.routes.map( route =>
                     {return {id:route.id, 
                         associated_object_id:route.html_url.replace('https://ridewithgps.com/routes/', ''),
-                        name:route.name}})
+                        name:route.name,
+                        associated_object_type:'route',
+                        dateAdded: route.updated_at}});
                 res.status(200).json(userRoutes);
             }
         } else {

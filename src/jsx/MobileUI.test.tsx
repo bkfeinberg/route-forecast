@@ -1,6 +1,5 @@
 // src/jsx/MobileUI.test.tsx
 import { renderWithProviders, screen, waitFor } from 'test-utils';
-import { describe, beforeEach, jest, test } from '@jest/globals';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@sentry/react', () => ({

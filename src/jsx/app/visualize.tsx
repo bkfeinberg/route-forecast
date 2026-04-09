@@ -16,7 +16,8 @@
 import {APIProvider, Map, InfoWindow, useMap, useApiIsLoaded, AdvancedMarker, useAdvancedMarkerRef} from '@vis.gl/react-google-maps';
 import { createRoot } from 'react-dom/client';
 import { useEffect, useState, useCallback } from 'react';
-const axios = require('axios');
+import axios from 'axios';
+import * as Sentry from "@sentry/react"
 
 interface Location {
   Time : Date;

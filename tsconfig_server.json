@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
+  // "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -12,9 +12,9 @@
     // "disableReferencedProjectLoad": true,             /* Reduce the number of projects loaded automatically by TypeScript. */
 
     /* Language and Environment */
-    // "target": "es6",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
-    "jsx": "react-jsx",                                /* Specify what JSX code is generated. */
+    "target": "esnext",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "lib": ["DOM"],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    "jsx": "react",                                /* Specify what JSX code is generated. */
     // "experimentalDecorators": true,                   /* Enable experimental support for legacy experimental decorators. */
     // "emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated declarations in source files. */
     // "jsxFactory": "",                                 /* Specify the JSX factory function used when targeting React JSX emit, e.g. 'React.createElement' or 'h'. */
@@ -26,16 +26,16 @@
     // "moduleDetection": "auto",                        /* Control what method is used to detect module-format JS files. */
 
     /* Modules */
-    // "module": "ES2022",                                /* Specify what module code is generated. */
+    "module": "nodenext",                                /* Specify what module code is generated. */
+    "moduleResolution": "nodenext",
     "explainFiles": false,
-    // "rootDir": "./",                                  /* Specify the root folder within your source files. */
-    "moduleResolution": "node16",
-    "paths": {"Images/*": ["./src/static/*"]},               /* Specify a set of entries that re-map imports to additional lookup locations. */
+    "rootDir": "./src/server",                                  /* Specify the root folder within your source files. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
     "types": [
       "chrome",
-       "@types/webappsec-credential-management"
+       "@types/webappsec-credential-management",
+       "node"
     ],                                                   /* Specify type package names to be included without being referenced in a source file. */
     // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
     // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */
@@ -111,6 +111,7 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     // "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/server/**/*"],
-  "exclude": ["__enzyme_tests__/", "node_modules/", "dist", "__mocks__", "__test__"]
+  // "include": ["src/server/**/*"],
+  "exclude": ["__enzyme_tests__/", "node_modules/", "dist", "__mocks__", "__test__"],
+  "files": ["./src/server/server.ts"]
 }

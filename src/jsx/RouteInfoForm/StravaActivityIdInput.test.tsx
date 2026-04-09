@@ -1,5 +1,4 @@
 import { renderWithProviders, fireEvent, screen } from 'test-utils';
-import { describe, beforeEach, test, expect } from '@jest/globals';
 import StravaActivityIdInput from './StravaActivityIdInput';
 import userEvent from '@testing-library/user-event';
 import {navigate} from '../../redux/loadFromStravaActions'

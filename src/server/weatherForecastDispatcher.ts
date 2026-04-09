@@ -1,11 +1,11 @@
-import callTomorrowIo from './tomorrowio';
-import callWeatherApi from './weatherApi'
-import callVisualCrossing from './visualCrossing'
-import callNWS from './nws'
-const callMeteomatics = require('./meteomatics');
-import callWeatherKit from './weatherKit';
-import callOpenMeteo from './openmeteo';
-import callOneCall from './oneCall'
+import callTomorrowIo from './tomorrowio.js';
+import callWeatherApi from './weatherApi.js'
+import callVisualCrossing from './visualCrossing.js'
+import callNWS from './nws.js'
+import callMeteomatics from './meteomatics.js';
+import callWeatherKit from './weatherKit.js';
+import callOpenMeteo from './openmeteo.js';
+import callOneCall from './oneCall.js'
 import * as Sentry from "@sentry/node";
 const { error } = Sentry.logger;
 

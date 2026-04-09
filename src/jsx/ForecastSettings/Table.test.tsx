@@ -1,7 +1,6 @@
 // src/jsx/ForecastSettings/Table.test.tsx
 import React from 'react';
 import { render, screen, cleanup, fireEvent } from 'test-utils';
-import { describe, beforeEach, afterEach, jest, test, expect } from '@jest/globals';
 import { Table } from './Table';
 
 describe('Table component', () => {

@@ -1,4 +1,4 @@
-import { WeatherFunc } from "./weatherForecastDispatcher";
+import { WeatherFunc } from "./weatherForecastDispatcher.js";
 
 const { DateTime } = require("luxon");
 const axios = require('axios');
@@ -114,4 +114,4 @@ const callMeteomatics = async function (lat, lon, currentTime, distance, zone, b
  )
 } as WeatherFunc
 
-module.exports = callMeteomatics;
+export default callMeteomatics;

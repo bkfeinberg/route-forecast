@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
-import { WeatherFunc } from "./weatherForecastDispatcher";
+import { WeatherFunc } from "./weatherForecastDispatcher.js";
 import { fetchWeatherApi } from "openmeteo";
+import * as Sentry from "@sentry/node";
 
 const findClosestDateTimeIndex = (sortedDates: DateTime[], targetDate: DateTime) => {
     if (sortedDates.length === 0) {

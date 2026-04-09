@@ -1,7 +1,6 @@
 // src/jsx/TopBar/TopBar.test.tsx
 import React from 'react';
 import { render, screen, cleanup } from 'test-utils';
-import { describe, beforeEach, afterEach, jest, test, expect } from '@jest/globals';
 import VersionContext from '../versionContext';
 
 jest.mock('react-responsive', () => {

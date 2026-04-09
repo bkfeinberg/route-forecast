@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.15.0",
+  "version": "5.15.2",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -121,6 +121,8 @@
     "@babel/preset-typescript": "^7.28.5",
     "@sentry/webpack-plugin": "^5.0.0",
     "@svgr/webpack": "^8.1.0",
+    "@swc/core": "^1.15.24",
+    "@swc/jest": "^0.2.39",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
@@ -129,7 +131,7 @@
     "@types/express": "^5.0.6",
     "@types/google.maps": "^3.58.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.0.7",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/redux-logger": "^3.0.13",
@@ -172,7 +174,7 @@
     "ts-jest": "^29.4.6",
     "ts-loader": "^9.5.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "webpack-cli": "^7.0.1",
     "webpack-merge": "^6.0.1",
     "webpack-node-externals": "^3.0.0",
@@ -214,5 +216,6 @@
     "minify": true,
     "rootDir": "."
   },
-  "homepage": "https://github.com/bfkeinberg/route-forecast#readme"
+  "homepage": "https://github.com/bfkeinberg/route-forecast#readme",
+  "type": "module"
 }

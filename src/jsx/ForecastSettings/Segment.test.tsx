@@ -1,7 +1,6 @@
 // src/jsx/ForecastSettings/Segment.test.tsx
 import React from 'react';
 import { render, screen, cleanup, fireEvent } from 'test-utils';
-import { describe, beforeEach, afterEach, jest, test, expect } from '@jest/globals';
 
 jest.mock('react-i18next', () => {
   return {

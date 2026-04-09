@@ -1,4 +1,3 @@
-import { describe, beforeEach, afterEach, jest, test, expect } from '@jest/globals';
 import { getMapBounds, cvtDistance } from './mapUtils';
 
 // Simple mock for google.maps.LatLngBounds used by getMapBounds

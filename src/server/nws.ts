@@ -1,4 +1,4 @@
-import { WeatherFunc } from "./weatherForecastDispatcher";
+import { WeatherFunc } from "./weatherForecastDispatcher.js";
 
 import { DateTime, Interval } from "luxon"
 import axios from "axios";

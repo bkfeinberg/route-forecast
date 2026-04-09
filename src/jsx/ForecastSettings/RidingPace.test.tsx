@@ -1,6 +1,5 @@
 // src/jsx/ForecastSettings/RidingPace.test.tsx
 import { render, fireEvent } from 'test-utils';
-import { describe, beforeEach, jest, test, expect } from '@jest/globals';
 import Cookies from 'universal-cookie';
 // Mocks
 const mCookie = {

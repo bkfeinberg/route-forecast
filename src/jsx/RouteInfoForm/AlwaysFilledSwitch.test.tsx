@@ -1,7 +1,6 @@
 // src/jsx/RouteInfoForm/AlwaysFilledSwitch.test.tsx
 import React from 'react';
 import { render } from 'test-utils';
-import { describe, test, expect } from '@jest/globals';
 import { AlwaysFilledSwitch } from './AlwaysFilledSwitch';
 
 jest.mock('./AlwaysFilledSwitch.css', () => ({}));

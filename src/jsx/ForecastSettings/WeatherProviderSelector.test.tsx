@@ -1,6 +1,5 @@
 // src/jsx/ForecastSettings/WeatherProviderSelector.test.tsx
 import { render, fireEvent } from 'test-utils';
-import { describe, beforeEach, jest, test, expect } from '@jest/globals';
 import Cookies from 'universal-cookie';
 
 const mCookie = {

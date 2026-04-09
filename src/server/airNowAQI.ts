@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-const { DateTime } = require("luxon");
+import { DateTime } from "luxon";
 import * as Sentry from "@sentry/node"
 const axiosInstance = axios.create()
 import axiosRetry from 'axios-retry'

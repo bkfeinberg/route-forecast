@@ -1,7 +1,6 @@
 // src/jsx/ForecastSettings/ForecastButton.test.tsx
 import React from 'react';
 import { render, fireEvent, waitFor } from 'test-utils';
-import { describe, beforeEach, jest, test, expect } from '@jest/globals';
 
 // Mocks
 jest.mock('react-i18next', () => ({

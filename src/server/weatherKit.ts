@@ -1,8 +1,11 @@
 import type { AxiosError, AxiosRequestConfig } from "axios";
-import type { WeatherFunc } from "./weatherForecastDispatcher";
+import type { WeatherFunc } from "./weatherForecastDispatcher.ts";
 
 import { DateTime } from "luxon";
-const jwt = require("jsonwebtoken");
+//@ts-ignore
+import jwt from 'jsonwebtoken';
+const { sign } = jwt;
+
 import * as Sentry from "@sentry/node";
 import axios from "axios";
 import http from 'http';
@@ -20,7 +23,8 @@ const httpsAgent = new https.Agent({
   timeout: 15000,
 });
 
-const axiosInstance = axios.create({
+// export solely for test
+export const axiosInstance = axios.create({
     httpAgent,
     httpsAgent,
     timeout: 10000

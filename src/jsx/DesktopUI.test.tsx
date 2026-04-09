@@ -1,6 +1,5 @@
 // src/jsx/DesktopUI.test.tsx
 import { renderWithProviders, screen, waitFor } from 'test-utils';
-import { describe, beforeEach, jest, test } from '@jest/globals';
 
 jest.mock('@sentry/react', () => ({
   __esModule: true,

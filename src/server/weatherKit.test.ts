@@ -1,15 +1,8 @@
-const mockGet = jest.fn();
-const mockAxiosInstance = {
-  get: mockGet,
-  interceptors: {
-    request: { use: jest.fn() },
-    response: { use: jest.fn() },
-  },
-};
+import callWeatherKit, {axiosInstance} from './weatherKit';
 
-jest.mock('axios', () => ({
-  create: jest.fn(() => mockAxiosInstance)
-}));
+const axiosInstanceSpy = jest.spyOn(axiosInstance, 'get').mockResolvedValue({
+  data: {a: 1}
+});
 
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(() => 'signed-token')
@@ -22,30 +15,22 @@ jest.mock('@sentry/node', () => ({
   startSpan: jest.fn()
 }));
 
-import axios from 'axios';
 import Sentry from '@sentry/node';
-import callWeatherKit from './weatherKit';
-
-type MockAxios = {
-  create: jest.Mock;
-};
 
 describe('callWeatherKit', () => {
-  const mockAxios = axios as unknown as MockAxios;
 
   beforeAll(() => {
     process.env.WEATHERKIT_KEY = 'test-key';
-    mockAxios.create.mockReturnValue(mockAxiosInstance);
   });
 
   beforeEach(() => {
-    mockGet.mockReset();
+    axiosInstanceSpy.mockReset();
     (Sentry.setContext as jest.Mock).mockClear();
     (Sentry.captureException as jest.Mock).mockClear();
   });
 
   test('fetches WeatherKit data and maps it to forecast fields', async () => {
-    mockGet.mockResolvedValue({
+    axiosInstanceSpy.mockResolvedValue({
       data: {
         currentWeather: {
           asOf: '2025-06-01T12:00:00Z',
@@ -81,8 +66,8 @@ describe('callWeatherKit', () => {
       'en'
     );
 
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockGet).toHaveBeenCalledWith(
+    expect(axiosInstanceSpy).toHaveBeenCalledTimes(1);
+    expect(axiosInstanceSpy).toHaveBeenCalledWith(
       'https://weatherkit.apple.com/api/v1/weather/en/40/-75?timezone=America/New_York&dataSets=currentWeather,forecastHourly,forecastNextHour,&countryCode=US&currentAsOf=2025-06-01T12:00:00Z&hourlyStart=2025-06-01T12:00:00Z&hourlyEnd=2025-06-01T13:00:00Z',
       { headers: { Authorization: 'Bearer signed-token' } }
     );
@@ -109,7 +94,7 @@ describe('callWeatherKit', () => {
 
   test('captures exception and rethrows when axios request fails', async () => {
     const error = new Error('network failure');
-    mockGet.mockRejectedValue(error);
+    axiosInstanceSpy.mockRejectedValue(error);
 
     await expect(callWeatherKit(
       40,
@@ -127,7 +112,7 @@ describe('callWeatherKit', () => {
   });
 
   test('returns <unavailable> for gust when windGust is undefined', async () => {
-    mockGet.mockResolvedValue({
+    axiosInstanceSpy.mockResolvedValue({
       data: {
         currentWeather: {
           asOf: '2025-06-01T12:00:00Z',

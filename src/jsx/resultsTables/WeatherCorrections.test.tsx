@@ -1,5 +1,4 @@
 import { renderWithProviders, fireEvent, screen } from 'test-utils';
-import { describe, beforeEach, test, expect, jest } from '@jest/globals';
 
 type ForecastDepValues = { weatherCorrectionMinutes: number, maxGustSpeed: number, chartData: any[] };
 
@@ -24,7 +23,7 @@ jest.mock('@mantine/core', () => {
 });
 
 // stub out forecast hook and chart component
-const mockedUseForecastDependentValues = jest.fn<() => ForecastDepValues>();
+const mockedUseForecastDependentValues = jest.fn<ForecastDepValues, []>();
 jest.mock('../../utils/forecastValuesHook', () => ({
   useForecastDependentValues: () => mockedUseForecastDependentValues()
 }));

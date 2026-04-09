@@ -1,5 +1,5 @@
-const Sentry = require('@sentry/node')
-const { nodeProfilingIntegration } = require("@sentry/profiling-node");
+import * as Sentry from "@sentry/node"
+import {nodeProfilingIntegration} from "@sentry/profiling-node";
 
 if (process.env.NODE_ENV !== 'development') {
     Sentry.init({

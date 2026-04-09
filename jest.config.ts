@@ -1,14 +1,13 @@
 // jest.config.ts
 import type { Config } from '@jest/types';
 
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const config: Config.InitialOptions = {
-  preset: "ts-jest",
   testEnvironment: 'jest-fixed-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Points to the setup file for jest-dom matchers
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'mjs', 'json', 'node'], // Ensures correct file resolution
@@ -26,10 +25,21 @@ const config: Config.InitialOptions = {
   ],
   transform: {
     '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
-    '^.+\\.(tsx?|jsx?|mjs)$': ['ts-jest', {
-      tsconfig: 'tsconfig.test.json',
-      babelConfig: true,
-    }]
+    '^.+\\.(tsx?|jsx?|mjs)$': ['@swc/jest',
+            {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic', // This is the equivalent of Babel's automatic option 
+            },
+          },
+        },
+      },
+    ]
   },
   moduleDirectories: [
     'node_modules',
