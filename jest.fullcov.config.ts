@@ -13,7 +13,6 @@ const config: Config.InitialOptions = {
     collectCoverageFrom: ["src/{jsx,redux,server,utils}/**/*.{js,jsx,ts,tsx}"],
     coveragePathIgnorePatterns: [
     ],
-    preset: "ts-jest",
     testEnvironment: 'jest-fixed-jsdom', // Provides a browser-like environment (Jest 28+ requires separate install)
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Points to the setup file for jest-dom matchers
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'mjs', 'json', 'node'], // Ensures correct file resolution
@@ -29,13 +28,24 @@ const config: Config.InitialOptions = {
     transformIgnorePatterns: [
         'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime)/)'
     ],
-    transform: {
-        '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
-        '^.+\\.(tsx?|jsx?|mjs)$': ['ts-jest', {
-        tsconfig: 'tsconfig.test.json',
-        babelConfig: true,
-    }]
-    },
+  transform: {
+    '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',
+    '^.+\\.(tsx?|jsx?|mjs)$': ['@swc/jest',
+            {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          transform: {
+            react: {
+              runtime: 'automatic', // This is the equivalent of Babel's automatic option 
+            },
+          },
+        },
+      },
+    ]
+  },
     moduleDirectories: [
         'node_modules',
         'src/utils', // Add your utility folder here
