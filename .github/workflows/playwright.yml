@@ -31,7 +31,6 @@ jobs:
         MAPS_KEY: ${{ secrets.MAPS_KEY }}
         TIMEZONE_API_KEY: ${{ secrets.TIMEZONE_API_KEY }}
         SENTRY_TRACE_SAMPLE_RATE: ${{ secrets.SENTRY_TRACE_SAMPLE_RATE }}
-         # SENTRY_ENVIRONMENT: 'playwright-tests'
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
