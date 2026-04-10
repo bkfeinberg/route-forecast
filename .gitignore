@@ -17,3 +17,10 @@ sample_output/
 .env.sentry-build-plugin
 tsc.log
 translateTo.sh
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

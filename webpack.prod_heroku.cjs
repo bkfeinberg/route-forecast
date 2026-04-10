@@ -23,16 +23,23 @@ module.exports = (env, argv) => merge(common(env, argv), {
             resourceRegExp: /^\.\/locale$/,
             contextRegExp: /moment$/,
         }),
+        new webpack.DefinePlugin({
+            __SENTRY_DEBUG__: false,
+            __SENTRY_TRACING__: false,
+            __RRWEB_EXCLUDE_IFRAME__: true,
+            __RRWEB_EXCLUDE_SHADOW_DOM__: true,
+            __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
+        }),        
         sentryWebpackPlugin({
             applicationKey: process.env.SENTRY_APP_ID,
             include: '.',
             ignoreFile: '.sentrycliignore',
             ignore: [
                 'node_modules',
-                'webpack.prod.js',
-                'webpack.prod_heroku.js',
+                'webpack.prod.cjs',
+                'webpack.prod_heroku.cjs',
                 'webpack.common.cjs',
-                'webpack.dev.js',
+                'webpack.dev.cjs',
                 'setupFile.js'
             ],
             configFile: 'sentry.properties',
@@ -42,8 +49,8 @@ module.exports = (env, argv) => merge(common(env, argv), {
             // stripPrefix: ['/dist'],
             // stripCommonPrefix: true,
             // urlPrefix: '/static',
-            debug: true,
-            bundleSizeOptimizations: {excludeReplayShadowDom: true},
+            debug: false,
+            bundleSizeOptimizations: {excludeDebugStatements: true, excludeReplayShadowDom: true},
             authToken: process.env.SENTRY_AUTH_TOKEN,
             release: {name: process.env.SOURCE_VERSION, setCommits: { auto: true } },
             deploy: { env: 'production', name: 'latest' }

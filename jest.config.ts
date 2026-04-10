@@ -20,6 +20,7 @@ const config: Config.InitialOptions = {
     '^p-limit$': '<rootDir>/__mocks__/p-limit.js',
     '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
   },
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/'],
   transformIgnorePatterns: [
     'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime|jose)/)'
   ],
