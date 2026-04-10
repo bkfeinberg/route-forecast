@@ -2,10 +2,7 @@ import type { AxiosError, AxiosRequestConfig } from "axios";
 import type { WeatherFunc } from "./weatherForecastDispatcher.ts";
 
 import { DateTime } from "luxon";
-//@ts-ignore
-import jwt from 'jsonwebtoken';
-const { sign } = jwt;
-
+import { SignJWT, importPKCS8 } from 'jose'
 import * as Sentry from "@sentry/node";
 import axios from "axios";
 import http from 'http';
@@ -36,24 +33,14 @@ const milesToMeters = 1609.34;
 const keyId = "4JSC7L3B75";
 const teamId = "2B6A6N9QBQ";
 const serviceId = "com.randoplan.weatherkit-client";
-const privateKey = process.env.WEATHERKIT_KEY;
-const makeJwt = () => {
-    return jwt.sign(
-        {
-            sub: serviceId
-        },
-        privateKey,
-        {
-            algorithm: "ES256",
-            expiresIn: "1h",
-            issuer: teamId,
-            header: {
-                alg: "ES256",
-                kid: keyId,
-                id: `${teamId}.${serviceId}`
-            }
-        }
-    )
+const privateKey = process.env.WEATHERKIT_KEY||'';
+const makeJwt = async () => {
+    const secret = await importPKCS8(privateKey, 'ES256');
+    return await new SignJWT({ sub: serviceId })
+        .setProtectedHeader({ alg: "ES256", kid: keyId, id: `${teamId}.${serviceId}` })
+        .setIssuedAt()
+        .setExpirationTime("1h")
+        .setIssuer(teamId).sign(secret)
 }
 
 axiosRetry(axiosInstance, {
@@ -99,7 +86,7 @@ axiosRetry(axiosInstance, {
  */
 const callWeatherKit = async function (lat, lon, currentTime, distance, zone, bearing, getBearingDifference, isControl, lang) {
     const startTime = DateTime.fromISO(currentTime, { zone: 'utc' });
-    const weatherKitKey = makeJwt();
+    const weatherKitKey = await makeJwt();
     const when = startTime.toISO({ suppressMilliseconds: true });
     const later = startTime.plus({ hours: 1 }).toISO({ suppressMilliseconds: true });
     const url = `https://weatherkit.apple.com/api/v1/weather/${lang}/${lat}/${lon}?timezone=${zone}&dataSets=currentWeather,forecastHourly,forecastNextHour,&countryCode=US&currentAsOf=${when}&hourlyStart=${when}&hourlyEnd=${later}`;

@@ -61,7 +61,7 @@
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-resources-for-ts": "^2.0.0",
     "isomorphic-fetch": "^3.0.0",
-    "jsonwebtoken": "^9.0.2",
+    "jose": "^6.2.2",
     "localforage": "^1.10.0",
     "luxon": "^3.3.0",
     "mathjs": "^15.0.0",
