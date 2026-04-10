@@ -12,8 +12,8 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v6
       with:
         node-version: lts/*
     - name: Install dependencies
@@ -22,10 +22,16 @@ jobs:
       run: npx playwright install --with-deps
     - name: run actual build
       run: npm run prod-local
-    - name: Echo current directory
-      run: pwd
     - name: Run Playwright tests
       run: npx playwright test
+      env:
+        BITLY_TOKEN: ${{ secrets.BITLY_TOKEN }}
+        SHORT_IO_KEY: ${{ secrets.SHORT_IO_KEY }}
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        MAPS_KEY: ${{ secrets.MAPS_KEY }}
+        TIMEZONE_API_KEY: ${{ secrets.TIMEZONE_API_KEY }}
+        SENTRY_TRACE_SAMPLE_RATE: ${{ secrets.SENTRY_TRACE_SAMPLE_RATE }}
+         # SENTRY_ENVIRONMENT: 'playwright-tests'
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
