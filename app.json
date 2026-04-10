@@ -12,9 +12,6 @@
  "buildpacks": [
     {
       "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://github.com/buyersight/heroku-google-application-credentials-buildpack.git"
     }
   ]
 }
