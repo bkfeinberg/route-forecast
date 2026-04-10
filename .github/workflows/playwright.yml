@@ -20,6 +20,8 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    - name: run actual build
+      run: npm run prod-local
     - name: Echo current directory
       run: pwd
     - name: Run Playwright tests
