@@ -26,7 +26,7 @@ const config: Config.InitialOptions = {
         '\\.(css|scss|sass|less)$': '<rootDir>/__mocks__/styleMock.js',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime)/)'
+        'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime|jose)/)'
     ],
   transform: {
     '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',

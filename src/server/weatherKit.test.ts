@@ -4,8 +4,28 @@ const axiosInstanceSpy = jest.spyOn(axiosInstance, 'get').mockResolvedValue({
   data: {a: 1}
 });
 
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(() => 'signed-token')
+// 1. Mock the SignJWT class and its chainable methods
+const mockSign = jest.fn().mockResolvedValue('signed-token');
+const mockSetProtectedHeader = jest.fn().mockReturnThis();
+const mockSetIssuedAt = jest.fn().mockReturnThis();
+const mockSetExpirationTime = jest.fn().mockReturnThis();
+const mockSetIssuer = jest.fn().mockReturnThis();
+
+jest.mock('jose', () => ({
+  // 2. Keep other exports actual if needed, or mock them
+  ...jest.requireActual('jose'), 
+  
+  // 3. Mock SignJWT as a constructor function
+  SignJWT: jest.fn().mockImplementation(() => ({
+    setProtectedHeader: mockSetProtectedHeader,
+    setIssuedAt: mockSetIssuedAt,
+    setExpirationTime: mockSetExpirationTime,
+    setIssuer: mockSetIssuer,
+    sign: mockSign,
+  })),
+  
+  // 4. Mock importPKCS8
+  importPKCS8: jest.fn().mockResolvedValue('mockedKeyObject'),
 }));
 
 jest.mock('@sentry/node', () => ({
