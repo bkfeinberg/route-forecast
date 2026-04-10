@@ -119,6 +119,7 @@
     "@babel/preset-env": "^7.29.2",
     "@babel/preset-react": "^7.10.4",
     "@babel/preset-typescript": "^7.28.5",
+    "@playwright/test": "^1.59.1",
     "@sentry/webpack-plugin": "^5.0.0",
     "@svgr/webpack": "^8.1.0",
     "@swc/core": "^1.15.24",
@@ -181,8 +182,8 @@
     "workbox-webpack-plugin": "^7.4.0"
   },
   "scripts": {
-    "prod": "./node_modules/.bin/webpack --mode production --config webpack.prod.cjs --env sentryRelease && tsc -p tsconfig_server.json > tsc.log",
-    "prod-local": "./node_modules/.bin/webpack --mode production --config webpack.prod-nosentry.cjs && tsc -p tsconfig_server.json > tsc.log",
+    "prod": "rm -rf dist && ./node_modules/.bin/webpack --mode production --config webpack.prod.cjs --env sentryRelease && tsc -p tsconfig_server.json > tsc.log",
+    "prod-local": "rm -rf dist && ./node_modules/.bin/webpack --mode production --config webpack.prod-nosentry.cjs && tsc -p tsconfig_server.json > tsc.log",
     "dev": "./node_modules/.bin/webpack --mode development --progress --color --stats-error-details --config webpack.dev.cjs --env sentryRelease && tsc -p tsconfig_server.json>tsc.log",
     "dev:watch": "./node_modules/.bin/webpack --mode development --progress --color --config webpack.dev.cjs --env sentryRelease --watch",
     "deploy": "./buildRelease.sh",
@@ -194,7 +195,7 @@
     "testDbg": "node --inspect-brk node_modules/.bin/jest",
     "testUTCDbg": "TZ=UTC node --inspect-brk node_modules/.bin/jest",
     "start": "node dist/server/index.js",
-    "build": "tsc -p tsconfig_server.json && echo 'running webpack' &&  ./node_modules/.bin/webpack --mode production --config webpack.prod_heroku.cjs --env sentryRelease"
+    "build": "rm -rf dist && tsc -p tsconfig_server.json && echo 'running webpack' &&  ./node_modules/.bin/webpack --mode production --config webpack.prod_heroku.cjs --env sentryRelease"
   },
   "repository": {
     "type": "git",

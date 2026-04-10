@@ -14,6 +14,7 @@ const config: Config.InitialOptions = {
     coveragePathIgnorePatterns: [
     ],
     testEnvironment: 'jest-fixed-jsdom', // Provides a browser-like environment (Jest 28+ requires separate install)
+    testPathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Points to the setup file for jest-dom matchers
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'mjs', 'json', 'node'], // Ensures correct file resolution
     // Add other options as needed

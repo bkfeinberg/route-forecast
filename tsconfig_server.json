@@ -113,5 +113,5 @@
   },
   // "include": ["src/server/**/*"],
   "exclude": ["__enzyme_tests__/", "node_modules/", "dist", "__mocks__", "__test__"],
-  "files": ["./src/server/server.ts"]
+  "files": ["./src/server/index.ts"]
 }
