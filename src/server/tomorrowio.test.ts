@@ -85,7 +85,7 @@ describe('callTomorrowIo', () => {
       'UTC',
       90,
       () => 20,
-      false
+      false, "en"
     );
 
     expect(mockedAxiosInstanceGet).toHaveBeenCalledTimes(1);
@@ -143,7 +143,7 @@ describe('callTomorrowIo', () => {
       'UTC',
       180,
       () => 0,
-      true
+      true, "en"
     );
 
     expect(result.windSpeed).toBe('<unavailable>');
