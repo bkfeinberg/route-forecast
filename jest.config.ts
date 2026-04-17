@@ -22,7 +22,7 @@ const config: Config.InitialOptions = {
   },
   testPathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/'],
   transformIgnorePatterns: [
-    'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime|jose)/)'
+    'node_modules/(?!(@mswjs|@exodus|gpxparser|query-string|msw|until-async|export-to-csv|rettime|jose|@open-draft)/)'
   ],
   transform: {
     '^.+\\.(css|scss|sass|less)$': 'jest-transform-css',

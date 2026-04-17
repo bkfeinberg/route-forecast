@@ -550,6 +550,7 @@ interface Short_IO_Response {
     shortURL: string
 }
 
+const urlLifetimeInDays = parseInt(process.env.URL_LIFETIME_IN_DAYS || '15');
 const getShortIoUrl = async (accessToken: string, longUrl: string, title?: string) => {
     // TODO: temporary for troubleshooting
     // info(`Short.io shortening ${longUrl}`);
@@ -569,7 +570,7 @@ const getShortIoUrl = async (accessToken: string, longUrl: string, title?: strin
             originalURL: longUrl,
             cloaking: false,
             domain: short_io_domain,
-            ttl: DateTime.now().plus({days: 10}).toISO(),
+            ttl: DateTime.now().plus({days: urlLifetimeInDays}).toISO(),
             title: title
         }
     };
