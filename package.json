@@ -32,7 +32,7 @@
     "@tabler/icons-react": "^3.35.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@turf/clean-coords": "^7.3.4",
-    "@turf/helpers": "^7.3.4",
+    "@turf/helpers": "^7.3.5",
     "@turf/nearest-point-on-line": "^7.3.4",
     "@types/luxon": "^3.4.2",
     "@types/webappsec-credential-management": "^0.6.8",
