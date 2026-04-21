@@ -39,7 +39,7 @@
     "@vis.gl/react-google-maps": "^1.0.0",
     "@we-gold/gpxjs": "^1.1.0",
     "animate.css": "^4.1.1",
-    "axios": "^1.13.5",
+    "axios": "^1.15.1",
     "axios-retry": "^4.5.0",
     "body-parser": "^2.2.0",
     "buffer": "^6.0.3",
