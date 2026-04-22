@@ -24,6 +24,7 @@ interface Query {
     pace : string
     interval : number
     metric : boolean
+    celsius: boolean,
     strava_activity : string,
     strava_route : string
     provider : string
@@ -35,11 +36,11 @@ interface Query {
     name : string
 }
 
-const makeQuery = (routeNumber : string, pace : string, interval : number, metric : boolean, 
+const makeQuery = (routeNumber : string, pace : string, interval : number, metric : boolean, celsius : boolean,
     controls : Array<UserControl>, strava_activity : string,
     strava_route : string, provider : string, rusa_route_id : string, routeName : string) => {
     const query : Query = {
-        pace, interval, metric, rwgpsRoute: routeNumber, strava_activity, 
+        pace, interval, metric, celsius, rwgpsRoute: routeNumber, strava_activity, 
         strava_route, provider, rusa_route_id, name: routeName
     }
     const formattedControls = formatControlsForUrl(controls, true)
@@ -55,12 +56,12 @@ const dateToShortDate = function (date : DateTime) {
     return Number.parseInt(date.toSeconds().toFixed(0));
 };
 
-const buildUrl = (routeNumber : string, pace : string, interval : number, metric : boolean, 
+const buildUrl = (routeNumber : string, pace : string, interval : number, metric : boolean, celsius : boolean,
     controls : Array<UserControl>, strava_activity : string,
     strava_route : string, provider : string, shortDate : number, start : DateTime, origin : string, 
     setPageUrl : boolean, zone : string,
     rusa_route_id : string, routeName : string) => {
-    let query = makeQuery(routeNumber, pace, interval, metric, controls, strava_activity,
+    let query = makeQuery(routeNumber, pace, interval, metric, celsius, controls, strava_activity,
         strava_route, provider, rusa_route_id, routeName);
     if (!isNaN(shortDate)) {
         query.startTimestamp = shortDate;
@@ -77,7 +78,7 @@ const buildUrl = (routeNumber : string, pace : string, interval : number, metric
 }
 
 export const generateUrl = (startTimestamp : number, routeNumber : string, pace : string, interval : number, 
-    metric : boolean, controls : Array<UserControl>, strava_activity : string,
+    metric : boolean, celsius : boolean, controls : Array<UserControl>, strava_activity : string,
     strava_route : string, provider : string, origin : string, setPageUrl : boolean, zone : string, 
     rusaRouteId : string, routeName : string) => {
     const start = DateTime.fromMillis(startTimestamp, {zone:zone})
@@ -85,11 +86,11 @@ export const generateUrl = (startTimestamp : number, routeNumber : string, pace 
     if (strava_route !== '') {
         routeNumber = ''
     }
-    let url = buildUrl(routeNumber, pace, interval, metric, controls, strava_activity, strava_route,
+    let url = buildUrl(routeNumber, pace, interval, metric, celsius, controls, strava_activity, strava_route,
          provider, shortDate, start, origin, setPageUrl, zone, rusaRouteId, routeName)
     if (url.url.length >= maxUrlLength) {
         const truncatedControls = shrinkControls(controls);
-        url = buildUrl(routeNumber, pace, interval, metric, truncatedControls, 
+        url = buildUrl(routeNumber, pace, interval, metric, celsius, truncatedControls, 
             strava_activity, strava_route, provider,
              shortDate, start, origin, setPageUrl, zone, rusaRouteId, '')
     }

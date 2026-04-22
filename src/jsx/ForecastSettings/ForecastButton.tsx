@@ -59,6 +59,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
     const fetchAqi = useAppSelector(state => state.forecast.fetchAqi)
     const rusaRouteId = useAppSelector(state => state.uiInfo.routeParams.rusaPermRouteId)
     const segmentRange = useAppSelector(state => state.uiInfo.routeParams.segment)
+    const celsius = useAppSelector(state => state.controls.celsius)
     const { t } = useTranslation()
     const forecastRequestData = useRef(useForecastRequestData())
     const [optionPressed, setOptionPressed] = useState(false)
@@ -264,7 +265,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
             dispatch(errorMessageListSet(extractRejectedResults(forecastResults, succeededParts).map(result => msgFromError(result, forecastProvider, 'forecast'))))
             dispatch(errorMessageListAppend(extractRejectedResults(aqiResults,[]).map(result => msgFromError(result, forecastProvider, 'aqi'))))
         // })
-        const url = generateUrl(startTimestamp, routeNumber, pace, interval, metric, controls,
+        const url = generateUrl(startTimestamp, routeNumber, pace, interval, metric, celsius, controls,
             strava_activity, strava_route, provider, origin, true, zone, rusaRouteId,
             routeName
         );

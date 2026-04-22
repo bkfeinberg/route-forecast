@@ -56,7 +56,7 @@ import { stravaActivitySet, stravaRefreshTokenSet, stravaRouteSet, stravaTokenSe
 import { apiKeysSet, querySet, actionUrlAdded } from "../../redux/paramsSlice";
 import { fetchAqiSet, zoomToRangeSet } from "../../redux/forecastSlice";
 import { stopAfterLoadSet, rusaPermRouteIdSet, routeLoadingModeSet, startTimestampSet, rwgpsRouteSet, reset } from "../../redux/routeParamsSlice";
-import { metricSet, displayControlTableUiSet } from "../../redux/controlsSlice";
+import { metricSet, displayControlTableUiSet, celsiusToggled, celsiusSet } from "../../redux/controlsSlice";
 import { defaultProvider, providerValues } from "../../redux/providerValues";
 import type { DesktopUIProps } from "../DesktopUI";
 const NewUserPage = React.lazy(() => import(/* webpackChunkName: "NewUserPage" */'./NewUserPage'));
@@ -192,7 +192,8 @@ type QueryParams = {
     startTimestamp: string
     zone: string
     pace: string
-    metric: boolean
+    metric: boolean,
+    celsius: boolean,
     strava_activity: string
     strava_route: string
     strava_error: string
@@ -294,6 +295,7 @@ const updateFromQueryParams = (dispatch : AppDispatch, queryParams : QueryParams
     }
     dispatch(setInterval(queryParams.interval))
     dispatch(metricSet(queryParams.metric))
+    dispatch(celsiusSet(queryParams.celsius))
     dispatch(stravaActivitySet(queryParams.strava_activity))
     dispatch(stravaRouteSet(queryParams.strava_route))
     dispatch(stravaErrorSet(queryParams.strava_error))

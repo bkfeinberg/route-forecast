@@ -51,6 +51,9 @@ const controlsSlice = createSlice({
         metricToggled(state) {
             state.metric = !state.metric
         },
+        celsiusSet(state, action) {
+            state.celsius = action.payload
+        },
         celsiusToggled(state) {
             state.celsius = !state.celsius
         },
@@ -85,6 +88,6 @@ const controlsSlice = createSlice({
     }
 })
 
-export const { metricSet, metricToggled, celsiusToggled, bankedDisplayToggled, controlRemoved,
+export const { metricSet, metricToggled, celsiusSet, celsiusToggled, bankedDisplayToggled, controlRemoved,
     userControlsUpdated, displayControlTableUiSet, controlAdded, clearOpenBusinesses, addOpenBusinesses} = controlsSlice.actions
 export const controlsReducer = controlsSlice.reducer
