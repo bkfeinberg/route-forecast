@@ -15,12 +15,12 @@ export const getRouteInfo = (routeData: GpxRouteData | RwgpsRoute | RwgpsTrip,
   let workingTimestamp = startTimestamp;
   // preflight check before using cached data
   // make sure to get a new forecast request if the starting date is in the past
-  if (cachedRouteData && cachedRouteData.forecastRequest &&
+/*   if (cachedRouteData && cachedRouteData.forecastRequest &&
     cachedRouteData.forecastRequest[0] &&
     DateTime.fromFormat(cachedRouteData.forecastRequest[0].time, "yyyy-MM-dd'T'HH:mm:00ZZZ") < DateTime.now()) {
     workingTimestamp = DateTime.now().plus({ hours: 1 }).toMillis();
   }
-  else if (routeUUID === cachedRouteUUID) {
+  else  */if (routeUUID === cachedRouteUUID) {
     return cachedRouteData;
   }
   if (routeData.type === "route" || routeData.type === "trip") {
