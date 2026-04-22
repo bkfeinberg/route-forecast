@@ -52,7 +52,9 @@ const controlsSlice = createSlice({
             state.metric = !state.metric
         },
         celsiusSet(state, action) {
-            state.celsius = action.payload
+            if (action.payload) {
+                state.celsius = action.payload
+            }
         },
         celsiusToggled(state) {
             state.celsius = !state.celsius
