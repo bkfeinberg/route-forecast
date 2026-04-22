@@ -159,12 +159,13 @@ const getForecastFromNws = async (forecastUrl : string) => {
  * @param {string} zone time zone
  * @param {number} bearing the direction of travel at the time of the forecast
  * @param {function} getBearingDifference - returns the difference between two bearings
- * @param {boolean} isControl the forecast point is from a controle
-  * @returns {Promise<{time: *, distance: *, summary: *, precip: string, humidity: number, cloudCover: string, windSpeed: string,
+ * @param {boolean} isControl the forecast point is from a contrôle
+ * @param {string} lang the language for the forecast summary
+ * @returns {Promise<{time: *, distance: *, summary: *, precip: string, humidity: number, cloudCover: string, windSpeed: string,
  * lat: *, lon: *, temp: string, fullTime: *, relBearing: null, rainy: boolean, windBearing: number,
  * vectorBearing: *, gust: string} | never>} a promise to evaluate to get the forecast results
  */
-const callNWS = async function (lat, lon, currentTime, distance, zone, bearing, getBearingDifference, isControl) {
+const callNWS = async function (lat, lon, currentTime, distance, zone, bearing, getBearingDifference, isControl, lang) {
     const forecastUrl = await getForecastUrl(lat, lon);
     Sentry.setContext('forecastUrl', {'forecastUrl': forecastUrl})
     if (!forecastUrl) {
