@@ -42,7 +42,7 @@ export type RouteParamsState = {
 }
 
 const checkedStartDate = (startDate : DateTime, canForecastPast : boolean) => {
-    if (canForecastPast) return startDate;
+    /*if (canForecastPast) */return startDate;
     const now = DateTime.now();
     if (startDate < now) {
         return startDate.set({year:now.year, month:now.month, day:now.day}).plus({days:1});
