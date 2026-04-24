@@ -386,8 +386,11 @@ class AnalyzeRoute {
                 controls, calculatedValues, point, shouldSkip);
             // see if it's time for forecast
             if (!shouldSkip && ((accumulatedTime + idlingTime) - lastTime) >= intervalInHours) {
-                forecastRequests.push(AnalyzeRoute.addToForecast(point, startTime, (accumulatedTime + idlingTime),
-                    accumulatedDistanceKm * kmToMiles, false));
+                // don't add request with duplicate distance
+                if (Math.round(accumulatedDistanceKm * kmToMiles) !== forecastRequests[forecastRequests.length - 1].distance) {
+                    forecastRequests.push(AnalyzeRoute.addToForecast(point, startTime, (accumulatedTime + idlingTime),
+                        accumulatedDistanceKm * kmToMiles, false));
+                }
                 lastTime = accumulatedTime + idlingTime;
                 previousAccumulatedTime = accumulatedTime;
                 if (forecastPoint) {
