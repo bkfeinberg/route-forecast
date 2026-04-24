@@ -15,7 +15,7 @@ jest.mock('react-ga4', () => ({
 // Mock d3fc-sample
 jest.mock('d3fc-sample', () => ({
   largestTriangleThreeBucket: jest.fn(() => {
-    const mockSampler = jest.fn((data: ChartData[]) => data);
+    const mockSampler = jest.fn((data: ChartData[]) => data) as any;
     mockSampler.x = jest.fn(() => mockSampler);
     mockSampler.y = jest.fn(() => mockSampler);
     mockSampler.bucketSize = jest.fn(() => mockSampler);
