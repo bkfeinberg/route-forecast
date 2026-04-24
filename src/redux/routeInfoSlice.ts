@@ -91,6 +91,10 @@ export interface NullRouteInfoState extends BaseRouteInfoState {
 type RwGpsData = RwgpsRoute | RwgpsTrip
 export type RouteInfoState = RwgpsRouteInfoState | GpxRouteInfoState | NullRouteInfoState
 
+type GpxRoutePayload = {
+    gpx: GpxRouteData,
+    country: string
+}
 const routeInfoSlice = createSlice({
     name:'routeInfo',
     initialState: routeInfoInitialState,
@@ -111,15 +115,15 @@ const routeInfoSlice = createSlice({
                 state.country = action.payload.trip.country_code
             }
         },
-        gpxRouteLoaded(state, action : PayloadAction<GpxRouteData>) {
+        gpxRouteLoaded(state, action : PayloadAction<GpxRoutePayload>) {
             state.routeUUID = uuidv4()
             state.type = "gpx"
-            state.gpxRouteData = action.payload
+            state.gpxRouteData = action.payload.gpx
             state.gpxRouteData.type = "gpx"
             state.rwgpsRouteData = routeInfoInitialState.rwgpsRouteData
-            state.name = getGpxRouteName(action.payload)
-            state.distanceInKm = action.payload.tracks[0].distance.total/1000
-            state.country = "US"
+            state.name = getGpxRouteName(action.payload.gpx)
+            state.distanceInKm = action.payload.gpx.tracks[0].distance.total/1000
+            state.country = action.payload.country
         },
         routeDataCleared(state) {
             const {rwgpsRouteData, gpxRouteData, name, type, distanceInKm, routeUUID} = routeInfoInitialState

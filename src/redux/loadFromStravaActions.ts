@@ -135,7 +135,7 @@ const getRouteParser = async function () {
     return parser.default;
 };
 
-const loadGpxRoute = function(gpxFileData : string) {
+const loadGpxRoute = function(gpxFileData : string, country : string) {
     return async function (dispatch : AppDispatch) {
         trace('Loading GPX parser module');
         const parser = await getRouteParser().catch((err) => {dispatch(gpxRouteLoadingFailed(err));return null});
@@ -147,7 +147,7 @@ const loadGpxRoute = function(gpxFileData : string) {
         const parsedResults = parser.loadGpxFile(gpxFileData)
         if (parsedResults.gpxData) {
             trace("GPX route loaded successfully, dispatching to store");
-            dispatch(gpxRouteLoaded(parsedResults.gpxData));
+            dispatch(gpxRouteLoaded({gpx:parsedResults.gpxData, country:country}));
         } else if (parsedResults.error) {
             dispatch(gpxRouteLoadingFailed(parsedResults.error))
         }
@@ -175,6 +175,14 @@ export const loadStravaRoute = (routeId : string) => {
         api.setDefaultHeader('Authorization', `Bearer ${access_token}`)
         try {
             trace(`Fetching Strava route with id ${routeId}`);
+            const routeMetadata = await api.get(`routes/${routeId}`);
+            let routeCountry = 'US';
+            if (routeMetadata) {
+                const metadata = JSON.parse(routeMetadata);
+                if (metadata.segments && metadata.segments.length > 0 && metadata.segments[0].country) {
+                    routeCountry = metadata.segments[0].country;
+                }
+            }
             const routeInfo = await api.get(`routes/${routeId}/export_gpx`)
             if (!routeInfo || typeof routeInfo !== 'string' || routeInfo.trim().length === 0) {
                 trace('Received empty or invalid response from Strava when fetching route');
@@ -189,7 +197,7 @@ export const loadStravaRoute = (routeId : string) => {
                 }
             } else if (routeInfo.includes('<gpx') || routeInfo.includes('<?xml')) {
                 trace('Returning GPX data from Strava, dispatching load');
-                return dispatch(loadGpxRoute(routeInfo));
+                return dispatch(loadGpxRoute(routeInfo, routeCountry));
             } else {
                 return dispatch(errorDetailsSet('Error fetching Strava route: Data received from Strava was not recognized as GPX.'));
             }

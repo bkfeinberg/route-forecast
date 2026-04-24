@@ -63,7 +63,7 @@ describe('routeInfoSlice reducer', () => {
             type: 'gpx'
         };
         mockUuid.mockReturnValueOnce('u2');
-        const state = routeInfoReducer(undefined, gpxRouteLoaded(gpx));
+        const state = routeInfoReducer(undefined, gpxRouteLoaded({gpx:gpx, country: 'US'}));
         expect(state.type).toBe('gpx');
         expect(state.gpxRouteData).toEqual(gpx);
         // track name is used for route name

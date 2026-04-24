@@ -146,7 +146,7 @@ describe('routeParamsSlice reducer', () => {
             expect(rwState.segment[1]).toBe(123);
 
             const gpxState = routeParamsReducer(initialState,
-                gpxRouteLoaded({ name: '', tracks: [{ distance: { total: 5 }, points: [], name: '', link: '' }], type: 'gpx' })
+                gpxRouteLoaded({ gpx: { name: '', tracks: [{ distance: { total: 5 }, points: [], name: '', link: '' }], type: 'gpx' }, country: 'US' })
             );
             expect(gpxState.segment[1]).toBe(5000);
         });

@@ -189,7 +189,7 @@ const routeParamsSlice = createSlice({
                 }
             })
             .addCase(gpxRouteLoaded, (state, action) => {
-                state.segment = [state.segment[0], action.payload.tracks[0].distance.total*1000]
+                state.segment = [state.segment[0], action.payload.gpx.tracks[0].distance.total*1000]
             })
             .addCase('routeInfo/routeDataCleared', (state) => {
                 state.segment = routeParamsInitialState.segment
