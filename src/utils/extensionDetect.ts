@@ -43,12 +43,17 @@ export const extensionIsInstalled = () => {
                 if (chrome.runtime.lastError) {
                     warn(chrome.runtime.lastError.message||'Unknown error when checking extension version');
                     resolve(false);
+                    return;
                 }
                 if (reply) {
                     if (reply.version) {
                         if (reply.version >= requiredVersion) {
                             resolve(true);
+                        } else {
+                            resolve(false);
                         }
+                    } else {
+                        resolve(false);
                     }
                 }
                 else {
