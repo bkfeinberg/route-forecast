@@ -235,7 +235,7 @@ const ForecastTable = () => {
     }
 
     const styleForControl = (point: Forecast) => {
-        return {color:point.isControl?'blue':'black'}
+        return {color:point.isControl?'blueviolet':'black'}
     }
 
     type MakeSummaryProps = {
