@@ -19,7 +19,7 @@
     "@loadable/component": "^5.13.2",
     "@mantine/core": "^9.0.0",
     "@mantine/dates": "^9.0.0",
-    "@mantine/hooks": "^9.0.0",
+    "@mantine/hooks": "^9.1.1",
     "@mantine/notifications": "^9.0.0",
     "@mui/material": "^9.0.0",
     "@reduxjs/toolkit": "^2.9.1",
