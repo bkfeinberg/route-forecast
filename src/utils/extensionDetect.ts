@@ -1,4 +1,4 @@
-const requiredVersion = 1.0;
+const requiredVersion = 1.4;
 import {logger} from "@sentry/react";
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 
@@ -47,7 +47,9 @@ export const extensionIsInstalled = () => {
                 }
                 if (reply) {
                     if (reply.version) {
-                        if (reply.version >= requiredVersion) {
+                        // updated to use localeCompare for numeric comparison of versions, in case we move to a 2.0 version in the future
+                        const versionString = typeof reply.version === 'string' ? reply.version : reply.version.toString();
+                        if (versionString.localeCompare(requiredVersion.toString(), undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
                             resolve(true);
                         } else {
                             resolve(false);
@@ -64,7 +66,7 @@ export const extensionIsInstalled = () => {
     } else if (browserIsFirefox()) {
         if (window.getRpExtVersion !== undefined) {
             const version = window.getRpExtVersion();
-            return Promise.resolve(version >= requiredVersion);
+            return Promise.resolve(version.toString().localeCompare(requiredVersion.toString(), undefined, { numeric: true, sensitivity: 'base' }) >= 0);
         } else {
             return Promise.resolve(false);
         }
@@ -77,7 +79,8 @@ export const extensionIsInstalled = () => {
                     "com.randoplan.extension.Extension (2B6A6N9QBQ)",
                     { message: "version" }).then(response => {
                         if (response && response.version) {
-                            return resolve(response.version >= requiredVersion)
+                            const versionString = typeof response.version === 'number' ? response.version.toString() : response.version;
+                            return resolve(versionString.localeCompare(requiredVersion.toString(), undefined, { numeric: true, sensitivity: 'base' }) >= 0)
                         } else {
                             return resolve(false);
                         }
