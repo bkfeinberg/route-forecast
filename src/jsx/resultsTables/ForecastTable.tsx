@@ -36,6 +36,13 @@ type TimeFormats = {
   }
 const timeFormatForLang : TimeFormats = {'en':'h:mm a', 'en-US':'h:mm a', 'fr':'H:mm', 'es':'H:mm', 'it': 'H:mm'}
   
+const RouteNameWithStartDate = ({name, startDate} : {name: string, startDate: DateTime}) => {
+    return (<div /*style={{display:'flex', flexDirection:'column', alignItems:'center'}}*/>
+        <h2>{name}</h2>
+        <h4>{startDate.toLocaleString()}</h4>
+    </div>)
+}
+
 const displayBacklink = (provider : string) => {
     switch (provider) {
         case 'climacell':
@@ -386,7 +393,7 @@ const ForecastTable = () => {
 
         <div className="animated slideInLeft">
             <InstallExtensionButton/>
-            {(!isLargeEnough || !isLandscape) && <h2>{routeName}</h2>}
+            {(!isLargeEnough || !isLandscape) && RouteNameWithStartDate({name:routeName, startDate:startTime})}
             <Sentry.ErrorBoundary  fallback={<h2>Something went wrong.</h2>}>
                 <div style={{ display: 'flex', flexDirection: "column", overflowY: 'scroll'}}>
                     <div style={{ display: 'flex', padding: '16px', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
