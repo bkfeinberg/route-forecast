@@ -46,8 +46,7 @@ export const usePointsAndBounds = (): PointsAndBounds => {
     pointsAndBounds = gpxParser.computePointsAndBounds(gpxParser.parseGpxRouteStream(gpxRouteData)), [gpxRouteData];
   }
   if (pointsAndBounds.pointList.length === 0) {
-    Sentry.captureMessage(
-      `Empty points and bounds :Strava activity empty=${stravaActivityStream === null} Strava route: ${stravaRoute} RWGPS:${rwgpsRoute} RWGPS empty:${rwgpsRouteData === null} GPX empty:${gpxRouteData === null}`);
+    pointsAndBounds.points = undefined;
   }
   if (pointsAndBounds.pointList.length > 0) {
     pointsAndBounds.points = pointsAndBounds.pointList
