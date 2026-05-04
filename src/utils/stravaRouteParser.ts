@@ -217,7 +217,7 @@ class StravaActivityParser {
             if (distanceInMiles >= currentControl!.distance) {
                 let currentMoment = startMoment.plus({seconds:time[index]})
                 let ctrlId = currentControl!.id
-                arrivalTimes.push({time:currentMoment.toFormat('EEE, MMM dd h:mma'),val:ctrlId?ctrlId:0});
+                arrivalTimes.push({time:currentMoment.toFormat('EEE, MMM dd h:mma'),val:currentControl!.distance});
                 if (controlsCopy.length===0) {
                     return;
                 } else {
