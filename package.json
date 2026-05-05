@@ -28,7 +28,7 @@
     "@sentry/profiling-node": "^10.19.0",
     "@sentry/react": "^10.19.0",
     "@sentry/tracing": "^7.120.4",
-    "@tabler/icons": "^3.35.0",
+    "@tabler/icons": "^3.42.0",
     "@tabler/icons-react": "^3.35.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@turf/clean-coords": "^7.3.4",
