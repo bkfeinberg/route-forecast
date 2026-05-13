@@ -236,7 +236,7 @@ const findMapBounds = (points : MapPointList, bounds : Bounds, zoomToRange : boo
             if (!map) return;
 
             // The rendering canvas
-            const canvas = map.getDiv().querySelector('canvas');
+            const canvas = map.getDiv()?.querySelector('canvas');
             if (!canvas) return;
 
             const handleContextLost = (event: { preventDefault: () => void; }) => {
