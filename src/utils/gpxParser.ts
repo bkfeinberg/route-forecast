@@ -382,6 +382,14 @@ class AnalyzeRoute {
                     previousAccumulatedTime
                 );
             }
+            if (Number.isNaN(accumulatedTime)) {
+                accumulatedTime = 0;
+                Sentry.captureMessage(`NaN accumulated time at point ${point.lat},${point.lon} with accumulated distance ${accumulatedDistanceKm} and climb ${accumulatedClimbMeters} baseSpeed ${baseSpeed}`)
+            }
+            if (Number.isNaN(idlingTime)) {
+                idlingTime = 0;
+                Sentry.captureMessage(`NaN idling time at point ${point.lat},${point.lon} with accumulated distance ${accumulatedDistanceKm} and climb ${accumulatedClimbMeters} baseSpeed ${baseSpeed}`)
+            }
             idlingTime += checkAndUpdateControls(accumulatedDistanceKm, startTime, (accumulatedTime + idlingTime),
                 controls, calculatedValues, point, shouldSkip);
             // see if it's time for forecast
@@ -503,6 +511,10 @@ class AnalyzeRoute {
             return 0;
         }
         let effectiveSpeed = AnalyzeRoute.getHilliness(climbInFeet, distanceInMiles, baseSpeed);
+        if (effectiveSpeed <= 0) {
+            Sentry.captureMessage(`Effective speed is zero or negative at ${climbInFeet} feet of climb, ${distanceInKm}km, baseSpeed ${baseSpeed}mph`);
+            return 0;
+        }
         return distanceInMiles / effectiveSpeed;     // hours
     }
 
