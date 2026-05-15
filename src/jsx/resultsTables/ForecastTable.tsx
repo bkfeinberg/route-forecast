@@ -405,6 +405,7 @@ const ForecastTable = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems:'center', justifyContent:'center' }}>
                                 <div style={{ flex: 1 }}>
                                     <WeatherCorrections />
+                                    {ForecastValues.finishTime && finishTimeFormat && <MakeSummaryLine startTime={startTime} finishTime={ForecastValues.finishTime} finishTimeFormat={finishTimeFormat} userControls={userControls} />}
                                 </div>
                                 <div style={{ marginTop: "5px", textAlign: "left" }}>
                                     <ShortUrl />
