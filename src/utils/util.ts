@@ -92,7 +92,12 @@ export const getRouteNumberFromValue = (value : string) => {
   if (value &&  typeof value === 'string') {
     const lastSlashIndex = value.lastIndexOf('/');
     if (lastSlashIndex >= 0) {
-      return value.substring(lastSlashIndex + 1)
+      const routeNumber = value.substring(lastSlashIndex + 1);
+      if (routeNumber.endsWith("?")) {
+        return routeNumber.slice(0, -1);
+      } else {
+        return routeNumber;
+      }
     } else {
       return value
     }

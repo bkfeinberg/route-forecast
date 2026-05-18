@@ -52,7 +52,7 @@ export const Table = ({data, onCellValueChanged} : TableProps) => {
       display: "grid",
       gridTemplateColumns: `repeat(${columns.length}, 1fr)`,
       gridAutoRows: "minmax(20px, auto)",
-      fontSize: "10px"
+      fontSize: "12px"
     }}>
       {columns.map(({render: columnTitle, name, headerStyle: customHeaderStyle} : Column, index:number) =>
         <div key={name} style={{...headerStyle, ...customHeaderStyle, gridColumn: index + 1, gridRow: 1}}>
