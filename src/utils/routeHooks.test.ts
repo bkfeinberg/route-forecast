@@ -1,8 +1,10 @@
-import { calculateWindResult } from './routeHooks';
+import { calculateWindResult, usePointsAndBounds } from './routeHooks';
 import type { ControlsState } from '../redux/controlsSlice';
 import type { RouteInfoState } from '../redux/routeInfoSlice';
-import type { WindAdjustResults } from './gpxParser';
+import type { WindAdjustResults, Point } from './gpxParser';
 import { DateTime } from 'luxon';
+import { useAppSelector } from './hooks';
+import { routeLoadingModes } from '../data/enums';
 
 // Mock the gpxParser module
 jest.mock('./gpxParser', () => ({
@@ -13,6 +15,14 @@ jest.mock('./gpxParser', () => ({
     parseGpxRouteStream: jest.fn(),
     parseRwgpsRouteStream: jest.fn(),
     walkRwgpsRoute: jest.fn(),
+  }
+}));
+
+// Mock the stravaRouteParser module
+jest.mock('./stravaRouteParser', () => ({
+  __esModule: true,
+  default: {
+    computePointsAndBounds: jest.fn(),
   }
 }));
 
@@ -488,6 +498,281 @@ describe('routeHooks', () => {
       expect(result).toHaveProperty('chartData');
       expect(Array.isArray(result.adjustedTimes)).toBe(true);
       expect(Array.isArray(result.chartData)).toBe(true);
+    });
+  });
+
+  describe('usePointsAndBounds', () => {
+    let mockGpxParser: any;
+    let mockStravaParser: any;
+    let mockUseAppSelector: jest.MockedFunction<typeof useAppSelector>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockGpxParser = require('./gpxParser').default;
+      mockStravaParser = require('./stravaRouteParser').default;
+      mockUseAppSelector = useAppSelector as jest.MockedFunction<typeof useAppSelector>;
+    });
+
+    it('should return default empty bounds when no route data is available', () => {
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: null, gpxRouteData: null },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.RWGPS, rwgpsRoute: '' } },
+          strava: { route: '', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(result.pointList).toEqual([]);
+      expect(result.points).toBeUndefined();
+      expect(result.bounds).toEqual({
+        min_latitude: 90,
+        min_longitude: 180,
+        max_latitude: -90,
+        max_longitude: -180,
+      });
+    });
+
+    it('should process STRAVA mode with activityStream', () => {
+      const mockPoints: Point[] = [
+        { lat: 40.7128, lon: -74.0060, dist: 0, elevation: 10 },
+        { lat: 40.7138, lon: -74.0050, dist: 100, elevation: 12 },
+      ];
+      const mockBounds = {
+        min_latitude: 40.7128,
+        min_longitude: -74.0060,
+        max_latitude: 40.7138,
+        max_longitude: -74.0050,
+      };
+      const mockActivityStream = { latlng: [[40.7128, -74.0060], [40.7138, -74.0050]] };
+
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: null, gpxRouteData: null },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.STRAVA, rwgpsRoute: '' } },
+          strava: { route: 'strava-route-123', activityStream: mockActivityStream },
+        };
+        return selector(state);
+      });
+
+      mockStravaParser.computePointsAndBounds.mockReturnValue({
+        pointList: mockPoints,
+        bounds: mockBounds,
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(mockStravaParser.computePointsAndBounds).toHaveBeenCalledWith(mockActivityStream);
+      expect(result.pointList).toEqual(mockPoints);
+      expect(result.bounds).toEqual(mockBounds);
+      expect(result.points).toEqual([
+        { lat: 40.7128, lng: -74.0060, dist: 0 },
+        { lat: 40.7138, lng: -74.0050, dist: 100 },
+      ]);
+    });
+
+    it('should process STRAVA mode with stravaRoute and gpxRouteData when activityStream is null', () => {
+      const mockGpxData = 'mock-gpx-string';
+      const mockPoints: Point[] = [
+        { lat: 40.7128, lon: -74.0060, dist: 0, elevation: 10 },
+        { lat: 40.7138, lon: -74.0050, dist: 100, elevation: 12 },
+      ];
+      const mockBounds = {
+        min_latitude: 40.7128,
+        min_longitude: -74.0060,
+        max_latitude: 40.7138,
+        max_longitude: -74.0050,
+      };
+
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: null, gpxRouteData: mockGpxData },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.STRAVA, rwgpsRoute: '' } },
+          strava: { route: 'strava-route-456', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      mockGpxParser.parseGpxRouteStream.mockReturnValue(mockPoints);
+      mockGpxParser.computePointsAndBounds.mockReturnValue({
+        pointList: mockPoints,
+        bounds: mockBounds,
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(mockGpxParser.parseGpxRouteStream).toHaveBeenCalledWith(mockGpxData);
+      expect(mockGpxParser.computePointsAndBounds).toHaveBeenCalledWith(mockPoints);
+      expect(result.pointList).toEqual(mockPoints);
+      expect(result.bounds).toEqual(mockBounds);
+    });
+
+    it('should process RWGPS mode with rwgpsRouteData', () => {
+      const mockRwgpsData = {
+        type: 'route',
+        route: { track_points: [{ lat: 40.7128, lon: -74.0060 }] },
+      };
+      const mockPoints: Point[] = [
+        { lat: 40.7128, lon: -74.0060, dist: 0, elevation: 10 },
+        { lat: 40.7138, lon: -74.0050, dist: 100, elevation: 12 },
+      ];
+      const mockBounds = {
+        min_latitude: 40.7128,
+        min_longitude: -74.0060,
+        max_latitude: 40.7138,
+        max_longitude: -74.0050,
+      };
+
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: mockRwgpsData, gpxRouteData: null },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.RWGPS, rwgpsRoute: 'rwgps-123' } },
+          strava: { route: '', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      mockGpxParser.parseRwgpsRouteStream.mockReturnValue(mockPoints);
+      mockGpxParser.computePointsAndBounds.mockReturnValue({
+        pointList: mockPoints,
+        bounds: mockBounds,
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(mockGpxParser.parseRwgpsRouteStream).toHaveBeenCalledWith(mockRwgpsData);
+      expect(mockGpxParser.computePointsAndBounds).toHaveBeenCalledWith(mockPoints);
+      expect(result.pointList).toEqual(mockPoints);
+      expect(result.bounds).toEqual(mockBounds);
+    });
+
+    it('should process GPX mode when rwgpsRouteData is null', () => {
+      const mockGpxData = 'mock-gpx-string';
+      const mockPoints: Point[] = [
+        { lat: 40.7128, lon: -74.0060, dist: 0, elevation: 10 },
+        { lat: 40.7138, lon: -74.0050, dist: 100, elevation: 12 },
+      ];
+      const mockBounds = {
+        min_latitude: 40.7128,
+        min_longitude: -74.0060,
+        max_latitude: 40.7138,
+        max_longitude: -74.0050,
+      };
+
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: null, gpxRouteData: mockGpxData },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.RWGPS, rwgpsRoute: '' } },
+          strava: { route: '', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      mockGpxParser.parseGpxRouteStream.mockReturnValue(mockPoints);
+      mockGpxParser.computePointsAndBounds.mockReturnValue({
+        pointList: mockPoints,
+        bounds: mockBounds,
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(mockGpxParser.parseGpxRouteStream).toHaveBeenCalledWith(mockGpxData);
+      expect(mockGpxParser.computePointsAndBounds).toHaveBeenCalledWith(mockPoints);
+      expect(result.pointList).toEqual(mockPoints);
+      expect(result.bounds).toEqual(mockBounds);
+    });
+
+    it('should map pointList to points with correct property names', () => {
+      const mockPoints: Point[] = [
+        { lat: 40.7128, lon: -74.0060, dist: 0, elevation: 10 },
+        { lat: 40.7138, lon: -74.0050, dist: 100, elevation: 12 },
+        { lat: 40.7148, lon: -74.0040, dist: 200, elevation: 11 },
+      ];
+      const mockBounds = {
+        min_latitude: 40.7128,
+        min_longitude: -74.0060,
+        max_latitude: 40.7148,
+        max_longitude: -74.0040,
+      };
+
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: null, gpxRouteData: 'gpx-data' },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.RWGPS, rwgpsRoute: '' } },
+          strava: { route: '', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      mockGpxParser.parseGpxRouteStream.mockReturnValue(mockPoints);
+      mockGpxParser.computePointsAndBounds.mockReturnValue({
+        pointList: mockPoints,
+        bounds: mockBounds,
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(result.points).toHaveLength(3);
+      expect(result.points?.[0]).toEqual({ lat: 40.7128, lng: -74.0060, dist: 0 });
+      expect(result.points?.[1]).toEqual({ lat: 40.7138, lng: -74.0050, dist: 100 });
+      expect(result.points?.[2]).toEqual({ lat: 40.7148, lng: -74.0040, dist: 200 });
+    });
+
+    it('should set points to undefined when pointList is empty', () => {
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: null, gpxRouteData: null },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.RWGPS, rwgpsRoute: '' } },
+          strava: { route: '', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(result.pointList).toEqual([]);
+      expect(result.points).toBeUndefined();
+    });
+
+    it('should prefer rwgpsRouteData over gpxRouteData when both are present', () => {
+      const mockRwgpsData = {
+        type: 'route',
+        route: { track_points: [{ lat: 40.7128, lon: -74.0060 }] },
+      };
+      const mockGpxData = 'mock-gpx-string';
+      const mockPoints: Point[] = [
+        { lat: 40.7128, lon: -74.0060, dist: 0, elevation: 10 },
+        { lat: 40.7138, lon: -74.0050, dist: 100, elevation: 12 },
+      ];
+      const mockBounds = {
+        min_latitude: 40.7128,
+        min_longitude: -74.0060,
+        max_latitude: 40.7138,
+        max_longitude: -74.0050,
+      };
+
+      mockUseAppSelector.mockImplementation((selector: any) => {
+        const state = {
+          routeInfo: { rwgpsRouteData: mockRwgpsData, gpxRouteData: mockGpxData },
+          uiInfo: { routeParams: { routeLoadingMode: routeLoadingModes.RWGPS, rwgpsRoute: 'rwgps-123' } },
+          strava: { route: '', activityStream: null },
+        };
+        return selector(state);
+      });
+
+      mockGpxParser.parseRwgpsRouteStream.mockReturnValue(mockPoints);
+      mockGpxParser.computePointsAndBounds.mockReturnValue({
+        pointList: mockPoints,
+        bounds: mockBounds,
+      });
+
+      const result = usePointsAndBounds();
+
+      expect(mockGpxParser.parseRwgpsRouteStream).toHaveBeenCalledWith(mockRwgpsData);
+      expect(mockGpxParser.parseGpxRouteStream).not.toHaveBeenCalled();
+      expect(result.pointList).toEqual(mockPoints);
     });
   });
 });

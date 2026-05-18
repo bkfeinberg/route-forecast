@@ -40,10 +40,10 @@ type ForecastInfo = Array<SingleForecast>
 export type Point = {lat : number, lon: number, dist?: number, elevation: number}
 export type CalculatedValue = {arrival : string, banked: number, val: number, distance: number, [index:string]:any}
 interface RwgpsCoursePointWithN {
-    d:number, t:string, n:string, x:number, y:number, i:number, description:never
+    d:number, t:string, n:string, x:number, y:number, i:number, description?:never
 }
 interface RwgpsCoursePointWithDescription {
-    d:number, t:string, n:never, x:number, y:number, i:number, description:string
+    d:number, t:string, n?:never, x:number, y:number, i:number, description:string
 }
 
 export type RwgpsCoursePoint = RwgpsCoursePointWithN|RwgpsCoursePointWithDescription
