@@ -10,7 +10,7 @@ import { Button, Paper } from "@mantine/core";
 
 import { IconPlus } from "@tabler/icons-react"
 
-export const ControlTableContainer = () => {
+export const ControlTableContainer = ({ref} : {ref?: React.RefObject<HTMLDivElement | null>}) => {
   const displayBanked = useAppSelector(state => state.controls.displayBanked)
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
@@ -18,7 +18,7 @@ export const ControlTableContainer = () => {
   return (
     <>
       <Sentry.ErrorBoundary fallback={<h2>Something went wrong.</h2>}>
-        <Paper withBorder shadow={"sm"} radius={3} style={{ margin: '16px', display: "flex", flexFlow: "column", alignItems: "center" }}>
+        <Paper ref={ref} withBorder shadow={"sm"} radius={3} style={{ margin: '16px', display: "flex", flexFlow: "column", alignItems: "center" }}>
             <Sentry.ErrorBoundary fallback={<h2>Something else went wrong.</h2>}>
               <ControlTable />
               <AddRowButton/>

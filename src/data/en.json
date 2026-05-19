@@ -98,7 +98,8 @@
                     "enabled":"Aqi fetch enabled",
                     "disabled":"AQI fetch disabled"
                 },
-                "tableCopied":"Forecast table copied"
+                "tableCopied":"Forecast table copied",
+                "controlsCopied":"Route control table copied"
             },
             "controls":{
                 "name":"Name",

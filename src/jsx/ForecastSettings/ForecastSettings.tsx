@@ -18,11 +18,12 @@ import WeatherProviderSelector from "./WeatherProviderSelector"
 import Segment from './Segment'
 import { Button, Notification, Checkbox, Collapse, Stack, CheckboxGroup, Paper } from '@mantine/core';
 
-import { IconSettings } from "@tabler/icons-react"
+import { IconClipboard, IconSettings } from "@tabler/icons-react"
 import { useAppSelector, useAppDispatch } from '../../utils/hooks';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useState, useRef } from 'react';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useDisclosure, useClickOutside } from '@mantine/hooks';
+import { notifications } from "@mantine/notifications";
 
 const ForecastSettings = () => {
     // const [showSettings, setShowSettings] = useState(false)
@@ -48,6 +49,56 @@ const ForecastSettings = () => {
     const toggleDownloadAll = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.checked) setComputeStdDEv(false)
         return setDownloadAll(!downloadAll)
+    }
+
+    const controlTableRef = useRef<HTMLDivElement>(null)
+
+    const fallbackCopy = () => {
+        const htmlTable = controlTableRef.current
+        const range = document.createRange()
+        const selection = window.getSelection();
+        if (htmlTable && selection) {
+            range.selectNode(htmlTable)
+            selection.removeAllRanges();
+            selection.addRange(range)
+            const copied = document.execCommand('copy')
+            console.log('copied: ', copied)
+            selection.removeAllRanges();
+        }
+    }  
+
+    const copyTable = async (event: React.MouseEvent) => {
+        // ReactGA.event('tutorial_complete')
+        const htmlTable = controlTableRef.current
+        if (htmlTable) {
+            if (navigator.clipboard && document.hasFocus()) {
+                const htmlContent = htmlTable.innerHTML;
+                const plainText = htmlTable.innerText;
+
+                // 2. Create Blobs for both HTML and plain text (fallback)
+                const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+                const textBlob = new Blob([plainText], { type: 'text/plain' });
+
+                // 3. Create a ClipboardItem containing both formats
+                const item = new ClipboardItem({
+                    'text/html': htmlBlob,
+                    'text/plain': textBlob
+                });
+
+                try {
+                    // 4. Write to the system clipboard
+                    await navigator.clipboard.write([item]);
+                    console.log('Formatted content copied!');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    fallbackCopy();
+                    notifications.show({ message: t('toasts.controlsCopied'), autoClose: 3000, withCloseButton: false });
+                }
+            } else {
+                fallbackCopy();
+                notifications.show({ message: t('toasts.controlsCopied'), autoClose: 3000, withCloseButton: false });
+            }
+        }
     }
 
     return (
@@ -108,8 +159,14 @@ const ForecastSettings = () => {
                     </LocationContext.Consumer>
                 </div>
             </div>
-            <ToggleButtonOpaque icon={<IconChevronDown />} active={showControlPoints} onClick={() => { setShowControlPoints() }}>{t('buttons.stops')}</ToggleButtonOpaque>
-            {showControlPoints && <ControlTableContainer />}
+            <div style={{ display: "flex", alignItems: "center" }}>
+                <ToggleButtonOpaque icon={<IconChevronDown />} active={showControlPoints} onClick={() => { setShowControlPoints() }}>{t('buttons.stops')}</ToggleButtonOpaque>
+                <div style={{paddingLeft:'20px'}}>
+                    <Button size='compact-sm' variant='default' leftSection={<IconClipboard size={16}/>} onClick={copyTable}/>
+                </div>
+            </div>
+
+            {showControlPoints && <ControlTableContainer ref={controlTableRef} />}
         </div>
     )
 }
