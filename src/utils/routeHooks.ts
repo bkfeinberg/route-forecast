@@ -76,24 +76,18 @@ interface WindResultInputs {
   routeInfo: RouteInfoState;
   [index: string]: any;
 }
-type WalkRouteResult = {
-  forecastRequest: [];
-  points: [];
-  values: [];
-  finishTime: String;
-  timeInHours: number;
-};
+export type ExpandedWindResult = WindAdjustResults & {timeOnFlat: number};
 type CachedWindResult = {
-  result: WindAdjustResults;
+  result: ExpandedWindResult;
   dependencyValues: WindResultInputs | { [index: string]: any; };
 };
 let lastWindResult: CachedWindResult = {
   result: {
     weatherCorrectionMinutes: 0, calculatedControlPointValues: [],
-    maxGustSpeed: 0, finishTime: "", adjustedTimes: [], chartData: []
+    maxGustSpeed: 0, finishTime: "", adjustedTimes: [], chartData: [], timeOnFlat: 0
   }, dependencyValues: {}
 };
-export const calculateWindResult = (inputs: WindResultInputs): WindAdjustResults => {
+export const calculateWindResult = (inputs: WindResultInputs): ExpandedWindResult => {
   if (dependencies.every(dependency => inputs[dependency] === lastWindResult.dependencyValues[dependency])) {
     return lastWindResult.result;
   }
@@ -101,7 +95,7 @@ export const calculateWindResult = (inputs: WindResultInputs): WindAdjustResults
   const routeInfo = routeInfoState.rwgpsRouteData ? routeInfoState.rwgpsRouteData : routeInfoState.gpxRouteData;
   let result;
   if (routeInfo) {
-    const { points, values, finishTime, totalDistMeters } = getRouteInfo(
+    const { points, values, finishTime, totalDistMeters, timeOnFlat } = getRouteInfo(
       routeInfo,
       routeParams.startTimestamp,
       routeParams.zone,
@@ -130,12 +124,12 @@ export const calculateWindResult = (inputs: WindResultInputs): WindAdjustResults
     result = {
       weatherCorrectionMinutes: weatherCorrectionMinutes,
       calculatedControlPointValues: calculatedControlPointValues, maxGustSpeed: maxGustSpeed,
-      finishTime: adjustedFinishTime, adjustedTimes, chartData: chartData
+      finishTime: adjustedFinishTime, adjustedTimes, chartData: chartData, timeOnFlat: timeOnFlat
     };
   } else {
     result = {
       weatherCorrectionMinutes: 0, calculatedControlPointValues: [],
-      maxGustSpeed: 0, finishTime: null, adjustedTimes: [], chartData: []
+      maxGustSpeed: 0, finishTime: null, adjustedTimes: [], chartData: [], timeOnFlat: 0
     };
   }
   lastWindResult = { result, dependencyValues: inputs };

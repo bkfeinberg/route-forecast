@@ -17,7 +17,7 @@ import { TimeFields } from "./TimeFields";
 import WeatherProviderSelector from "./WeatherProviderSelector"
 import Segment from './Segment'
 import { Button, Notification, Checkbox, Collapse, Stack, CheckboxGroup, Paper } from '@mantine/core';
-
+import * as Sentry from '@sentry/react';
 import { IconClipboard, IconSettings } from "@tabler/icons-react"
 import { useAppSelector, useAppDispatch } from '../../utils/hooks';
 import { ChangeEvent, useState, useRef } from 'react';
@@ -53,35 +53,29 @@ const ForecastSettings = () => {
         return setDownloadAll(!downloadAll)
     }
 
-    const controlTableRef = useRef<HTMLDivElement>(null)
-
     const copyTable = async (event: React.MouseEvent) => {
         // ReactGA.event('tutorial_complete')
-        const controlsTableAsString = userControls.reduce((accum,current) => accum += `${current.name}\t${current.distance}\t${current.duration}\t${controls.find(control=>control.distance===current.distance)?.arrival || ''}\n`, '')
-        const htmlTable = controlTableRef.current
-        if (htmlTable) {
-            if (navigator.clipboard && document.hasFocus()) {
+        const controlsTableAsString = userControls.reduce((accum, current) => accum += `${current.name}\t${current.distance}\t${current.duration}\t${controls.find(control => control.distance === current.distance)?.arrival || ''}\n`, '')
+        if (navigator.clipboard && document.hasFocus()) {
 
-                // 2. Create Blobs for both HTML and plain text (fallback)
-                const textBlob = new Blob([controlsTableAsString], { type: 'text/plain' });
+            // 2. Create Blobs for both HTML and plain text (fallback)
+            const textBlob = new Blob([controlsTableAsString], { type: 'text/plain' });
 
-                // 3. Create a ClipboardItem containing both formats
-                const item = new ClipboardItem({
-                    'text/plain': textBlob
-                });
+            // 3. Create a ClipboardItem containing both formats
+            const item = new ClipboardItem({
+                'text/plain': textBlob
+            });
 
-                try {
-                    // 4. Write to the system clipboard
-                    await navigator.clipboard.write([item]);
-                    console.log('Formatted content copied!');
-                    notifications.show({ message: t('toasts.controlsCopied'), autoClose: 3000, withCloseButton: false });
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
-                    notifications.show({ message: 'Cannot copy to clipboard', autoClose: 3000, withCloseButton: false });
-                }
-            } else {
-                notifications.show({ message: 'Copy to clipboard not supported', autoClose: 3000, withCloseButton: false });
+            try {
+                // 4. Write to the system clipboard
+                await navigator.clipboard.write([item]);
+                notifications.show({ message: t('toasts.controlsCopied'), autoClose: 3000, withCloseButton: false });
+            } catch (err) {
+                Sentry.captureException(err);
+                notifications.show({ message: 'Cannot copy to clipboard', autoClose: 3000, withCloseButton: false });
             }
+        } else {
+            notifications.show({ message: 'Copy to clipboard not supported', autoClose: 3000, withCloseButton: false });
         }
     }
 
@@ -150,7 +144,7 @@ const ForecastSettings = () => {
                 </div>
             </div>
 
-            {showControlPoints && <ControlTableContainer ref={controlTableRef} />}
+            {showControlPoints && <ControlTableContainer />}
         </div>
     )
 }
