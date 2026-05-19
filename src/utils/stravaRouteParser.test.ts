@@ -237,13 +237,13 @@ describe('StravaActivityParser', () => {
 
             const controlPoints: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Control 1',
                     distance: 6.2, // ~10000 meters
                     lat: 40.15,
                     lon: -105.15,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
 
@@ -270,22 +270,22 @@ describe('StravaActivityParser', () => {
 
             const controlPoints: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Control 2',
                     distance: 9.3, // ~15000 meters
                     lat: 40.25,
                     lon: -105.25,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 },
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Control 1',
                     distance: 6.2, // ~10000 meters
                     lat: 40.15,
                     lon: -105.15,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
 
@@ -352,13 +352,13 @@ describe('StravaActivityParser', () => {
             const arrivalTimes: Array<{ time: string; val: number }> = [];
             const controlPoints: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Control 1',
                     distance: 6.2, // miles
                     lat: 40.1,
                     lon: -105.1,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
 
@@ -378,22 +378,22 @@ describe('StravaActivityParser', () => {
             const arrivalTimes: Array<{ time: string; val: number }> = [];
             const controlPoints: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Control 1',
                     distance: 3.1, // miles (~5000 meters)
                     lat: 40.05,
                     lon: -105.05,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 },
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Control 2',
                     distance: 6.2, // miles (~10000 meters)
                     lat: 40.1,
                     lon: -105.1,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
 

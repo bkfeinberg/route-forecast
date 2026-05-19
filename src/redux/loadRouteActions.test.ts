@@ -29,13 +29,13 @@ describe('loadRouteActions', () => {
         it('should return new controls if old controls is empty', () => {
             const newControls: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Control 1',
                     distance: 10,
                     lat: 40.0,
                     lon: -105.0,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
             const result = mergeControls([], newControls);
@@ -45,24 +45,24 @@ describe('loadRouteActions', () => {
         it('should preserve duration from old controls when merging', () => {
             const oldControls: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Old Control 1',
                     distance: 10,
                     lat: 39.9,
                     lon: -104.9,
                     duration: 60,
-                    business: true
+                    business: 'yes'
                 }
             ];
             const newControls: UserControl[] = [
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Control 1',
                     distance: 10,
                     lat: 40.0,
                     lon: -105.0,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
             const result = mergeControls(oldControls, newControls);
@@ -75,33 +75,33 @@ describe('loadRouteActions', () => {
         it('should preserve old controls not in new controls', () => {
             const oldControls: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Old Control 1',
                     distance: 10,
                     lat: 39.9,
                     lon: -104.9,
                     duration: 60,
-                    business: true
+                    business: 'yes'
                 },
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Old Control 2',
                     distance: 50,
                     lat: 40.5,
                     lon: -105.5,
                     duration: 120,
-                    business: false
+                    business: 'no'
                 }
             ];
             const newControls: UserControl[] = [
                 {
-                    id: '3',
+                    id: 3,
                     name: 'Control 1',
                     distance: 10,
                     lat: 40.0,
                     lon: -105.0,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
             const result = mergeControls(oldControls, newControls);
@@ -116,33 +116,33 @@ describe('loadRouteActions', () => {
         it('should sort merged controls by distance', () => {
             const oldControls: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Control 100',
                     distance: 100,
                     lat: 40.5,
                     lon: -105.5,
                     duration: 200,
-                    business: false
+                    business: 'no'
                 }
             ];
             const newControls: UserControl[] = [
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Control 50',
                     distance: 50,
                     lat: 40.0,
                     lon: -105.0,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 },
                 {
-                    id: '3',
+                    id: 3,
                     name: 'Control 10',
                     distance: 10,
                     lat: 39.9,
                     lon: -104.9,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
             const result = mergeControls(oldControls, newControls);
@@ -155,33 +155,33 @@ describe('loadRouteActions', () => {
         it('should handle multiple old controls with same distance as new controls', () => {
             const oldControls: UserControl[] = [
                 {
-                    id: '1',
+                    id: 1,
                     name: 'Old Control 1',
                     distance: 20,
                     lat: 39.9,
                     lon: -104.9,
                     duration: 30,
-                    business: true
+                    business: 'yes'
                 },
                 {
-                    id: '2',
+                    id: 2,
                     name: 'Old Control 2',
                     distance: 20,
                     lat: 40.1,
                     lon: -105.1,
                     duration: 40,
-                    business: false
+                    business: 'no'
                 }
             ];
             const newControls: UserControl[] = [
                 {
-                    id: '3',
+                    id: 3,
                     name: 'New Control',
                     distance: 20,
                     lat: 40.0,
                     lon: -105.0,
-                    duration: undefined,
-                    business: false
+                    duration: 0,
+                    business: 'no'
                 }
             ];
             const result = mergeControls(oldControls, newControls);
@@ -207,15 +207,15 @@ describe('loadRouteActions', () => {
                         rwgpsRouteIsTrip: false,
                         startTimestamp: Date.now(),
                         zone: 'America/Denver'
-                    }
+                    },
+                    dialogParams: { errorDetails: null, fetchingRoute: false }
                 },
                 rideWithGpsInfo: { token: 'test_token' },
                 controls: { userControlPoints: [] },
                 routeInfo: { type: 'route', country: 'US' },
                 forecast: { weatherProvider: 'openWeather' },
                 params: { timezone_api_key: 'test_key', queryString: '', searchString: '' },
-                strava: { route: '', activity: '' },
-                uiInfo: { dialogParams: { errorDetails: null, fetchingRoute: false } }
+                strava: { route: '', activity: '' }
             };
             mockGetState.mockReturnValue(mockState);
 

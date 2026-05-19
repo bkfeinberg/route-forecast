@@ -17,7 +17,7 @@ import { DateTime } from "luxon";
 import { providerValues, alternateProvider } from "./providerValues";
 const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 
-const mergeControls = (oldCtrls : Array<UserControl>, newCtrls : Array<UserControl>) => {
+export const mergeControls = (oldCtrls : Array<UserControl>, newCtrls : Array<UserControl>) => {
     let oldCtrlsCopy = oldCtrls.slice()
     const merged = newCtrls.map(ctrl => {
         const matchingOldCtrl = oldCtrlsCopy.find(item => item.distance === ctrl.distance)
