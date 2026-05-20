@@ -17,13 +17,14 @@ import { TimeFields } from "./TimeFields";
 import WeatherProviderSelector from "./WeatherProviderSelector"
 import Segment from './Segment'
 import { Button, Notification, Checkbox, Collapse, Stack, CheckboxGroup, Paper } from '@mantine/core';
-
+import * as Sentry from '@sentry/react';
 import { IconClipboard, IconSettings } from "@tabler/icons-react"
 import { useAppSelector, useAppDispatch } from '../../utils/hooks';
 import { ChangeEvent, useState, useRef } from 'react';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useDisclosure, useClickOutside } from '@mantine/hooks';
 import { notifications } from "@mantine/notifications";
+import { useForecastDependentValues } from "../../utils/forecastValuesHook";
 
 const ForecastSettings = () => {
     // const [showSettings, setShowSettings] = useState(false)
@@ -38,7 +39,8 @@ const ForecastSettings = () => {
     const showControlPoints = useAppSelector(state => state.controls.displayControlTableUI)
     const setShowControlPoints = () => { ReactGA.event('select_content', { content_type: 'controls' }); return dispatch(displayControlTableUiSet(!showControlPoints)) }
     const onDesktop = useMediaQuery({ query: `(min-width: ${maxWidthForMobile})` })
-
+    const userControls = useAppSelector(state => state.controls.userControlPoints)
+    const { calculatedControlPointValues: controls } = useForecastDependentValues()
     const outsideRef = useClickOutside(closeSettings);    
 
     const toggleStdDev = (event: ChangeEvent<HTMLInputElement>) => {
@@ -51,53 +53,29 @@ const ForecastSettings = () => {
         return setDownloadAll(!downloadAll)
     }
 
-    const controlTableRef = useRef<HTMLDivElement>(null)
-
-    const fallbackCopy = () => {
-        const htmlTable = controlTableRef.current
-        const range = document.createRange()
-        const selection = window.getSelection();
-        if (htmlTable && selection) {
-            range.selectNode(htmlTable)
-            selection.removeAllRanges();
-            selection.addRange(range)
-            const copied = document.execCommand('copy')
-            console.log('copied: ', copied)
-            selection.removeAllRanges();
-        }
-    }  
-
     const copyTable = async (event: React.MouseEvent) => {
         // ReactGA.event('tutorial_complete')
-        const htmlTable = controlTableRef.current
-        if (htmlTable) {
-            if (navigator.clipboard && document.hasFocus()) {
-                const htmlContent = htmlTable.innerHTML;
-                const plainText = htmlTable.innerText;
+        const controlsTableAsString = userControls.reduce((accum, current) => accum += `${current.name}\t${current.distance}\t${current.duration}\t${controls.find(control => control.distance === current.distance)?.arrival || ''}\n`, '')
+        if (navigator.clipboard && document.hasFocus()) {
 
-                // 2. Create Blobs for both HTML and plain text (fallback)
-                const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-                const textBlob = new Blob([plainText], { type: 'text/plain' });
+            // 2. Create Blobs for both HTML and plain text (fallback)
+            const textBlob = new Blob([controlsTableAsString], { type: 'text/plain' });
 
-                // 3. Create a ClipboardItem containing both formats
-                const item = new ClipboardItem({
-                    'text/html': htmlBlob,
-                    'text/plain': textBlob
-                });
+            // 3. Create a ClipboardItem containing both formats
+            const item = new ClipboardItem({
+                'text/plain': textBlob
+            });
 
-                try {
-                    // 4. Write to the system clipboard
-                    await navigator.clipboard.write([item]);
-                    console.log('Formatted content copied!');
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
-                    fallbackCopy();
-                    notifications.show({ message: t('toasts.controlsCopied'), autoClose: 3000, withCloseButton: false });
-                }
-            } else {
-                fallbackCopy();
+            try {
+                // 4. Write to the system clipboard
+                await navigator.clipboard.write([item]);
                 notifications.show({ message: t('toasts.controlsCopied'), autoClose: 3000, withCloseButton: false });
+            } catch (err) {
+                Sentry.captureException(err);
+                notifications.show({ message: 'Cannot copy to clipboard', autoClose: 3000, withCloseButton: false });
             }
+        } else {
+            notifications.show({ message: 'Copy to clipboard not supported', autoClose: 3000, withCloseButton: false });
         }
     }
 
@@ -166,7 +144,7 @@ const ForecastSettings = () => {
                 </div>
             </div>
 
-            {showControlPoints && <ControlTableContainer ref={controlTableRef} />}
+            {showControlPoints && <ControlTableContainer />}
         </div>
     )
 }

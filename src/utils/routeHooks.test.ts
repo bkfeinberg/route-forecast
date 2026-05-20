@@ -1,4 +1,4 @@
-import { calculateWindResult, usePointsAndBounds } from './routeHooks';
+import { calculateWindResult, ExpandedWindResult, usePointsAndBounds } from './routeHooks';
 import type { ControlsState } from '../redux/controlsSlice';
 import type { RouteInfoState } from '../redux/routeInfoSlice';
 import type { WindAdjustResults, Point } from './gpxParser';
@@ -57,13 +57,14 @@ describe('routeHooks', () => {
         routeUUID: null,
       } as unknown as RouteInfoState;
 
-      const expectedResult: WindAdjustResults = {
+      const expectedResult: ExpandedWindResult = {
         weatherCorrectionMinutes: 0,
         calculatedControlPointValues: [],
         maxGustSpeed: 0,
         finishTime: null,
         adjustedTimes: [],
         chartData: [],
+        timeOnFlat: 0,
       };
 
       const inputs = {

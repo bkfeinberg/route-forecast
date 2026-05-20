@@ -39,7 +39,7 @@ describe('routeUtils', () => {
       values: [{ distance: 0, time: '12:00', pace: '10:00', arrival: '12:00', banked: 0, val: 0 }],
       finishTime: '2h 30m',
       timeInHours: 2.5,
-      totalDistMeters: 25000,
+      totalDistMeters: 25000, timeOnFlat: 0
     };
 
     it('should call walkRwgpsRoute for route/trip type data', () => {
@@ -168,7 +168,7 @@ describe('routeUtils', () => {
         values: [{ distance: 0, time: '12:00', pace: '10:00', arrival: '12:00', banked: 0, val: 0 }],
         finishTime: '2h 30m',
         timeInHours: 2.5,
-        totalDistMeters: 25000,
+        totalDistMeters: 25000, timeOnFlat: 0
       };
 
       mockGpxParser.walkRwgpsRoute.mockReturnValue(mockRouteAnalysisResults);
@@ -194,7 +194,7 @@ describe('routeUtils', () => {
         values: [],
         finishTime: '2h 30m',
         timeInHours: 2.5,
-        totalDistMeters: 25000,
+        totalDistMeters: 25000, timeOnFlat: 0
       };
 
       mockGpxParser.walkRwgpsRoute.mockReturnValue(mockRouteAnalysisResults);
