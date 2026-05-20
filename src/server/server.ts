@@ -409,7 +409,7 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
                         new Date(), `(${forecastPoints.lat},${forecastPoints.lon})`]);
                 // console.info(insertResult);
             } catch (err) {
-                warn(`DB call from /forecast_one failed for route ${req.body.routeName} with ${err}`)
+                warn(`DB call from /forecast_one failed for route ${routeName} ${routeNumber} with ${err}`)
             }
         }
     }
