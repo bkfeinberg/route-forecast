@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import type { UserControl } from '../redux/controlsSlice';
 import type { GpxRouteData, RwgpsRoute, RwgpsTrip, } from '../redux/routeInfoSlice';
-import gpxParser, { type RouteAnalysisResults, type Segment, type ExtractedControl } from './gpxParser';
+import gpxParser, { type RouteAnalysisResults, type Segment, type ExtractedControl, ForecastRequest } from './gpxParser';
 
 let cachedRouteUUID: string | null = null;
 let cachedRouteData: RouteAnalysisResults = {
@@ -9,19 +9,24 @@ let cachedRouteData: RouteAnalysisResults = {
   finishTime: '', timeInHours: 0, totalDistMeters: 0, timeOnFlat: 0
 };
 
+const filterOutPastForecastRequests = (forecastRequest: Array<ForecastRequest>) => {
+  const now = DateTime.now();
+  return forecastRequest.filter(req => DateTime.fromFormat(req.time, "yyyy-MM-dd'T'HH:mm:00ZZZ") > now)
+}
+
 export const getRouteInfo = (routeData: GpxRouteData | RwgpsRoute | RwgpsTrip,
   startTimestamp: number, timeZoneId: string, pace: string, interval: number,
   userControlPoints: Array<UserControl>, segment: Segment, routeUUID: string | null) => {
   let workingTimestamp = startTimestamp;
   // preflight check before using cached data
-  // make sure to get a new forecast request if the starting date is in the past
-/*   if (cachedRouteData && cachedRouteData.forecastRequest &&
-    cachedRouteData.forecastRequest[0] &&
-    DateTime.fromFormat(cachedRouteData.forecastRequest[0].time, "yyyy-MM-dd'T'HH:mm:00ZZZ") < DateTime.now()) {
+  // make sure to get a new forecast request if entire requested forecast is in the past
+   if (cachedRouteData && cachedRouteData.forecastRequest &&
+    cachedRouteData.forecastRequest[cachedRouteData.forecastRequest.length - 1] &&
+    DateTime.fromFormat(cachedRouteData.forecastRequest[cachedRouteData.forecastRequest.length - 1].time, "yyyy-MM-dd'T'HH:mm:00ZZZ") < DateTime.now()) {
     workingTimestamp = DateTime.now().plus({ hours: 1 }).toMillis();
   }
-  else  */if (routeUUID === cachedRouteUUID) {
-    return cachedRouteData;
+  else  if (routeUUID === cachedRouteUUID) {
+    return {...cachedRouteData, forecastRequest: filterOutPastForecastRequests(cachedRouteData.forecastRequest)}
   }
   if (routeData.type === "route" || routeData.type === "trip") {
     const data = gpxParser.walkRwgpsRoute(
