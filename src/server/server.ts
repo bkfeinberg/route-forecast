@@ -398,7 +398,7 @@ app.post('/forecast_one', cache.middleware(), upload.none(), timeout('27s'), hal
         if (postgresClient && req.body.routeNumber && req.body.routeName) {
             // tear off the privacy code if any
             const queryPos = req.body.routeNumber.indexOf('?')
-            const routeNumber = (queryPos === -1) ? req.body.routeNumber : req.body.routeNumber.slice(0,queryPos);
+            const routeNumber = req.body.routeNumber.replace(/[&?].*/, '');
             // limit route name to 90 characters to match DB schema
             const routeName = req.body.routeName.length > 90 ? req.body.routeName.slice(0,90) : req.body.routeName;
             try {

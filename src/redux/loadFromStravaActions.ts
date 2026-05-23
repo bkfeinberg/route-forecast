@@ -196,7 +196,7 @@ export const loadStravaRoute = (routeId : string) => {
                     return dispatch(errorDetailsSet('Error fetching Strava route: Received an unparsable JSON error from Strava.'));
                 }
             } else if (routeInfo.includes('<gpx') || routeInfo.includes('<?xml')) {
-                trace('Returning GPX data from Strava, dispatching load');
+                // trace('Returning GPX data from Strava, dispatching load');
                 return dispatch(loadGpxRoute(routeInfo, routeCountry));
             } else {
                 return dispatch(errorDetailsSet('Error fetching Strava route: Data received from Strava was not recognized as GPX.'));
