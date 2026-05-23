@@ -11,6 +11,7 @@ import {cleanCoords} from "@turf/clean-coords";
 import { lineString, point } from "@turf/helpers";
 import { create, all } from 'mathjs/number'
 import type { Feature, LineString, GeoJsonProperties } from 'geojson';
+import { Forecast } from "../redux/forecastSlice";
 
 // Format for finish times (moved from TimeFields to avoid circular dependency in tests)
 const finishTimeFormat = 'EEE, MMM dd yyyy h:mma';
@@ -569,7 +570,9 @@ class AnalyzeRoute {
         return (distance*60)/modifiedVelocity-(distance*60)/baseSpeed;
     }
 
-    adjustForWind = (forecastInfo : ForecastInfo, stream : Array<Point>, pace : string, controls : Array<UserControl>, 
+    static FtoC = (f : string) => (Number.parseInt(f) - 32) * 5 / 9;
+
+    adjustForWind = (forecastInfo : Forecast[], stream : Array<Point>, pace : string, controls : Array<UserControl>, 
         previouslyCalculatedValues : Array<CalculatedValue>, start : DateTime, 
         finishTime : string, timeZoneId : string, totalDistMeters : number) : WindAdjustResults => {
         "use memo";
@@ -641,9 +644,9 @@ class AnalyzeRoute {
                             effectiveSpeed = AnalyzeRoute.getHilliness(accumulatedClimbMeters* 3.2808, totalDistanceInKm*kmToMiles, baseSpeed);
                         }
                         const power = getPowerOrVelocity(deltas.distance, Math.abs(previousPoint.elevation-currentPoint.elevation)/2,
-                            grade, 0, undefined, effectiveSpeed);
+                            grade, 0, undefined, effectiveSpeed, AnalyzeRoute.FtoC(currentForecast.temp));
                         const modifiedVelocity = getPowerOrVelocity(deltas.distance, Math.abs(previousPoint.elevation-currentPoint.elevation)/2,
-                            grade, effectiveWindSpeed, power, effectiveSpeed);
+                            grade, effectiveWindSpeed, power, effectiveSpeed, AnalyzeRoute.FtoC(currentForecast.temp));
                         // console.info(`grade was ${grade} power was ${power} wind:${effectiveWindSpeed} speed:${effectiveSpeed} modifiedVelocity was ${modifiedVelocity}`);
                         if (modifiedVelocity > 0) {
                             totalMinutesLost += AnalyzeRoute.windToTimeInMinutes(effectiveSpeed, distanceInMiles, modifiedVelocity);

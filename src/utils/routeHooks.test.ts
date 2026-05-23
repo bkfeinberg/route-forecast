@@ -143,7 +143,24 @@ describe('routeHooks', () => {
         routeInfo: mockRouteInfoWithData,
         routeParams: { startTimestamp: 0, zone: 'UTC', pace: '10:00', interval: 1 },
         timeZoneId: 'UTC',
-        forecast: [{ temp: 20 }],
+        forecast: [{
+          temp: '20',
+          feel: 18,
+          humidity: 65,
+          zone: 'UTC',
+          distance: 0,
+          cloudCover: '50%',
+          windSpeed: '10 mph',
+          gust: '15 mph',
+          relBearing: 45,
+          windBearing: 180,
+          time: '2026-05-22T00:00:00Z',
+          isControl: false,
+          precip: '0',
+          lat: 40.7128,
+          lon: -74.0060,
+          rainy: false,
+        }],
         segment: null,
       };
 
@@ -228,7 +245,24 @@ describe('routeHooks', () => {
         routeInfo: mockRouteInfo,
         routeParams: { startTimestamp: 0, zone: 'UTC', pace: '10:00', interval: 1 },
         timeZoneId: 'UTC',
-        forecast: [{ temp: 20 }],
+        forecast: [{
+          temp: '20',
+          feel: 18,
+          humidity: 65,
+          zone: 'UTC',
+          distance: 0,
+          cloudCover: '50%',
+          windSpeed: '10 mph',
+          gust: '15 mph',
+          relBearing: 45,
+          windBearing: 180,
+          time: '2026-05-22T00:00:00Z',
+          isControl: false,
+          precip: '0',
+          lat: 40.7128,
+          lon: -74.0060,
+          rainy: false,
+        }],
         segment: null,
       };
 
@@ -279,7 +313,24 @@ describe('routeHooks', () => {
         routeInfo: mockRouteInfo,
         routeParams: { startTimestamp: 1000, zone: 'America/New_York', pace: '9:00', interval: 2 },
         timeZoneId: 'America/New_York',
-        forecast: [{ lat: 40.7128, lon: -74.0060, time: '2026-05-15T12:00:00Z', distance: 0, isControl: false }],
+        forecast: [{
+          temp: '22',
+          feel: 20,
+          humidity: 60,
+          zone: 'America/New_York',
+          distance: 0,
+          cloudCover: '40%',
+          windSpeed: '12 mph',
+          gust: '18 mph',
+          relBearing: 90,
+          windBearing: 200,
+          time: '2026-05-15T12:00:00Z',
+          isControl: false,
+          precip: '0',
+          lat: 40.7128,
+          lon: -74.0060,
+          rainy: false,
+        }],
         segment: null,
       };
 
@@ -415,7 +466,24 @@ describe('routeHooks', () => {
         chartData: [],
       });
 
-      const mockForecast = [{ temp: 20, humidity: 50 }] as any;
+      const mockForecast = [{
+        temp: '20',
+        feel: 18,
+        humidity: 50,
+        zone: 'UTC',
+        distance: 0,
+        cloudCover: '50%',
+        windSpeed: '10 mph',
+        gust: '15 mph',
+        relBearing: 45,
+        windBearing: 180,
+        time: '2026-05-22T00:00:00Z',
+        isControl: false,
+        precip: '0',
+        lat: 40.7128,
+        lon: -74.0060,
+        rainy: false,
+      }];
       const startTimestamp = Date.now();
       const zone = 'UTC';
       const pace = '10:00';

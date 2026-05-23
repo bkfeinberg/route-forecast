@@ -8,22 +8,22 @@ describe('windUtils', () => {
     });
 
     test('getPowerOrVelocity computes a positive mph value when given a power', () => {
-        const mph = getPowerOrVelocity(0, 0, 0, 0, 100, 0);
+        const mph = getPowerOrVelocity(0, 0, 0, 0, 100, 0, 25);
         expect(typeof mph).toBe('number');
         expect(mph).toBeGreaterThan(0);
     });
 
     test('getPowerOrVelocity round-trip between power and speed remains consistent', () => {
         const power = 200;
-        const speed = getPowerOrVelocity(0, 0, 0, 0, power, 0);
+        const speed = getPowerOrVelocity(0, 0, 0, 0, power, 0, 25);
         expect(speed).toBeGreaterThan(0);
-        const recovered = getPowerOrVelocity(0, 0, 0, 0, undefined, speed);
+        const recovered = getPowerOrVelocity(0, 0, 0, 0, undefined, speed, 25);
         // allow some tolerance due to rounding and solver imprecision
         expect(recovered).toBeCloseTo(power, 0); // within 1 watt
     });
 
     test('getPowerOrVelocity returns nonzero power for reasonable speed', () => {
-        const p = getPowerOrVelocity(0, 0, 0, 0, undefined, 10); // 10 mph
+        const p = getPowerOrVelocity(0, 0, 0, 0, undefined, 10, 25); // 10 mph
         expect(p).toBeGreaterThan(0);
     });
 });

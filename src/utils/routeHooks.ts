@@ -61,6 +61,7 @@ import type { ControlsState } from "../redux/controlsSlice";
 import type { RouteInfoState } from "../redux/routeInfoSlice";
 import { type WindAdjustResults } from "./gpxParser";
 import { getRouteInfo } from "./routeUtils";
+import type { Forecast } from "../redux/forecastSlice";
 
 ///
 //  routeInfo, routeParams, controls, timeZoneId, forecast, segment
@@ -74,6 +75,7 @@ const dependencies = [
 interface WindResultInputs {
   controls: ControlsState;
   routeInfo: RouteInfoState;
+  forecast: Forecast[]
   [index: string]: any;
 }
 export type ExpandedWindResult = WindAdjustResults & {timeOnFlat: number};
