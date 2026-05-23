@@ -159,7 +159,7 @@ const setupPostgres = async () => {
     });
     
     try {
-        await client.connect((err:any) => {if (err) {warn(err)}});
+        await client.connect((err:any) => {if (err) {warn(`Postgres connection error: ${err}`)}});
         return client;
     } catch (excpt) {
         warn(`Postgres connection error: ${excpt}`);
@@ -662,7 +662,7 @@ app.get('/stravaActivities', async (req: Request, res : Response) => {
         id: number,
         name: string
     }
-    const activitiesResult = await axiosInstance.get<StravaActivity[]>(`https://www.strava.com/api/v3/athlete/activities?per_page=20`, activitiesOptions
+    const activitiesResult = await axiosInstance.get<StravaActivity[]>(`https://www.strava.com/api/v3/athlete/activities?per_page=25`, activitiesOptions
     ).catch(((error: AxiosError) => {
         if (error.response && isAxiosError(error) && error.response.data) {
             Sentry.captureMessage(`Error fetching user activities for ${access_token} with ${JSON.stringify((error.response.data as ErrorResponses).errors[0])}`);
