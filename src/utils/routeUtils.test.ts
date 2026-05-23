@@ -7,6 +7,7 @@ import {
 import gpxParser from './gpxParser';
 import type { ExtractedControl, RouteAnalysisResults } from './gpxParser';
 import type { RwgpsRoute, RwgpsTrip } from '../redux/routeInfoSlice';
+import { DateTime } from 'luxon';
 
 // Mock the gpxParser module
 jest.mock('./gpxParser', () => ({
@@ -35,7 +36,7 @@ describe('routeUtils', () => {
 
     const mockRouteAnalysisResults: RouteAnalysisResults = {
       points: [{ lat: 40.7128, lon: -74.0060, elevation: 10 }],
-      forecastRequest: [{ time: '2026-05-15T12:00:00Z', lat: 40.7128, lon: -74.0060, distance: 0, isControl: false }],
+      forecastRequest: [{ time: DateTime.now().plus({ hours: 1 }).toFormat("yyyy-MM-dd'T'HH:mm:00ZZZ"), lat: 40.7128, lon: -74.0060, distance: 0, isControl: false }],
       values: [{ distance: 0, time: '12:00', pace: '10:00', arrival: '12:00', banked: 0, val: 0 }],
       finishTime: '2h 30m',
       timeInHours: 2.5,
@@ -94,7 +95,7 @@ describe('routeUtils', () => {
         mockRouteData,
         startTimestamp,
         'UTC',
-        '10:00',
+        'D',
         1,
         [],
         [0, 0],
@@ -106,7 +107,7 @@ describe('routeUtils', () => {
         mockRouteData,
         startTimestamp,
         'UTC',
-        '10:00',
+        'D',
         1,
         [],
         [0, 0],
