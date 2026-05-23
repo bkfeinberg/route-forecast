@@ -137,16 +137,16 @@ const getRouteParser = async function () {
 
 const loadGpxRoute = function(gpxFileData : string, country : string) {
     return async function (dispatch : AppDispatch) {
-        trace('Loading GPX parser module');
+        // trace('Loading GPX parser module');
         const parser = await getRouteParser().catch((err) => {dispatch(gpxRouteLoadingFailed(err));return null});
         // handle failed load, error has already been dispatched
         if (parser == null) {
             return Promise.resolve(Error('Cannot load parser'))
         }
-        trace("Beginning to load GPX route from file data");
+        // trace("Beginning to load GPX route from file data");
         const parsedResults = parser.loadGpxFile(gpxFileData)
         if (parsedResults.gpxData) {
-            trace("GPX route loaded successfully, dispatching to store");
+            // trace("GPX route loaded successfully, dispatching to store");
             dispatch(gpxRouteLoaded({gpx:parsedResults.gpxData, country:country}));
         } else if (parsedResults.error) {
             dispatch(gpxRouteLoadingFailed(parsedResults.error))

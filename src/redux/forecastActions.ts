@@ -36,14 +36,14 @@ const getRouteId = (routeData : RwgpsRoute|RwgpsTrip) => {
 
 export const msgFromError = (error : {reason:{data:{details:string, which:number}} | {reason:string, data: never}}, provider : string, context?: string ) => {
     if (error.reason.data) {
-        warn(error.reason.data.details, {provider:provider, context:context, error: error} );
+        // warn(error.reason.data.details, {provider:provider, context:context, error: error} );
         if (/^\s*$/.test(error.reason.data.details)) {
             Sentry.captureMessage("Error string from data.details was all whitespace", {extra: {error: JSON.stringify(error)}});
         }
         Sentry.metrics.count("forecast_errors", 1, {attributes:{provider:provider, details:error.reason.data.details, context:context}});
         return error.reason.data.details
     } else {
-        warn(JSON.stringify(error.reason), {provider:provider, context:context, error:error} );
+        // warn(JSON.stringify(error.reason), {provider:provider, context:context, error:error} );
         if (/^\s*$/.test(JSON.stringify(error.reason))) {
             Sentry.captureMessage("Error string from reason was all whitespace", {extra: {error: JSON.stringify(error)}})
         }
