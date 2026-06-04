@@ -49,8 +49,11 @@ axiosRetry(axiosInstance, {
     retryCondition: (error: AxiosError) => {
         // in the weird case that we don't get a response field in the error then report to Sentry and fail the request
         if (!error.response) {
-            Sentry.captureMessage(`Error object reported to Apple WeatherKit was missing the response`)
-            Sentry.captureMessage(`Defective error object from WeatherKit:${JSON.stringify(error)}`)
+            // no sense logging timeouts to Sentry since we retry on them, but log other cases where we don't get a response since that's unexpected and we have no visibility into it otherwise
+            if (!error.message.startsWith('timeout of')) {
+                Sentry.captureMessage(`Error object reported to Apple WeatherKit was missing the response`)
+                Sentry.captureMessage(`Defective error object from WeatherKit:${JSON.stringify(error)}`)
+            }
             return false
         }
         switch (error.response.status) {
