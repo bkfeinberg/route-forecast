@@ -18,7 +18,7 @@ export const useForecastRequestData = () => {
       timeZoneId, pace,
       interval, controlPoints,
       segment, routeUUID);
-    return { length: forecastRequest.length, last: forecastRequest[forecastRequest.length - 1].time };
+    return { length: forecastRequest.length, last: forecastRequest[forecastRequest.length - 1]?.time };
   };
   const forecastData = getForecastRequestData();
   const daysInFuture = Interval.fromDateTimes(DateTime.now(), DateTime.fromISO(forecastData.last)).length('days');
