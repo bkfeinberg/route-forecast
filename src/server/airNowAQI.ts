@@ -21,14 +21,16 @@ axiosRetry(axiosInstance, {
         console.log(`AirNow axios retry count ${retryCount} for ${requestConfig.url}`);
     },
     onMaxRetryTimesExceeded: (err: any) => {
-        Sentry.captureMessage(`last AirNow axios error after retrying was ${err}`)
+        // we can't really address this so don't use up Sentry quota on it, but log it just in case
+        // Sentry.captureMessage(`last AirNow axios error after retrying was ${err}`)
     }
 });
 
 const getAirNowAQI = async function (lat : number, lon : number) {
     const url = `https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=${lat}&longitude=${lon}&date=${forecastDay}&API_KEY=${airNowKey}`;
     let airNowResult = await axiosInstance.get<Array<IqAirData>>(url).catch((error: any) => {
-        Sentry.captureException(error)
+        // we can't really address this so don't use up Sentry quota on it, but log it just in case
+        // Sentry.captureException(error)
     });
     if (!airNowResult || airNowResult.data.length===0) {
         return undefined;
