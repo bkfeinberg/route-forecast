@@ -184,8 +184,8 @@ axiosRetry(axiosInstance, {
 
 const getPurpleAirAQI = async function (lat : number, lon : number) {
     let ranges = [
-        0.5,
-        2,
+        // 0.5,
+        // 2,
         5,
         10,
         20,
