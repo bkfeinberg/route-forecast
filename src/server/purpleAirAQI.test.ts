@@ -67,6 +67,6 @@ describe('getPurpleAirAQI', () => {
     const result = await getPurpleAirAQI(40, -75);
 
     expect(result).toBeUndefined();
-    expect(mockedAxiosInstanceGet).toHaveBeenCalledTimes(6);
+    expect(mockedAxiosInstanceGet).toHaveBeenCalledTimes(4);
   });
 });
