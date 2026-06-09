@@ -174,7 +174,7 @@ export const loadStravaRoute = (routeId : string) => {
         }
         api.setDefaultHeader('Authorization', `Bearer ${access_token}`)
         try {
-            trace(`Fetching Strava route with id ${routeId}`);
+            // trace(`Fetching Strava route with id ${routeId}`);
             const routeMetadata = await api.get(`routes/${routeId}`);
             let routeCountry = 'US';
             if (routeMetadata) {

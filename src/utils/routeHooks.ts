@@ -2,7 +2,7 @@ import { logger } from "@sentry/react";
 import * as Sentry from "@sentry/react";
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 import { routeLoadingModes } from "../data/enums";
-import gpxParser, { type Point } from "./gpxParser";
+import gpxParser, { ForecastRequest, type Point } from "./gpxParser";
 import { useAppSelector } from "./hooks";
 import stravaRouteParser from "./stravaRouteParser";
 import type { Bounds } from "./util";
@@ -78,7 +78,7 @@ interface WindResultInputs {
   forecast: Forecast[]
   [index: string]: any;
 }
-export type ExpandedWindResult = WindAdjustResults & {timeOnFlat: number};
+export type ExpandedWindResult = WindAdjustResults & {timeOnFlat: number, forecastRequest?: Array<ForecastRequest>};
 type CachedWindResult = {
   result: ExpandedWindResult;
   dependencyValues: WindResultInputs | { [index: string]: any; };
@@ -97,7 +97,7 @@ export const calculateWindResult = (inputs: WindResultInputs): ExpandedWindResul
   const routeInfo = routeInfoState.rwgpsRouteData ? routeInfoState.rwgpsRouteData : routeInfoState.gpxRouteData;
   let result;
   if (routeInfo) {
-    const { points, values, finishTime, totalDistMeters, timeOnFlat } = getRouteInfo(
+    const { points, values, finishTime, totalDistMeters, timeOnFlat, forecastRequest } = getRouteInfo(
       routeInfo,
       routeParams.startTimestamp,
       routeParams.zone,
@@ -126,7 +126,8 @@ export const calculateWindResult = (inputs: WindResultInputs): ExpandedWindResul
     result = {
       weatherCorrectionMinutes: weatherCorrectionMinutes,
       calculatedControlPointValues: calculatedControlPointValues, maxGustSpeed: maxGustSpeed,
-      finishTime: adjustedFinishTime, adjustedTimes, chartData: chartData, timeOnFlat: timeOnFlat
+      finishTime: adjustedFinishTime, adjustedTimes, chartData: chartData, timeOnFlat: timeOnFlat,
+      forecastRequest:forecastRequest
     };
   } else {
     result = {

@@ -17,44 +17,36 @@ const filterOutPastForecastRequests = (forecastRequest: Array<ForecastRequest>) 
 export const getRouteInfo = (routeData: GpxRouteData | RwgpsRoute | RwgpsTrip,
   startTimestamp: number, timeZoneId: string, pace: string, interval: number,
   userControlPoints: Array<UserControl>, segment: Segment, routeUUID: string | null) => {
-  let workingTimestamp = startTimestamp;
-  // preflight check before using cached data
-  // make sure to get a new forecast request if entire requested forecast is in the past
-   if (cachedRouteData && cachedRouteData.forecastRequest &&
-    cachedRouteData.forecastRequest[cachedRouteData.forecastRequest.length - 1] &&
-    DateTime.fromFormat(cachedRouteData.forecastRequest[cachedRouteData.forecastRequest.length - 1].time, "yyyy-MM-dd'T'HH:mm:00ZZZ") < DateTime.now()) {
-    workingTimestamp = DateTime.now().plus({ hours: 1 }).toMillis();
-  }
-  else  if (routeUUID === cachedRouteUUID) {
-    return {...cachedRouteData, forecastRequest: filterOutPastForecastRequests(cachedRouteData.forecastRequest)}
-  }
-  if (routeData.type === "route" || routeData.type === "trip") {
-    const data = gpxParser.walkRwgpsRoute(
-      routeData,
-      DateTime.fromMillis(workingTimestamp, { zone: timeZoneId }),
-      pace,
-      interval,
-      userControlPoints,
-      timeZoneId,
-      segment
-    );
-    cachedRouteData = data;
-    cachedRouteUUID = routeUUID;
-    return data;
-  } else {
-    const data = gpxParser.walkGpxRoute(
-      routeData,
-      DateTime.fromMillis(workingTimestamp, { zone: timeZoneId }),
-      pace,
-      interval,
-      userControlPoints,
-      timeZoneId,
-      segment
-    );
-    cachedRouteData = data;
-    cachedRouteUUID = routeUUID;
-    return data;
-  }
+    if (routeUUID === cachedRouteUUID) {
+      return { ...cachedRouteData, forecastRequest: filterOutPastForecastRequests(cachedRouteData.forecastRequest) }
+    }
+    if (routeData.type === "route" || routeData.type === "trip") {
+      const data = gpxParser.walkRwgpsRoute(
+        routeData,
+        DateTime.fromMillis(startTimestamp, { zone: timeZoneId }),
+        pace,
+        interval,
+        userControlPoints,
+        timeZoneId,
+        segment
+      );
+      cachedRouteData = data;
+      cachedRouteUUID = routeUUID;
+      return data;
+    } else {
+      const data = gpxParser.walkGpxRoute(
+        routeData,
+        DateTime.fromMillis(startTimestamp, { zone: timeZoneId }),
+        pace,
+        interval,
+        userControlPoints,
+        timeZoneId,
+        segment
+      );
+      cachedRouteData = data;
+      cachedRouteUUID = routeUUID;
+      return data;
+    }
 };
 
 export const getForecastRequest = (routeData: GpxRouteData | RwgpsRoute | RwgpsTrip,
@@ -78,7 +70,7 @@ export const removeDuplicateControl = (controls: Array<ExtractedControl>) => {
   }
 }
 
-const longerName = (a : ExtractedControl,b : ExtractedControl) => {
+const longerName = (a: ExtractedControl, b: ExtractedControl) => {
   if (!a.name) return -1
   if (!b.name) return 1
   return (b.name.length - a.name.length)
@@ -87,13 +79,13 @@ const longerName = (a : ExtractedControl,b : ExtractedControl) => {
 const compareControls = (a: ExtractedControl, b: ExtractedControl) => {
   if (a.distance === b.distance) {
     if (a.duration === b.duration) {
-      return longerName(a,b)
+      return longerName(a, b)
     }
     else {
       return b.duration - a.duration
     }
   }
-    return a.distance - b.distance
+  return a.distance - b.distance
 }
 
 export const extractControlsFromRoute = (routeData: RwgpsRoute | RwgpsTrip, loadPOIs: boolean = true) => {

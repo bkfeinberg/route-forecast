@@ -89,7 +89,7 @@ module.exports = (env, argv) => {
                     ]/*.reverse()*/,
                     exclude: [
                         /node_modules/,
-                        /\.test\.tsx$/,
+                        /\.test\.(ts|tsx)$/,
                         /test-utils\.tsx$/
 
                     ]
@@ -240,11 +240,12 @@ module.exports = (env, argv) => {
         },
         resolve: {
             extensions: [
-                '*',
                 '.ts',
                 '.tsx',
                 '.js',
                 '.jsx',
+                '.mjs',
+                '.cjs',
                 '.d.ts'
             ],
             extensionAlias: {
@@ -256,7 +257,8 @@ module.exports = (env, argv) => {
                 ["node_modules"],
             alias:
             {
-                Images: SRC_STATIC_DIR
+                Images: SRC_STATIC_DIR,
+                'react-transition-group/TransitionGroupContext': path.resolve(__dirname, 'node_modules/react-transition-group/esm/TransitionGroupContext.js')
             },
         },
         // webpack.common.js
