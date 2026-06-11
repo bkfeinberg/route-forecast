@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.19.4",
+  "version": "5.19.5",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -49,7 +49,7 @@
     "d3fc": "^15.2.13",
     "d3fc-sample": "^3.0.5",
     "dayjs": "^1.11.18",
-    "ejs": "^5.0.1",
+    "ejs": "^6.0.1",
     "export-to-csv": "^1.4.0",
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
@@ -221,6 +221,10 @@
   "homepage": "https://github.com/bfkeinberg/route-forecast#readme",
   "type": "module",
   "allowScripts": {
-    "@sentry/cli@2.58.6": true
+    "@sentry/cli@2.58.6": true,
+    "@swc/core@1.15.41": true,
+    "@sentry-internal/node-cpu-profiler@2.4.1": true,
+    "fsevents@2.3.3": true,
+    "fsevents@2.3.2": true
   }
 }

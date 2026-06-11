@@ -2,7 +2,7 @@ import { WeatherFunc } from "./weatherForecastDispatcher.js";
 
 import { DateTime, Interval } from "luxon"
 import axios from "axios";
-import http from 'http';
+import http, { validateHeaderValue } from 'http';
 import https from 'https';
 
 const httpAgent = new http.Agent({
@@ -25,6 +25,8 @@ const { trace, debug, info, warn, error, fatal, fmt } = Sentry.logger;
 const milesToMeters = 1609.34;
 import axiosRetry from "axios-retry";
 import type { AxiosError, AxiosRequestConfig } from "axios";
+import { validate } from "uuid";
+import { getValueByDataKey } from "recharts/types/util/ChartUtils.js";
 
 axiosRetry(axiosInstance, {
     retries: 3,
@@ -89,11 +91,12 @@ interface ForecastGridType {
         }
     }
 }
-const findNearestTime = <T>(data : {values: Array<{validTime: string, value: T}>}, 
+// for testing purposes
+export const findNearestTime = <T>(data : {values: Array<{validTime: string, value: T}>}, 
     time : DateTime, dataType: string) : T => {
     let newerThan = data.values.find(value => {return Interval.fromISO(value.validTime, {setZone:true}).contains(time)});
     if (!newerThan) {
-        throw Error(`No matching ${dataType} data for ${time.toString()} in ${JSON.stringify(data.values)}`);
+        throw Error(`No matching ${dataType} data for ${time.toString()} ${time.zoneName} in ${JSON.stringify(data.values)}`);
     }
     return newerThan.value;
 };
