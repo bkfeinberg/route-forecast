@@ -225,6 +225,7 @@
     "@swc/core@1.15.41": true,
     "@sentry-internal/node-cpu-profiler@2.4.1": true,
     "fsevents@2.3.3": true,
-    "fsevents@2.3.2": true
+    "fsevents@2.3.2": true,
+    "msw@2.14.6": true
   }
 }
