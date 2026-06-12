@@ -24,7 +24,8 @@ import { GpxRouteData, RwgpsRoute, RwgpsTrip } from '../../redux/routeInfoSlice'
 import { writeObjToFile } from '../../utils/writeToFile';
 import { Button } from "@mantine/core";
 import pLimit from 'p-limit';
-
+import {preflightDaysOfForecast} from '../../utils/util'
+import { DateTime } from "luxon";
 declare module 'react' {
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
         // extends React's HTMLAttributes
@@ -106,6 +107,12 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
         const limit = pLimit(maxSimultaneousRequests);
         for (let which = 0; which < forecastRequest.length; ++which) {
             if (requestCopy.length < 0 || !locations) break;
+            // do not continue if the request is too far in the future for the provider given its limits
+            const requestDate = DateTime.fromFormat(locations.time, "yyyy-MM-dd'T'HH:mm:00ZZZ", {zone: zone})
+            if (preflightDaysOfForecast(service, requestDate)) {
+                warn(`Not fetching forecast for part ${which} ${locations.lat} using ${service} because the request date of ${requestDate.toISO()} is too far in the future for that provider`, { provider: service });
+                break;
+            }
             const request = {
                 locations: locations, timezone: zone, service: service, routeName: routeName,
                 routeNumber: routeNumber, lang: i18n.language, which
@@ -115,6 +122,13 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
                 warn(`Forecast fetch failed for part ${which} ${request.locations.lat} with error ${errorDetails(err)}`, { provider: service });
                 // retry with alternate provider if any failed
                 if (alternateProvider === service) {
+                    return;
+                }
+                // do not retry if the error was that the request was too far in the future given the provider's limits
+                // first get the date of the forecast request
+                const retryRequestDate = DateTime.fromFormat(request.locations.time, "yyyy-MM-dd'T'HH:mm:00ZZZ", {zone: zone})
+                if (preflightDaysOfForecast(alternateProvider, retryRequestDate)) {
+                    warn(`Not retrying forecast fetch for part ${which} ${request.locations.lat} with ${alternateProvider} because the request date of ${retryRequestDate.toISO()} is too far in the future for that provider`, { provider: alternateProvider });
                     return;
                 }
                 info(`Retrying forecast fetch [FB] for part ${which} ${request.locations.lat},${request.locations.lon} using ${alternateProvider}`, { provider: alternateProvider });

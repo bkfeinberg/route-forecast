@@ -1,6 +1,8 @@
 import type {UserControl} from '../redux/controlsSlice'
 import type {Point} from './gpxParser'
 import type { GpxRouteData, RwgpsRoute, RwgpsTrip, } from '../redux/routeInfoSlice';
+import { providerValues } from '../redux/providerValues';
+import { DateTime } from 'luxon';
 
 export type Bounds = {
   min_latitude: number
@@ -105,14 +107,9 @@ export const getRouteNumberFromValue = (value : string) => {
   return value;
 }
 
-/*const sanitizeCookieName = (cookieName : string) => {
-  return encodeURIComponent(cookieName.replace(/[ =/]/,''));
-};
+// returns true for start dates that are out of range
+export const preflightDaysOfForecast = (provider: string, startDate: DateTime) => {
+  const daysInFuture = startDate.diff(DateTime.now(), 'days').days;
+  return (providerValues[provider].max_days < daysInFuture);
+}
 
-export const saveCookie = (name : string,value : string) => {
-      cookie.save(sanitizeCookieName(name),value,{maxAge:60*60*24*7});
-};
-
-export const loadCookie = (name : string) => {
-  return cookie.load(sanitizeCookieName(name));
-};*/

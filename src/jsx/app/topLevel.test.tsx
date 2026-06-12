@@ -71,6 +71,10 @@ import TopLevel from './topLevel';
 import LocationContext from '../locationContext';
 
 describe('TopLevel', () => {
+  beforeEach(() => {
+    shouldThrow = false;
+  });
+
   test('renders the lazy-loaded RouteWeatherUI with provided props', async () => {
     render(
       <LocationContext.Provider
@@ -99,6 +103,7 @@ describe('TopLevel', () => {
   });
 
   test('displays ErrorBoundary fallback when child throws', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     shouldThrow = true;
 
     render(
@@ -117,5 +122,6 @@ describe('TopLevel', () => {
     await waitFor(() => expect(screen.getByText('Something went wrong.')).toBeInTheDocument());
 
     shouldThrow = false;
+    consoleErrorSpy.mockRestore();
   });
 });

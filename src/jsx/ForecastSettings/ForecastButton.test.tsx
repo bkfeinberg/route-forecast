@@ -236,7 +236,7 @@ describe('ForecastButton', () => {
 
     // make getForecastRequest return parts so forecast promises are created
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
 
     const { container } = render(<ForecastButton
       fetchingForecast={false}
@@ -322,7 +322,7 @@ describe('ForecastButton', () => {
 
     // ensure getForecastRequest returns two parts so we get one fulfilled and one rejected
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
 
     const { container } = render(<ForecastButton
       fetchingForecast={false}
@@ -369,7 +369,7 @@ describe('ForecastButton', () => {
     mockedUseAqi.mockReturnValue([jest.fn(), { isLoading: false }]);
 
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
 
     const { container } = render(<ForecastButton
       fetchingForecast={false}
@@ -450,7 +450,7 @@ describe('ForecastButton', () => {
     mockedGetDeps.mockReturnValue({ routeData: {}, timeZoneId: 'tz', controlPoints: [], segment: 0, routeUUID: 'uuid' });
     // two parts
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
 
     // forecast unwrap always rejects
     const forecastFn = jest.fn(() => ({ unwrap: () => Promise.reject({ details: 'bad' }) }));
@@ -493,7 +493,7 @@ describe('ForecastButton', () => {
     mockedGetDeps.mockReturnValue({ routeData: {}, timeZoneId: 'tz', controlPoints: [], segment: 0, routeUUID: 'uuid' });
 
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T13:00:00-07:00" }]);
 
     // return distance based on part data so result ordering is deterministic
     const forecastFn = jest.fn((req: any) => ({ unwrap: () => Promise.resolve({ forecast: { distance: req.locations.lat } }) }));
@@ -543,7 +543,7 @@ describe('ForecastButton', () => {
     mockedGetDeps.mockReturnValue({ routeData: {}, timeZoneId: 'tz', controlPoints: [], segment: 0, routeUUID: 'uuid' });
 
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
 
     const forecastFn = jest.fn((req: any) => ({ unwrap: () => Promise.resolve({ forecast: { distance: req.locations.lat } }) }));
     const aqiFn = jest.fn((req: any) => ({ unwrap: () => Promise.resolve({ aqi: { aqi: req.locations.lat * 10 } }) }));
@@ -594,7 +594,7 @@ describe('ForecastButton', () => {
 
     mockedGetDeps.mockReturnValue({ routeData: {}, timeZoneId: 'tz', controlPoints: [], segment: 0, routeUUID: 'uuid' });
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
 
     const forecastFn = jest.fn((req: any) => ({ unwrap: () => Promise.resolve({ forecast: { distance: req.locations.lat } }) }));
     const aqiFn = jest.fn((req: any) => ({ unwrap: () => (req.locations.lat === 1 ? Promise.resolve({ aqi: { aqi: 10 } }) : Promise.reject({ details: 'badAQI' })) }));
@@ -647,7 +647,7 @@ describe('ForecastButton', () => {
 
     mockedGetDeps.mockReturnValue({ routeData: {}, timeZoneId: 'tz', controlPoints: [], segment: 0, routeUUID: 'uuid' });
     const routeUtils = require('../../utils/routeUtils');
-    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1 }, { lat: 2 }]);
+    routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T13:00:00-07:00" }]);
 
     const forecastFn = jest.fn((req: any) => ({ unwrap: () => Promise.resolve({ forecast: { distance: req.locations.lat } }) }));
     const aqiFn = jest.fn(() => ({ unwrap: () => Promise.reject({ details: 'badAQI' }) }));

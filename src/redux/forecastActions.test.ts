@@ -1,4 +1,5 @@
 jest.mock('@sentry/react', () => ({
+  __esModule: true,
   captureMessage: jest.fn(),
   metrics: { count: jest.fn() },
   logger: {
@@ -13,18 +14,12 @@ jest.mock('@sentry/react', () => ({
 }));
 
 jest.mock('react-ga4', () => ({
-  event: jest.fn()
+  __esModule: true,
+  default: {
+    event: jest.fn()
+  }
 }));
 
-jest.mock('../utils/routeUtils', () => ({
-  getForecastRequest: jest.fn()
-}));
-
-jest.mock('./dialogParamsSlice', () => ({
-  forecastFetchBegun: jest.fn(() => ({ type: 'dialogParams/forecastFetchBegun' })),
-  errorMessageListSet: jest.fn((payload: any) => ({ type: 'dialogParams/errorMessageListSet', payload })),
-  errorMessageListAppend: jest.fn((payload: any) => ({ type: 'dialogParams/errorMessageListAppend', payload }))
-}));
 
 jest.mock('./forecastSlice', () => ({
   forecastFetched: jest.fn((payload: any) => ({ type: 'forecast/forecastFetched', payload })),
@@ -33,18 +28,54 @@ jest.mock('./forecastSlice', () => ({
   Forecast: jest.fn()
 }));
 
-import { cancelForecast, msgFromError, errorDetails, removeDuplicateForecasts, extractRejectedResults, getDaysInFuture, forecastWithHook } from './forecastActions';
-import { getForecastRequest } from '../utils/routeUtils';
-import * as Sentry from '@sentry/react';
-import * as ReactGA from 'react-ga4';
-import { forecastFetchBegun, errorMessageListSet, errorMessageListAppend } from './dialogParamsSlice';
-import { forecastFetched, forecastAppended, forecastInvalidated } from './forecastSlice';
+let cancelForecast: any;
+let msgFromError: any;
+let errorDetails: any;
+let removeDuplicateForecasts: any;
+let extractRejectedResults: any;
+let getDaysInFuture: any;
+let forecastWithHook: any;
+let getForecastRequest: any;
+let Sentry: any;
+let ReactGA: any;
+let forecastFetchBegun: any;
+let errorMessageListSet: any;
+let errorMessageListAppend: any;
+let forecastFetched: any;
+let forecastAppended: any;
+let forecastInvalidated: any;
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn();
 
 beforeEach(() => {
+  jest.resetModules();
   jest.clearAllMocks();
+  jest.mock('../utils/routeUtils', () => ({ __esModule: true, getForecastRequest: jest.fn(() => []) }));
+  const forecastActions = require('./forecastActions');
+  const routeUtils = require('../utils/routeUtils');
+  routeUtils.getForecastRequest.mockReturnValue([{ lat: 1, lon: -105.0, time: "2024-12-01T12:00:00-07:00" }, { lat: 2, lon: -106.0, time: "2024-12-02T12:00:00-07:00" }]);
+
+  Sentry = require('@sentry/react');
+  ReactGA = require('react-ga4').default;
+  const dialogParams = require('./dialogParamsSlice');
+  const forecastSlice = require('./forecastSlice');
+
+  cancelForecast = forecastActions.cancelForecast;
+  msgFromError = forecastActions.msgFromError;
+  errorDetails = forecastActions.errorDetails;
+  removeDuplicateForecasts = forecastActions.removeDuplicateForecasts;
+  extractRejectedResults = forecastActions.extractRejectedResults;
+  getDaysInFuture = forecastActions.getDaysInFuture;
+  forecastWithHook = forecastActions.forecastWithHook;
+  getForecastRequest = routeUtils.getForecastRequest;
+  forecastFetchBegun = dialogParams.forecastFetchBegun;
+  errorMessageListSet = dialogParams.errorMessageListSet;
+  errorMessageListAppend = dialogParams.errorMessageListAppend;
+  forecastFetched = forecastSlice.forecastFetched;
+  forecastAppended = forecastSlice.forecastAppended;
+  forecastInvalidated = forecastSlice.forecastInvalidated;
+
   mockDispatch.mockClear();
   mockGetState.mockClear();
 });
@@ -142,9 +173,9 @@ describe('forecastActions', () => {
       const forecastFunc = jest.fn(() => ({ unwrap: () => Promise.resolve(fakeForecast) }));
       const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.resolve(fakeAqi) }));
 
-      (getForecastRequest as jest.Mock).mockReturnValue([{
-        locations: { lat: 39.9, lon: -105.0 }
-      }]);
+      (getForecastRequest as jest.Mock).mockReturnValue([
+        { lat: 39.9, lon: -105.0, time: '2024-12-01T12:00:00-07:00' }
+      ]);
 
       mockGetState.mockReturnValue({
         routeInfo: {
@@ -199,7 +230,9 @@ describe('forecastActions', () => {
       const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.resolve({ aqi: { aqi: 100 } }) }));
       const startTimestamp = Date.now() + 5 * 24 * 60 * 60 * 1000;
 
-      (getForecastRequest as jest.Mock).mockReturnValue([{ locations: { lat: 39.9, lon: -105.0 } }]);
+      (getForecastRequest as jest.Mock).mockReturnValue([{
+        lat: 39.9, lon: -105.0, time: '2024-12-01T12:00:00-07:00'
+      }]);
 
       mockGetState.mockReturnValue({
         routeInfo: {

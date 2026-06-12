@@ -3,7 +3,7 @@ import type { AppDispatch } from "../redux/store";
 import ReactGA from "react-ga4";
 import { forecastFetchBegun, errorMessageListSet, forecastFetchFailed, errorMessageListAppend } from "./dialogParamsSlice";
 import { forecastFetched, forecastAppended, Forecast, forecastInvalidated } from "./forecastSlice";
-import {getRwgpsRouteName, getRouteNumberFromValue} from "../utils/util"
+import {getRwgpsRouteName, getRouteNumberFromValue, preflightDaysOfForecast} from "../utils/util"
 import { RwgpsRoute, RwgpsTrip } from "./routeInfoSlice";
 import { MutationWrapper } from "./loadRouteActions";
 import { type ForecastRequest } from "../utils/gpxParser";
@@ -87,12 +87,25 @@ const forecastByParts = (forecastFunc: MutationWrapper, aqiFunc: MutationWrapper
     }
     while (requestCopy.length >= 0 && locations) {
         try {
+            // do not continue if the request is too far in the future for the provider given its limits
+            const requestDate = DateTime.fromFormat(locations.time, "yyyy-MM-dd'T'HH:mm:00ZZZ").setZone(zone)
+            if (preflightDaysOfForecast(service, requestDate)) {
+                warn(`Not fetching forecast for part ${which} ${locations.lat} using ${service} because the request date of ${requestDate.toISO()} is too far in the future for that provider`, { provider: service });
+                break;
+            }
             const request = { locations: locations, timezone: zone, service: service, routeName: routeName, routeNumber: routeNumber, lang: lang, which }
             const result = limit(() => forecastFunc(request).unwrap())
             result.catch((err) => {
                 warn(`Forecast fetch failed for part ${which} ${request.locations.lat},${request.locations.lon} with error ${errorDetails(err)}`, { provider: service });
                 // retry with alternate provider if any failed
                 if (alternateProvider === service) {
+                    return;
+                }
+                // do not retry if the error was that the request was too far in the future given the provider's limits
+                // first get the date of the forecast request
+                const retryRequestDate = DateTime.fromFormat(request.locations.time, "yyyy-MM-dd'T'HH:mm:00ZZZ").setZone(zone)
+                if (preflightDaysOfForecast(alternateProvider, retryRequestDate)) {
+                    warn(`Not retrying forecast fetch for part ${which} ${request.locations.lat} with ${alternateProvider} because the request date of ${retryRequestDate.toISO()} is too far in the future for that provider`, { provider: alternateProvider });
                     return;
                 }
                 info(`Retrying forecast fetch for part ${which} ${request.locations.lat},${request.locations.lon} using ${alternateProvider}`, { provider: alternateProvider });

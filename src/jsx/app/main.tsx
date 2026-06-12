@@ -56,7 +56,7 @@ import { stravaActivitySet, stravaRefreshTokenSet, stravaRouteSet, stravaTokenSe
 import { apiKeysSet, querySet, actionUrlAdded } from "../../redux/paramsSlice";
 import { fetchAqiSet, zoomToRangeSet } from "../../redux/forecastSlice";
 import { stopAfterLoadSet, rusaPermRouteIdSet, routeLoadingModeSet, startTimestampSet, rwgpsRouteSet, reset } from "../../redux/routeParamsSlice";
-import { metricSet, displayControlTableUiSet, celsiusToggled, celsiusSet } from "../../redux/controlsSlice";
+import { metricSet, displayControlTableUiSet, celsiusSet } from "../../redux/controlsSlice";
 import { defaultProvider, providerValues } from "../../redux/providerValues";
 import type { DesktopUIProps } from "../DesktopUI";
 const NewUserPage = React.lazy(() => import(/* webpackChunkName: "NewUserPage" */'./NewUserPage'));
