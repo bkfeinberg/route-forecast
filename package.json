@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.19.5",
+  "version": "5.19.6",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -226,6 +226,7 @@
     "@sentry-internal/node-cpu-profiler@2.4.1": true,
     "fsevents@2.3.3": true,
     "fsevents@2.3.2": true,
-    "msw@2.14.6": true
+    "msw@2.14.6": true,
+    "unrs-resolver@1.12.2": true
   }
 }

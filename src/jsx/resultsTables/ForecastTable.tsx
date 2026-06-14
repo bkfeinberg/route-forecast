@@ -250,14 +250,14 @@ const ForecastTable = () => {
         finishTime: string
         finishTimeFormat: string
         userControls: Array<UserControl>,
-        timeOnFlat: number
+        timeFromHills: number
     }
-    const MakeSummaryLine = ({startTime, finishTime, finishTimeFormat, userControls, timeOnFlat} : MakeSummaryProps) => {
+    const MakeSummaryLine = ({startTime, finishTime, finishTimeFormat, userControls, timeFromHills} : MakeSummaryProps) => {
         const elapsedTimeInterval = Interval.fromDateTimes(startTime, DateTime.fromFormat(finishTime, finishTimeFormat, {zone:zone}));
-        const hoursSpentFromHills = elapsedTimeInterval.toDuration('hours').minus({ hours: timeOnFlat }).as('hours');
+
         const minutesOfIdling = userControls.reduce((accum,current) => accum += Number.parseInt(current.duration.toString()), 0)
         return (
-            <div style={{border:'3px solid black'}}>Elapsed time <strong>{elapsedTimeInterval.length('hours').toFixed(1)} hours</strong>, <strong>{(minutesOfIdling/60).toFixed(1)}</strong> off bike, <strong>{(hoursSpentFromHills).toFixed(1)} hours</strong> from hills</div>
+            <div style={{border:'3px solid black'}}>Elapsed time <strong>{elapsedTimeInterval.length('hours').toFixed(1)} hours</strong>, <strong>{(minutesOfIdling/60).toFixed(1)}</strong> off bike, <strong>{(timeFromHills).toFixed(1)} hours</strong> from hills</div>
         )
     }
 
@@ -407,7 +407,7 @@ const ForecastTable = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems:'center', justifyContent:'center' }}>
                                 <div style={{ flex: 1 }}>
                                     <WeatherCorrections />
-                                    {ForecastValues.finishTime && finishTimeFormat && <MakeSummaryLine startTime={startTime} finishTime={ForecastValues.finishTime} finishTimeFormat={finishTimeFormat} userControls={userControls} timeOnFlat={ForecastValues.timeOnFlat}/>}
+                                    {ForecastValues.finishTime && finishTimeFormat && <MakeSummaryLine startTime={startTime} finishTime={ForecastValues.finishTime} finishTimeFormat={finishTimeFormat} userControls={userControls} timeFromHills={ForecastValues.timeFromHills}/>}
                                 </div>
                                 <div style={{ marginTop: "5px", textAlign: "left" }}>
                                     <ShortUrl />
@@ -424,7 +424,7 @@ const ForecastTable = () => {
                                 <div style={{ flex: 1 }}>
                                     <WeatherCorrections />
                                 </div>
-                                {ForecastValues.finishTime && finishTimeFormat && <MakeSummaryLine startTime={startTime} finishTime={ForecastValues.finishTime} finishTimeFormat={finishTimeFormat} userControls={userControls} timeOnFlat={ForecastValues.timeOnFlat}/>}
+                                {ForecastValues.finishTime && finishTimeFormat && <MakeSummaryLine startTime={startTime} finishTime={ForecastValues.finishTime} finishTimeFormat={finishTimeFormat} userControls={userControls} timeFromHills={ForecastValues.timeFromHills}/>}
                             </div>
                             <div style={{padding:'20px'}}>
                                 <Tooltip label={t('tooltips.copyTable')}>

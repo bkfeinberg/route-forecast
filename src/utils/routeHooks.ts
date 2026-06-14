@@ -78,7 +78,7 @@ interface WindResultInputs {
   forecast: Forecast[]
   [index: string]: any;
 }
-export type ExpandedWindResult = WindAdjustResults & {timeOnFlat: number, forecastRequest?: Array<ForecastRequest>};
+export type ExpandedWindResult = WindAdjustResults & {timeFromHills: number, forecastRequest?: Array<ForecastRequest>};
 type CachedWindResult = {
   result: ExpandedWindResult;
   dependencyValues: WindResultInputs | { [index: string]: any; };
@@ -86,7 +86,7 @@ type CachedWindResult = {
 let lastWindResult: CachedWindResult = {
   result: {
     weatherCorrectionMinutes: 0, calculatedControlPointValues: [],
-    maxGustSpeed: 0, finishTime: "", adjustedTimes: [], chartData: [], timeOnFlat: 0
+    maxGustSpeed: 0, finishTime: "", adjustedTimes: [], chartData: [], timeFromHills: 0
   }, dependencyValues: {}
 };
 export const calculateWindResult = (inputs: WindResultInputs): ExpandedWindResult => {
@@ -97,7 +97,7 @@ export const calculateWindResult = (inputs: WindResultInputs): ExpandedWindResul
   const routeInfo = routeInfoState.rwgpsRouteData ? routeInfoState.rwgpsRouteData : routeInfoState.gpxRouteData;
   let result;
   if (routeInfo) {
-    const { points, values, finishTime, totalDistMeters, timeOnFlat, forecastRequest } = getRouteInfo(
+    const { points, values, finishTime, totalDistMeters, timeFromHills, forecastRequest } = getRouteInfo(
       routeInfo,
       routeParams.startTimestamp,
       routeParams.zone,
@@ -126,13 +126,13 @@ export const calculateWindResult = (inputs: WindResultInputs): ExpandedWindResul
     result = {
       weatherCorrectionMinutes: weatherCorrectionMinutes,
       calculatedControlPointValues: calculatedControlPointValues, maxGustSpeed: maxGustSpeed,
-      finishTime: adjustedFinishTime, adjustedTimes, chartData: chartData, timeOnFlat: timeOnFlat,
+      finishTime: adjustedFinishTime, adjustedTimes, chartData: chartData, timeFromHills: timeFromHills,
       forecastRequest:forecastRequest
     };
   } else {
     result = {
       weatherCorrectionMinutes: 0, calculatedControlPointValues: [],
-      maxGustSpeed: 0, finishTime: null, adjustedTimes: [], chartData: [], timeOnFlat: 0
+      maxGustSpeed: 0, finishTime: null, adjustedTimes: [], chartData: [], timeFromHills: 0
     };
   }
   lastWindResult = { result, dependencyValues: inputs };

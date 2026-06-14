@@ -6,7 +6,7 @@ import gpxParser, { type RouteAnalysisResults, type Segment, type ExtractedContr
 let cachedRouteUUID: string | null = null;
 let cachedRouteData: RouteAnalysisResults = {
   points: [], forecastRequest: [], values: [],
-  finishTime: '', timeInHours: 0, totalDistMeters: 0, timeOnFlat: 0
+  finishTime: '', timeInHours: 0, totalDistMeters: 0, timeFromHills: 0
 };
 
 const filterOutPastForecastRequests = (forecastRequest: Array<ForecastRequest>) => {

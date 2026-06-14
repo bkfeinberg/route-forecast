@@ -64,7 +64,7 @@ describe('routeHooks', () => {
         finishTime: null,
         adjustedTimes: [],
         chartData: [],
-        timeOnFlat: 0,
+        timeFromHills: 0,
       };
 
       const inputs = {

@@ -93,7 +93,7 @@ export interface RouteAnalysisResults {
     finishTime: string,
     timeInHours: number,
     totalDistMeters: number,
-    timeOnFlat: number
+    timeFromHills: number
 }
 
 const desiredSeparationInMeters = 25;       // meters of distance desired between two points for grade calculation
@@ -428,12 +428,14 @@ class AnalyzeRoute {
         calculatedValues.sort((a,b) => a.val-b.val);
         let requestsWithBearings : Array<ForecastRequest> = forecastRequests.map( 
             ( request, index) => {return (index === 0) ? {...request, bearing:0} : {...request, bearing:bearings.shift()}});
-        const timeOnFlat = ((accumulatedDistanceKm*kmToMiles) / baseSpeed) + idlingTime;
+        const timeOnFlat = ((accumulatedDistanceKm*kmToMiles) / baseSpeed);
+        const timeFromHills = accumulatedTime - timeOnFlat;
         console.log(`Total time on flat at pace ${pace} is ${timeOnFlat.toFixed(2)} hours`)
+        console.log(`Total time on climb at pace ${pace} is ${timeFromHills.toFixed(2)} hours`)
         return {forecastRequest:requestsWithBearings,
             points:stream,values:calculatedValues,
             finishTime: finishTime, timeInHours:accumulatedTime + idlingTime,
-            totalDistMeters, timeOnFlat: timeOnFlat
+            totalDistMeters, timeFromHills: timeFromHills
         };
     }
 
