@@ -65,7 +65,7 @@
     "localforage": "^1.10.0",
     "luxon": "^3.3.0",
     "mathjs": "^15.0.0",
-    "multer": "^2.0.0",
+    "multer": "^2.2.0",
     "node-cache-32": "^1.6.3",
     "node-fetch": "^3.3.2",
     "openmeteo": "^1.2.3",
