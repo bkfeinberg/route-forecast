@@ -107,9 +107,9 @@ export const getRouteNumberFromValue = (value : string) => {
   return value;
 }
 
-// returns true for start dates that are out of range
+// returns true for start dates that are out of range - either too far in the future or in the past
 export const preflightDaysOfForecast = (provider: string, startDate: DateTime) => {
   const daysInFuture = startDate.diff(DateTime.now(), 'days').days;
-  return (providerValues[provider].max_days < daysInFuture);
+  return (daysInFuture < 0 || providerValues[provider].max_days < daysInFuture);
 }
 
