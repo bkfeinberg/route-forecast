@@ -26,6 +26,8 @@ import { Button } from "@mantine/core";
 import pLimit from 'p-limit';
 import {preflightDaysOfForecast} from '../../utils/util'
 import { DateTime } from "luxon";
+import Cookies from 'universal-cookie';
+
 declare module 'react' {
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
         // extends React's HTMLAttributes
@@ -67,7 +69,8 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
     const [shiftPressed, setShiftPressed] = useState(false)
     const { i18n } = useTranslation()
     const country = useAppSelector((state: RootState) => state.routeInfo.country);
-    
+    const cookies = new Cookies(null, { path: '/' });
+
     const keyIsDown = (event : KeyboardEvent) => {
         if (event.code === "AltLeft" || event.code === "AltRight") {
             setOptionPressed(true)
@@ -223,6 +226,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
     }
 
     const forecastClick = async (event : React.MouseEvent) => {
+        cookies.set('forecastButtonClick', new Date().toISOString(), { path: '/' });
         if (downloadAll || (event.altKey && !event.shiftKey)) {
             ReactGA.event('generate_lead', {currency:'USD', value: distanceInKm})
             grabAllPossibleForecasts(forecastRequestData.current)
