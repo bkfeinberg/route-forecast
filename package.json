@@ -130,7 +130,7 @@
     "@types/express": "^5.0.6",
     "@types/google.maps": "^3.58.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.0.1",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
