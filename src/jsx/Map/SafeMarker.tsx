@@ -9,7 +9,7 @@ interface SafeAdvancedMarkerProps {
     collisionBehavior?: CollisionBehavior;
     onMouseEnter?: (event: google.maps.MapMouseEvent['domEvent']) => void;
     onMouseLeave?: (event: google.maps.MapMouseEvent['domEvent']) => void;
-    onClick?: (event: google.maps.MapMouseEvent) => void;
+    onClick?: (event: google.maps.marker.AdvancedMarkerClickEvent) => void;
 }
 
 const SafeAdvancedMarker = (props : SafeAdvancedMarkerProps) => {

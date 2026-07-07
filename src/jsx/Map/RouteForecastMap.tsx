@@ -634,7 +634,7 @@ const ControlMarker = ({ latitude, longitude, value = '' }: ControlMarkerProps) 
                 zIndex={5} collisionBehavior={CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL}
                 onMouseEnter={(event: google.maps.MapMouseEvent['domEvent']) => { setShowTheText(true) }}
                 onMouseLeave={(event: google.maps.MapMouseEvent['domEvent']) => { setShowTheText(false) }}
-                onClick={(event: google.maps.MapMouseEvent) => setShowTheText(false)}
+                onClick={(event: google.maps.marker.AdvancedMarkerClickEvent) => setShowTheText(false)}
             >
                 <img src={sandwich} style={{ backgroundColor: 'transparent' }} />
                 {showTheText && ShowControlName(latitude, longitude, value, setShowTheText)}
