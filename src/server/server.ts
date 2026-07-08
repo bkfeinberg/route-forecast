@@ -7,8 +7,8 @@ app.set('trust proxy', 1 /* number of proxies between user and server */)
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const moduleFilename = fileURLToPath(import.meta.url);
+const moduleDirname = dirname(moduleFilename);
 
 //@ts-ignore
 import apicache from 'node-cache-32';
@@ -84,7 +84,7 @@ if (!short_io_key) {
     process.exit(1)
 }
 
-const publicPath = express.static(path.resolve(__dirname, '../static'), {
+const publicPath = express.static(path.resolve(moduleDirname, '../static'), {
     setHeaders: (res, path) => {
         // Long-term caching for hashed static assets (js, css, images, etc.)
         if (path.match(/\.(js|br|css|png|jpg|jpeg|gif|ico|json|svg)$/)) {
@@ -97,7 +97,7 @@ const publicPath = express.static(path.resolve(__dirname, '../static'), {
     }
 });
 
-app.use('/static', expressStaticGzip(path.resolve(__dirname, '../'), {
+app.use('/static', expressStaticGzip(path.resolve(moduleDirname, '../'), {
     enableBrotli: true,
     orderPreference: [
         'br',
@@ -116,37 +116,37 @@ app.get('/worker.js', (req: Request, res : Response) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');    
-    res.sendFile(path.resolve(__dirname,'../static/worker.js'));
+    res.sendFile(path.resolve(moduleDirname,'../static/worker.js'));
 })
 
 app.use('/lib/localforage.js', limiter)
 app.get('/lib/localforage.js', (req : Request, res : Response) => {
     res.set('Content-Type', 'application/javascript');
-    res.sendFile(path.resolve(__dirname,'../static/lib/localforage.js'));
+    res.sendFile(path.resolve(moduleDirname,'../static/lib/localforage.js'));
 });
 
 app.get('/lib/localforage.min.js', (req : Request, res : Response) => {
     res.set('Content-Type', 'application/javascript');
-    res.sendFile(path.resolve(__dirname,'../static/lib/localforage.min.js'));
+    res.sendFile(path.resolve(moduleDirname,'../static/lib/localforage.min.js'));
 })
 app.get('/robots.txt', (req : Request, res : Response) => {
-    res.sendFile(path.resolve(__dirname,'../static/robots.txt'));
+    res.sendFile(path.resolve(moduleDirname,'../static/robots.txt'));
 })
 
 // ejs
-app.set('views', path.resolve(__dirname, 'views'));
+app.set('views', path.resolve(moduleDirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.get('/favicon.ico', (req : Request, res : Response) => { 
-    res.sendFile(path.resolve(__dirname, '../static/favicon.ico'))
+    res.sendFile(path.resolve(moduleDirname, '../static/favicon.ico'))
 })
 
 app.get('/apple-touch-icon.png', (req : Request, res : Response) => { 
-    res.sendFile(path.resolve(__dirname, '../static/apple-touch-icon.png'))
+    res.sendFile(path.resolve(moduleDirname, '../static/apple-touch-icon.png'))
 })
 
 app.get('/apple-touch-icon-precomposed.png', (req : Request, res : Response) => { 
-    res.sendFile(path.resolve(__dirname, '../static/apple-touch-icon-precomposed.png'))
+    res.sendFile(path.resolve(moduleDirname, '../static/apple-touch-icon-precomposed.png'))
 })
 
 const setupPostgres = async () => {
@@ -255,8 +255,10 @@ app.get('/rwgps_route', (req : Request, res : Response) => {
     const rwgpsUrl = `https://ridewithgps.com/${routeType}/${buildRouteUrl(routeNumber,rwgpsApiKey)}`;
     fetch(rwgpsUrl,{headers:headers}).then(fetchResult => {if (!fetchResult.ok) {throw Error(fetchResult.statusText)} return fetchResult.text()})
         .then(body => {if (!isValidRouteResult(body, routeType)) {res.status(401).send(body)} else {res.status(200).send(body)}})
-        .catch(err => {const status = isNaN(Number.parseInt(err.message,10))?500:Number.parseInt(err.message,10);
-            res.status(status).json({ 'status': JSON.stringify(err) })});
+        .catch(err => {
+            const status = isNaN(Number.parseInt(err.message,10)) ? 500 : Number.parseInt(err.message,10);
+            res.status(status).json({ 'status': String(err) });
+        });
 });
 
 app.get('/rusa_perm_id', (req : Request, res : Response) => {
@@ -800,7 +802,15 @@ app.get('/stravaAuthReply', async (req : Request, res : Response) => {
     }
     let restoredState = {} as RestoredState;
     if (state && typeof state === 'string' && state !== '') {
-        restoredState = JSON.parse(decodeURIComponent(state));
+        try {
+            const decodedState = decodeURIComponent(state);
+            const normalizedState = decodedState.startsWith('?') ? decodedState.slice(1) : decodedState;
+            if (normalizedState.trim().startsWith('{')) {
+                restoredState = JSON.parse(normalizedState);
+            }
+        } catch (parseError) {
+            console.warn(`Could not parse Strava state: ${parseError}`);
+        }
     }
     if (error === undefined && typeof code === "string") {
         console.log(`Requesting Strava token exchange with code ${code} and scope ${scope}`)

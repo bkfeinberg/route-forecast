@@ -1,5 +1,18 @@
 {
     "jest.jestCommandLine": "/usr/local/bin/npm run test --",
     "jest.runMode": "on-demand",
-    "jest.nodeEnv": {"TZ": "UTC"}
+    "jest.nodeEnv": {
+        "TZ": "UTC"
+    },
+    "chat.tools.terminal.autoApprove": {
+        "/^npx jest --runInBand --coverage --collectCoverageFrom='src/server/server\\.ts' src/server/server\\.test\\.ts$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "npx jest": true,
+        "/^cd /Users/brian/Src/route-forecast && node - <<'NODE'\nconst fs = require\\('fs'\\);\nconst path = require\\.resolve\\('axios-retry'\\);\nconst lines = fs\\.readFileSync\\(path,'utf8'\\)\\.split\\('\\\\n'\\);\nfor \\(let i = 180; i <= 205; i\\+\\+\\) console\\.log\\(i\\+': '\\+lines\\[i-1\\]\\);\nNODE$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
 }

@@ -225,14 +225,69 @@ describe('forecastActions', () => {
       expect((ReactGA.event as jest.Mock).mock.calls.some(call => call[0] === 'add_payment_info')).toBe(true);
     });
 
-    it('overrides provider when the selected provider cannot forecast that far and reports no successful forecasts', async () => {
+    it('dispatches a fetch event for RWGPS route data and handles no AQI fetch', async () => {
+      const fakeForecast = { forecast: { distance: 10, isControl: false, time: 2000 }, which: 0 };
+      const forecastFunc = jest.fn(() => ({ unwrap: () => Promise.resolve(fakeForecast) }));
+      const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.reject(new Error('should not be called')) }));
+
+      (getForecastRequest as jest.Mock).mockReturnValue([
+        { lat: 39.9, lon: -105.0, time: '2024-12-01T12:00:00-07:00' }
+      ]);
+
+      mockGetState.mockReturnValue({
+        routeInfo: {
+          rwgpsRouteData: {
+            type: 'route',
+            route: {
+              id: 123,
+              distance: 10000,
+              name: 'RWGPS Route',
+              country_code: 'US',
+              track_points: [{ lat: 39.9, lon: -105.0, d: 1 }],
+              course_points: [],
+              points_of_interest: []
+            }
+          },
+          gpxRouteData: null,
+          name: 'RWGPS Route',
+          routeUUID: 'uuid'
+        },
+        uiInfo: {
+          routeParams: {
+            startTimestamp: Date.now() + 24 * 60 * 60 * 1000,
+            zone: 'America/Denver',
+            pace: 10,
+            interval: 60,
+            segment: null
+          }
+        },
+        forecast: {
+          weatherProvider: 'weatherKit',
+          fetchAqi: false
+        },
+        controls: {
+          userControlPoints: []
+        },
+        strava: {
+          route: ''
+        }
+      });
+
+      await forecastWithHook(forecastFunc as any, aqiFunc as any, mockDispatch as any, mockGetState as any, 'en');
+
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'dialogParams/forecastFetchBegun' });
+      expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'forecast/forecastFetched' }));
+      expect(ReactGA.event).toHaveBeenCalledWith('weather_provider', { provider: 'weatherKit' });
+      expect((ReactGA.event as jest.Mock).mock.calls.some(call => call[0] === 'add_payment_info')).toBe(true);
+    });
+
+    it('does not retry when the provider matches the alternate provider', async () => {
       const forecastFunc = jest.fn(() => ({ unwrap: () => Promise.reject({ data: { details: 'Forecast failed', which: 0 } }) }));
       const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.resolve({ aqi: { aqi: 100 } }) }));
-      const startTimestamp = Date.now() + 5 * 24 * 60 * 60 * 1000;
 
-      (getForecastRequest as jest.Mock).mockReturnValue([{
-        lat: 39.9, lon: -105.0, time: '2024-12-01T12:00:00-07:00'
-      }]);
+      (getForecastRequest as jest.Mock).mockReturnValue([
+        { lat: 39.9, lon: -105.0, time: '2024-12-01T12:00:00-07:00' }
+      ]);
 
       mockGetState.mockReturnValue({
         routeInfo: {
@@ -252,7 +307,7 @@ describe('forecastActions', () => {
         },
         uiInfo: {
           routeParams: {
-            startTimestamp,
+            startTimestamp: Date.now() + 24 * 60 * 60 * 1000,
             zone: 'America/Denver',
             pace: 10,
             interval: 60,
@@ -260,7 +315,7 @@ describe('forecastActions', () => {
           }
         },
         forecast: {
-          weatherProvider: 'climacell',
+          weatherProvider: 'oneCall',
           fetchAqi: true
         },
         controls: {
@@ -273,10 +328,68 @@ describe('forecastActions', () => {
 
       await forecastWithHook(forecastFunc as any, aqiFunc as any, mockDispatch as any, mockGetState as any, 'en');
 
-      expect((ReactGA.event as jest.Mock).mock.calls.some(call => call[1]?.provider === 'visualcrossing')).toBe(true);
+      expect((ReactGA.event as jest.Mock).mock.calls.some(call => call[1]?.provider === 'oneCall')).toBe(true);
+      expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'forecast/forecastFetched' }));
+      expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'dialogParams/errorMessageListSet' }));
+    });
+
+    it('dispatches error actions when no route data exists', async () => {
+      const forecastFunc = jest.fn(() => ({ unwrap: () => Promise.resolve({ forecast: { distance: 5, isControl: false, time: 2000 }, which: 0 }) }));
+      const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.resolve({ aqi: { aqi: 100 } }) }));
+
+      mockGetState.mockReturnValue({
+        routeInfo: {
+          rwgpsRouteData: null,
+          gpxRouteData: null,
+          name: '',
+          routeUUID: null
+        },
+        uiInfo: {
+          routeParams: {
+            startTimestamp: Date.now() + 24 * 60 * 60 * 1000,
+            zone: 'America/Denver',
+            pace: 10,
+            interval: 60,
+            segment: null
+          }
+        },
+        forecast: {
+          weatherProvider: 'weatherKit',
+          fetchAqi: true
+        },
+        controls: {
+          userControlPoints: []
+        },
+        strava: {
+          route: ''
+        }
+      });
+
+      await forecastWithHook(forecastFunc as any, aqiFunc as any, mockDispatch as any, mockGetState as any, 'en');
+
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'dialogParams/forecastFetchBegun' });
       expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'forecast/forecastFetched' }));
       expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'dialogParams/errorMessageListSet' }));
       expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'dialogParams/errorMessageListAppend' }));
+    });
+
+    it('captures whitespace details and reports a Sentry message', () => {
+      const error = { reason: { data: { details: '   ' } } };
+      const result = msgFromError(error as any, 'openWeather', 'forecast');
+
+      expect(result).toBe('   ');
+      expect(Sentry.captureMessage).toHaveBeenCalledWith(
+        'Error string from data.details was all whitespace',
+        { extra: { error: JSON.stringify(error) } }
+      );
+    });
+
+    it('falls back to JSON.stringify(reason) when data.details is absent', () => {
+      const error = { reason: { data: undefined, reason: 'Network failure' } };
+      const result = msgFromError(error as any, 'openWeather', 'forecast');
+
+      expect(result).toBe(JSON.stringify(error.reason));
+      expect(Sentry.captureMessage).not.toHaveBeenCalled();
     });
   });
 

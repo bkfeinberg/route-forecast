@@ -89,6 +89,9 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-beforeAll(() => {server.listen()});
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'bypass' });
+});
+
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
