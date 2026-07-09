@@ -79,6 +79,72 @@ describe('src/server/server.ts', () => {
     expect(response.body).toEqual({ status: 'Invalid route number' });
   });
 
+  test('rejects missing location payload on /forecast_one', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .post('/forecast_one')
+      .send({ timezone: 'UTC' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ status: 'Missing location key' });
+  });
+
+  test('rejects missing timezone payload on /forecast_one', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .post('/forecast_one')
+      .send({ locations: { lat: 1, lon: 2, time: '2026-01-01T00:00:00Z', distance: 0, bearing: 0, isControl: false } });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ status: 'Missing timezone key' });
+  });
+
+  test('returns a forecast for multi-service requests on /forecast_one', async () => {
+    const weatherService = await import('./weatherForecastDispatcher.js');
+    (weatherService.default as jest.Mock).mockResolvedValueOnce({ temp: '44' }).mockResolvedValueOnce({ temp: '46' });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .post('/forecast_one')
+      .send({
+        locations: { lat: 1, lon: 2, time: '2026-01-01T00:00:00Z', distance: 0, bearing: 0, isControl: false },
+        timezone: 'UTC',
+        service: 'metno,icon'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.forecast.temp).toBe('44');
+    expect(response.body.forecast.stdDev).toBe(1.4142135623730951);
+  });
+
+  test('rejects missing location payload on /aqi_one', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .post('/aqi_one')
+      .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ status: 'Missing location key' });
+  });
+
+  test('returns AQI data for /aqi_one', async () => {
+    const purpleAirModule = await import('./purpleAirAQI.js');
+    const airNowModule = await import('./airNowAQI.js');
+    (airNowModule.default as jest.Mock).mockResolvedValueOnce({ aqi: 12 });
+    (purpleAirModule.default as jest.Mock).mockResolvedValueOnce({ aqi: 15 });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .post('/aqi_one')
+      .send({ locations: { lat: 1, lon: 2 } });
+
+    expect(response.status).toBe(200);
+    expect(response.body.aqi).toEqual({ aqi: { aqi: 12 } });
+  });
+
   test('returns 200 for a valid rwgps route response', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,

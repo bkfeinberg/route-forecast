@@ -303,7 +303,14 @@ app.get('/cache/index', (req : Request, res : Response) => {
 let cache = apicache.options(
     {
         trackPerformance: true,
-        appendKey: (req: Request, res: Response) => req.body.locations.lat.toString() + req.body.locations.lon.toString() + req.body.locations.time + req.body.service
+        appendKey: (req: Request, res: Response) => {
+            const locations = req.body?.locations;
+            const lat = locations?.lat?.toString() ?? '';
+            const lon = locations?.lon?.toString() ?? '';
+            const time = locations?.time ?? '';
+            const service = req.body?.service ?? '';
+            return `${lat}${lon}${time}${service}`;
+        }
     })
 
 
