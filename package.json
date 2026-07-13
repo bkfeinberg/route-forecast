@@ -118,7 +118,7 @@
     "@babel/runtime": "^8.0.0",
     "@babel/traverse": "^8.0.0",
     "@playwright/test": "^1.59.1",
-    "@sentry/webpack-plugin": "^5.0.0",
+    "@sentry/webpack-plugin": "^5.4.0",
     "@svgr/webpack": "^8.1.0",
     "@swc/core": "^1.15.24",
     "@swc/jest": "^0.2.39",
