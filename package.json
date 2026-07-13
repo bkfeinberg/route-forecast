@@ -94,7 +94,7 @@
     "webpack": "^5.76.0"
   },
   "devDependencies": {
-    "@babel/cli": "^8.0.1",
+    "@babel/cli": "^8.0.4",
     "@babel/core": "^8.0.1",
     "@babel/plugin-proposal-decorators": "^8.0.2",
     "@babel/plugin-proposal-do-expressions": "^8.0.1",
