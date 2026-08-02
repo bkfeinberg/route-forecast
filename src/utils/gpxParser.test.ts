@@ -227,6 +227,11 @@ describe('AnalyzeRoute', () => {
             expect(result).toBeCloseTo(0, 5);
         });
 
+        it('should return 0 when effective speed is non-positive', () => {
+            const result = AnalyzeRouteClass.calculateElapsedTime(0, 50, -5);
+            expect(result).toBe(0);
+        });
+
         it('should calculate elapsed time with no climb', () => {
             const result = AnalyzeRouteClass.calculateElapsedTime(0, 50, 15);
             expect(result).toBeGreaterThan(0);
@@ -495,6 +500,37 @@ describe('AnalyzeRoute', () => {
             const result = AnalyzeRoute.adjustForWind([], [], 'fast', [], [], DateTime.now(), '', 'UTC', 100);
             expect(result.weatherCorrectionMinutes).toBe(0);
             expect(result.calculatedControlPointValues).toEqual([]);
+        });
+
+        it('should preserve the control update path when forecast data exists', () => {
+            const start = DateTime.fromISO('2024-01-01T08:00:00', { zone: 'UTC' });
+            const stream: Point[] = [
+                { lat: 40.7128, lon: -74.0060, elevation: 100 },
+                { lat: 40.7528, lon: -73.9660, elevation: 100 },
+            ];
+            const controls: UserControl[] = [{ distance: 0, id: 1, duration: 30, name: 'Control', banked: 0 }];
+            const previousValues: CalculatedValue[] = [{
+                arrival: start.toFormat('EEE, MMM dd yyyy h:mma'),
+                banked: 0,
+                val: 1,
+                distance: 0,
+            }];
+
+            const result = AnalyzeRoute.adjustForWind(
+                [{ time: '2024-01-01T09:00:00', distance: 0, windBearing: 90, windSpeed: '10', gust: '20', temp: '60' } as any],
+                stream,
+                'D',
+                controls,
+                previousValues,
+                start,
+                start.toFormat('EEE, MMM dd yyyy h:mma'),
+                'UTC',
+                1000
+            );
+
+            expect(result.weatherCorrectionMinutes).toBeDefined();
+            expect(result.calculatedControlPointValues).toHaveLength(1);
+            expect(result.finishTime).toContain('2024');
         });
     });
 

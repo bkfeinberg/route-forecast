@@ -78,7 +78,7 @@ export const controlsMeaningfullyDifferent = (controls1 : Array<UserControl>, co
 }
 
 export const stringIsOnlyNumeric = (string : string) => string.match(/^[0-9]+$/) !== null
-export const stringIsOnlyDecimal = (string : string) => string.match(/^[0-9.]*$/) !== null
+export const stringIsOnlyDecimal = (string : string) => string.match(/^\d+(?:\.\d+)?$/) !== null
 
 export const milesToMeters = 1609.34;
 
@@ -92,17 +92,15 @@ export const metricPaceToSpeed : PaceTable = {"Q":5, "R":6, "S":8, "T":10, 'A-':
 
 export const getRouteNumberFromValue = (value : string) => {
   if (value &&  typeof value === 'string') {
-    const lastSlashIndex = value.lastIndexOf('/');
+    const pathWithoutQuery = value.split(/[?#]/)[0];
+    const lastSlashIndex = pathWithoutQuery.lastIndexOf('/');
     if (lastSlashIndex >= 0) {
-      const routeNumber = value.substring(lastSlashIndex + 1);
-      if (routeNumber.endsWith("?")) {
-        return routeNumber.slice(0, -1);
-      } else {
+      const routeNumber = pathWithoutQuery.substring(lastSlashIndex + 1);
+      if (routeNumber.length > 0) {
         return routeNumber;
       }
-    } else {
-      return value
     }
+    return value;
   }
   return value;
 }
