@@ -27,7 +27,7 @@ axiosRetry(axiosInstance, {
 });
 
 const getAirNowAQI = async function (lat : number, lon : number) {
-    const url = `https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&latitude=${lat}&longitude=${lon}&date=${forecastDay}&API_KEY=${airNowKey}`;
+    const url = `https://www.airnowapi.org/aq/forecast/current/?format=application/json&latitude=${lat}&longitude=${lon}&date=${forecastDay}&API_KEY=${airNowKey}`;
     let airNowResult = await axiosInstance.get<Array<IqAirData>>(url).catch((error: any) => {
         // we can't really address this so don't use up Sentry quota on it, but log it just in case
         // Sentry.captureException(error)
@@ -36,15 +36,16 @@ const getAirNowAQI = async function (lat : number, lon : number) {
         return undefined;
     }
     interface IqAirData {
-        ParameterName: string;
-        AQI: number;
+        parameterName: string;
+        aqi: number;
     }
 
-    let filteredResults = airNowResult.data.filter((obj: IqAirData) => obj.ParameterName==="PM2.5" && obj.AQI!==-1);
+    let filteredResults = airNowResult.data.filter((obj: IqAirData) => obj.parameterName==="PM2.5" && obj.aqi!==-1);
     if (filteredResults.length===0) {
         return undefined;
     }
-    return filteredResults[filteredResults.length-1].AQI;
+    console.log(`AirNow AQI for ${lat},${lon} is ${filteredResults[filteredResults.length-1].aqi}`);
+    return filteredResults[filteredResults.length-1].aqi;
 }
 
 export default getAirNowAQI;
