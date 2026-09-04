@@ -1,6 +1,6 @@
 {
   "name": "route_weather",
-  "version": "5.20.0",
+  "version": "5.21.0",
   "description": "Forecast weather along a route from RideWithGps or Strava. Support for others may be added if there is demand",
   "main": "jsx/server/index.js",
   "engines": {
@@ -96,7 +96,6 @@
   "devDependencies": {
     "@babel/cli": "^8.0.1",
     "@babel/core": "^8.0.1",
-    "@babel/plugin-transform-runtime": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-react": "^8.0.1",
     "@babel/preset-typescript": "^8.0.1",
@@ -121,7 +120,6 @@
     "@types/react-dom": "^19.2.2",
     "@types/redux-logger": "^3.0.13",
     "@types/supertest": "^7.2.0",
-    "babel-jest": "^30.2.0",
     "babel-loader": "^10.0.0",
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
@@ -158,11 +156,16 @@
     "terser-webpack-plugin": "^5.3.14",
     "ts-loader": "^9.5.7",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "webpack-cli": "^7.0.1",
     "webpack-merge": "^6.0.1",
     "webpack-node-externals": "^3.0.0",
     "workbox-webpack-plugin": "^7.4.0"
+  },
+  "overrides": {
+    "babel-jest": {
+      "@babel/core": "^8.0.0"
+    }
   },
   "scripts": {
     "prod": "rm -rf dist && ./node_modules/.bin/webpack --mode production --config webpack.prod.cjs --env sentryRelease && tsc -p tsconfig_server.json > tsc.log",
