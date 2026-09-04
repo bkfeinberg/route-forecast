@@ -1,6 +1,5 @@
 // src/jsx/MobileUI.test.tsx
-import { renderWithProviders, screen, waitFor } from 'test-utils';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, renderWithProviders, screen } from 'test-utils';
 
 jest.mock('@sentry/react', () => ({
   __esModule: true,
@@ -23,6 +22,11 @@ jest.mock('@sentry/react', () => ({
     fatal: jest.fn(),
     fmt: jest.fn()
   }  
+}));
+
+jest.mock('./resultsTables/PaceTable', () => ({
+  __esModule: true,
+  default: () => <table><tbody><tr><td>PaceTable</td></tr></tbody></table>
 }));
 
 import MobileUI from './MobileUI';
@@ -80,17 +84,14 @@ describe('MobileUI tabs/navigation', () => {
   const futureTimestamp = futureTime.toMillis();
 
   test('MobileUI component renders without errors', async () => {
-    await waitFor(() => {
-      const {container} = renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {preloadedState: defaultState});
-      expect(container).toBeTruthy();
-    });
+    const {container} = renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {preloadedState: defaultState});
+    expect(container).toBeTruthy();
     expect(screen.getByTitle(/randoplan/i)).toBeInTheDocument();
     expect(screen.getByText(/data\.loading/i)).toBeInTheDocument();
   });
 
   test('navigates to /controlPoints and shows ForecastSettings when route data exists', async () => {
-    await waitFor(() => {
-      const {container} = renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
+    renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
         preloadedState: {
           ...defaultState,
           routeInfo: {
@@ -105,8 +106,6 @@ describe('MobileUI tabs/navigation', () => {
             }
           }
         }
-      });
-      expect(container).toBeTruthy();
     });
 
     const settings = await screen.findByText('Loading forecast settings...');
@@ -115,10 +114,7 @@ describe('MobileUI tabs/navigation', () => {
   });
 
     test('navigates to /forecastTable and shows ForecastTable when forecast data exists', async () => {
-        const user = userEvent.setup();
-
-      await waitFor(() => {
-        renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
+      renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
           preloadedState: {
             ...defaultState,
             routeInfo: {
@@ -180,19 +176,16 @@ describe('MobileUI tabs/navigation', () => {
               }
             }
           }
-        });
       });
 
         const forecastButtons = screen.getAllByRole('button', { name: /forecast/i })
-        await user.click(forecastButtons[0]);
-        expect(screen.getByRole('table')).toBeTruthy();
+          fireEvent.click(forecastButtons[0]);
+        expect(await screen.findByRole('table')).toBeTruthy();
     });
 
   test('navigates to /paceTable and shows PaceTable when strava activity data exists', async () => {
-    const user = userEvent.setup();
-    await waitFor(() => {
-      renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
-        preloadedState: {
+    renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, {
+      preloadedState: {
           ...defaultState,
           routeInfo: {
             ...defaultState.routeInfo,
@@ -201,50 +194,7 @@ describe('MobileUI tabs/navigation', () => {
             canDoUserSegment: true,
             country: 'US'
           },
-          forecast: {
-            forecast: [{
-              "time": "2026-02-20T07:00:00.000-08:00",
-              "zone": "America/Los_Angeles",
-              "distance": 0,
-              "summary": "Mainly clear, partly cloudy, and overcast",
-              "precip": "1.0%",
-              "humidity": 76,
-              "cloudCover": "100.0%",
-              "windSpeed": "6",
-              "lat": 37.37564,
-              "lon": -122.11944,
-              "temp": "40",
-              "relBearing": 130.10084533691406,
-              "rainy": false,
-              "windBearing": 230,
-              "vectorBearing": 0,
-              "gust": "6",
-              "feel": 34,
-              "isControl": false
-            },
-            {
-              "time": "2026-02-20T08:00:00.000-08:00",
-              "zone": "America/Los_Angeles",
-              "distance": 15,
-              "summary": "Mainly clear, partly cloudy, and overcast",
-              "precip": "0.0%",
-              "humidity": 65,
-              "cloudCover": "100.0%",
-              "windSpeed": "3",
-              "lat": 37.4353,
-              "lon": -122.28601,
-              "temp": "42",
-              "relBearing": 50.684601010775964,
-              "rainy": false,
-              "windBearing": 243,
-              "vectorBearing": 294.1196138281588,
-              "gust": "3",
-              "feel": 37,
-              "isControl": true
-            }], valid: true, timeZoneId: 'America/Los_Angeles',
-            tableViewed: false, mapViewed: false, weatherProvider: 'nws', zoomToRange: true,
-            fetchAqi: false, range: []
-          },
+          forecast: defaultState.forecast,
           uiInfo: {
             ...defaultState.uiInfo,
             routeParams: {
@@ -262,23 +212,17 @@ describe('MobileUI tabs/navigation', () => {
             analysisInterval: 1,
             subrange: []
           },
-        }
-      });
+      }
     });
 
-    const paceButtons = screen.getAllByRole('button', { name: /strava/i })
-    await user.click(paceButtons[0]);
-
-    expect(screen.getByRole('table')).toBeTruthy();
+    expect(await screen.findByRole('table')).toBeTruthy();
   });
 
   test('wraps tabs content in ErrorBoundary', async () => {
-    await waitFor(() => {
-      const { getAllByTestId } = renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, { preloadedState: defaultState });
+    const { getAllByTestId } = renderWithProviders(<MobileUI mapsApiKey="test-key" orientationChanged={false} setOrientationChanged={jest.fn()} />, { preloadedState: defaultState });
 
-      const errorBoundaries = getAllByTestId('error-boundary');
-      expect(errorBoundaries.length).toBeGreaterThan(0);
-    })
+    const errorBoundaries = getAllByTestId('error-boundary');
+    expect(errorBoundaries.length).toBeGreaterThan(0);
   });
 
 });

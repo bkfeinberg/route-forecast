@@ -23,6 +23,16 @@ jest.mock('@sentry/react', () => ({
   metrics: { count: jest.fn() }
 }));
 
+jest.mock('./DateSelect', () => ({
+  __esModule: true,
+  default: () => <div data-testid="date-select" />
+}));
+
+jest.mock('./RidingPace', () => ({
+  __esModule: true,
+  default: () => <div data-testid="riding-pace" />
+}));
+
 describe('ForecastSettings', () => {
   test('renders ForecastInterval and settings UI', () => {
     renderWithProviders(<ForecastSettings />, {

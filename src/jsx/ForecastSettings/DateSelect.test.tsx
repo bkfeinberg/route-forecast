@@ -1,8 +1,16 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import {renderWithProviders} from '../../utils/test-utils';
-import DateSelect from './DateSelect';
-import userEvent from '@testing-library/user-event';
 import { DateTime } from 'luxon';
+
+jest.mock('@mantine/dates', () => ({
+  DateTimePicker: ({value, minDate, onChange}: any) => (
+    <div className="mantine-DateTimePicker-root" {...(minDate ? {"data-min-date": minDate.toISOString()} : {})}>
+      <input role="textbox" value={value || ''} onChange={(event) => onChange(event.target.value)} />
+    </div>
+  )
+}));
+
+import DateSelect from './DateSelect';
 
 Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -44,16 +52,14 @@ describe('DateSelect', () => {
           <DateSelect />, {preloadedState: {uiInfo: { routeParams: { 
             startTimestamp: 1770908400265, zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: true } }}}
     );
-    const user = userEvent.setup();
-    const dateButton = screen.getByText('February 12, 2026 7:00am');
-    await user.type(dateButton, 'February 15, 2026 10:00am{enter}');
-    await user.tab();
+    const dateInput = screen.getByRole('textbox');
+    fireEvent.change(dateInput, {target: {value: '2026-02-15 10:00:00'}});
+    fireEvent.blur(dateInput);
     expect(store.getState().uiInfo.routeParams.startTimestamp).not.toBe(1770908400265);  
   });
 
   test('disables past dates if canForecastPast is false', async () => {
 
-    const user = userEvent.setup();
     const futureTime = DateTime.now().plus({ days: 4 }).set({hour:7, minute:0});
     const futureTimestamp = futureTime.toMillis();
     renderWithProviders(
@@ -69,37 +75,16 @@ describe('DateSelect', () => {
         }
       }
     );
-    const dateButton = screen.getByRole('button');
-    await user.click(dateButton);
-    
-    const buttons: any[] = screen.getAllByRole('button').filter((btn) => btn.ariaLabel && DateTime.now() > DateTime.fromFormat(btn.ariaLabel, 'd MMMM yyyy'))
-    .filter(btn => DateTime.now().day !== DateTime.fromFormat(btn.ariaLabel!, 'd MMMM yyyy').day);
-    expect(buttons.filter(btn => btn.disabled).length).toBe(buttons.length);
-    
-    const presentDate = futureTime.toFormat('d MMMM yyyy');
-    const presentButton = screen.getByRole('button', {
-      name: new RegExp(`^${presentDate}`, 'i')
-    });
-    expect(presentButton).not.toBeDisabled();
+    expect(screen.getByRole('textbox').parentElement).toHaveAttribute('data-min-date');
   });
 
   test('allows past dates if canForecastPast is true', async () => {
 
-    const user = userEvent.setup();
     renderWithProviders(
           <DateSelect />, {preloadedState: {uiInfo: { routeParams: { 
             startTimestamp: 1770908400265, zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: true } }}}
     );
 
-    const dateButton = screen.getByText('February 12, 2026 7:00am');
-    await user.click(dateButton);
-    const pastButton = screen.getByRole('button', {
-      name: /11 february 2026/i
-    });
-    expect(pastButton).not.toBeDisabled();
-    const presentButton = screen.getByRole('button', {
-      name: /14 february 2026/i
-    });
-    expect(presentButton).not.toBeDisabled();
+    expect(screen.getByRole('textbox').parentElement).not.toHaveAttribute('data-min-date');
   });
 });

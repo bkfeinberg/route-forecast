@@ -37,10 +37,10 @@ describe('getAirNowAQI', () => {
   test('returns last PM2.5 AQI from AirNow results', async () => {
     mockedAxiosInstanceGet.mockResolvedValue({
       data: [
-        { ParameterName: 'PM2.5', AQI: -1 },
-        { ParameterName: 'PM2.5', AQI: 50 },
-        { ParameterName: 'O3', AQI: 10 },
-        { ParameterName: 'PM2.5', AQI: 60 }
+        { parameterName: 'PM2.5', aqi: -1 },
+        { parameterName: 'PM2.5', aqi: 50 },
+        { parameterName: 'O3', aqi: 10 },
+        { parameterName: 'PM2.5', aqi: 60 }
       ]
     });
 

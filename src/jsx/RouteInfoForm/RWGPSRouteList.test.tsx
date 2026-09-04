@@ -14,6 +14,26 @@ jest.mock('../../redux/loadRouteActions', () => ({
   loadFromRideWithGps: jest.fn(() => ({ type: 'MOCK_ACTION' })),
 }));
 
+jest.mock('@mantine/core', () => {
+  const actual = jest.requireActual('@mantine/core');
+  const React = require('react');
+  const Combobox = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Target = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Dropdown = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Options = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Option = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Empty = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Chevron = () => null;
+  return {
+    ...actual,
+    Combobox,
+    useCombobox: () => ({
+      openDropdown: jest.fn(),
+      closeDropdown: jest.fn(),
+    }),
+  };
+});
+
 describe('RWGPSRouteList', () => {
   const mockFavorites = [
     {

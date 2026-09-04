@@ -49,6 +49,33 @@ jest.mock('react-ga4', () => ({
   default: { event: jest.fn() }
 }));
 
+jest.mock('@mantine/core', () => {
+  const actual = jest.requireActual('@mantine/core');
+  const React = require('react');
+  const OptionContext = React.createContext(() => {});
+  const Combobox = ({ children, onOptionSubmit }: any) => React.createElement(
+    OptionContext.Provider,
+    {value: onOptionSubmit},
+    React.createElement('div', null, children)
+  );
+  Combobox.Target = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Dropdown = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Options = ({ children }: any) => React.createElement('div', null, children);
+  Combobox.Option = ({ children, value }: any) => {
+    const onOptionSubmit = React.useContext(OptionContext);
+    return React.createElement('button', {type: 'button', onClick: () => onOptionSubmit(value)}, children);
+  };
+  Combobox.Chevron = () => null;
+  return {
+    ...actual,
+    Combobox,
+    useCombobox: () => ({
+      toggleDropdown: jest.fn(),
+      closeDropdown: jest.fn(),
+    }),
+  };
+});
+
 
 import { useTranslation } from 'react-i18next';
 import { useForecastRequestData } from '../../utils/useForecastRequestData';

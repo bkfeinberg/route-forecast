@@ -28,7 +28,7 @@ const useDelay = (delay: number, startCondition = true) => {
   return ready
 }
 
-const useReusableDelay = <Type>(delay: number, startCondition = true) => {
+const useReusableDelay = <Type,>(delay: number, startCondition = true) => {
   const [
     ready,
     setReady
@@ -77,7 +77,7 @@ const useReusableDelay = <Type>(delay: number, startCondition = true) => {
   ]
 }
 
-const useValueHasChanged = <Type>(value: Type, startValue?: Type) => {
+const useValueHasChanged = <Type,>(value: Type, startValue?: Type) => {
   const [
     oldValue,
     setOldValue
@@ -98,7 +98,7 @@ const useValueHasChanged = <Type>(value: Type, startValue?: Type) => {
   return hasChanged
 }
 
-const usePreviousPersistent = <Type>(value: Type) => {
+const usePreviousPersistent = <Type,>(value: Type) => {
   const [
     oldValue,
     setOldValue
@@ -134,7 +134,7 @@ const useActualArrivalTimes = () => {
   stravaRouteParser.computeControlPointArrivalTimes(activityData, activityStream, controls) : null
 }
 
-const usePrevious = <Type>(value : Type) => {
+const usePrevious = <Type,>(value : Type) => {
   const ref = useRef<Type>(null);
   useEffect(() => {
     ref.current = value;
@@ -149,7 +149,7 @@ const useFormatSpeed = () => {
     `${speed.toFixed(1)} mph`);
 }
 
-const useWhenChanged = <Type>(value : Type, callback : () => void, changedCondition = true) => {
+const useWhenChanged = <Type,>(value : Type, callback : () => void, changedCondition = true) => {
   const previousValue = usePrevious(value)
   const valueChanged = previousValue !== undefined && previousValue !== value && value !== null && changedCondition
   useEffect(() => {
