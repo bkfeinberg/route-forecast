@@ -54,6 +54,7 @@ describe('src/server/server.ts', () => {
     process.env.BITLY_TOKEN = 'test-bitly-token';
     process.env.SHORT_IO_KEY = 'test-short-io-key';
     process.env.RWGPS_API_KEY = 'test-rwgps-api-key';
+    process.env.RUSA_PERM_ID_KEY = 'test-rusa-key';
     process.env.RWGPS_OAUTH_CLIENT_ID = 'rwgps-client';
     process.env.RWGPS_OAUTH_SECRET = 'rwgps-secret';
     process.env.STRAVA_CLIENT_ID = 'strava-client';
@@ -73,6 +74,7 @@ describe('src/server/server.ts', () => {
     delete process.env.BITLY_TOKEN;
     delete process.env.SHORT_IO_KEY;
     delete process.env.RWGPS_API_KEY;
+    delete process.env.RUSA_PERM_ID_KEY;
     delete process.env.RWGPS_OAUTH_CLIENT_ID;
     delete process.env.RWGPS_OAUTH_SECRET;
     delete process.env.STRAVA_CLIENT_ID;
