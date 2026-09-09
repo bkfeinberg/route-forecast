@@ -107,6 +107,10 @@ export const getRouteNumberFromValue = (value : string) => {
 
 // returns true for start dates that are out of range - either too far in the future or in the past
 export const preflightDaysOfForecast = (provider: string, startDate: DateTime) => {
+  // don't proceed with a bogus provider
+  if (!Object.hasOwn(providerValues, provider)) {
+    return false;
+  }
   const daysInFuture = startDate.diff(DateTime.now(), 'days').days;
   return (daysInFuture < 0 || providerValues[provider].max_days < daysInFuture);
 }

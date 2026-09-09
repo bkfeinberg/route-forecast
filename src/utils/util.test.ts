@@ -103,5 +103,6 @@ describe('util', () => {
         expect(preflightDaysOfForecast('nws', DateTime.now().plus({ days: 8 }))).toBe(true);
         expect(preflightDaysOfForecast('nws', DateTime.now())).toBe(false);
         expect(preflightDaysOfForecast('nws', DateTime.now().minus({ days: 1 }))).toBe(true);
+        expect(preflightDaysOfForecast('badProvider', DateTime.now().plus({ days: 8 }))).toBe(false);
     });
 });
