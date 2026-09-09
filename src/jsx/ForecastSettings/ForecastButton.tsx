@@ -113,7 +113,7 @@ const ForecastButton = ({fetchingForecast,submitDisabled, routeNumber, startTime
             // do not continue if the request is too far in the future for the provider given its limits
             const requestDate = DateTime.fromFormat(locations.time, "yyyy-MM-dd'T'HH:mm:00ZZZ", {zone: zone})
             if (preflightDaysOfForecast(service, requestDate)) {
-                warn(`Not fetching forecast for part ${which} ${locations.lat} using ${service} because the request date of ${requestDate.toISO()} is too far in the future for that provider`, { provider: service });
+                warn(`Not fetching forecast for part ${which} ${locations.lat} using ${service} because the request date of ${requestDate.toISO()} is either too far in the future for that provider or in the past`, { provider: service });
                 break;
             }
             const request = {
