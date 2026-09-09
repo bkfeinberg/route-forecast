@@ -1,4 +1,4 @@
-import { renderWithProviders, screen, fireEvent } from '../../utils/test-utils';
+import { renderWithProviders, screen, fireEvent, waitFor } from '../../utils/test-utils';
 import ForecastSettings from './ForecastSettings';
 
 jest.mock('react-i18next', () => {
@@ -77,5 +77,59 @@ describe('ForecastSettings', () => {
     // ControlTableContainer renders an "add control" button
     expect(screen.getByText('Add')).toBeInTheDocument();
     expect(store.getState().controls.displayControlTableUI).toBe(true);
+  });
+
+  test('opens settings and toggles temperature and metric controls', async () => {
+    const { store } = renderWithProviders(<ForecastSettings />, {
+      preloadedState: {
+        uiInfo: { routeParams: { startTimestamp: 1770908400265, zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: true, segment: [0, 10000] }, dialogParams: { errorDetails: null } },
+        routeInfo: { distanceInKm: 100, canDoUserSegment: true },
+        controls: { metric: false, celsius: false, displayBanked: false, displayControlTableUI: false, userControlPoints: [], controlOpenStatus: [] }
+      }
+    });
+
+    fireEvent.click(screen.getByText('Settings'));
+    fireEvent.click(screen.getByText('C', { exact: true }));
+    expect(store.getState().controls.celsius).toBe(true);
+
+    fireEvent.click(screen.getByText('Metric', { exact: true }));
+    expect(store.getState().controls.metric).toBe(true);
+  });
+
+  test('keeps standard deviation and download-all options mutually exclusive', async () => {
+    renderWithProviders(<ForecastSettings />, {
+      preloadedState: {
+        uiInfo: { routeParams: { startTimestamp: 1770908400265, zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: true, segment: [0, 10000] }, dialogParams: { errorDetails: null } },
+        routeInfo: { distanceInKm: 100, canDoUserSegment: true },
+        controls: { metric: false, celsius: false, displayBanked: false, displayControlTableUI: false, userControlPoints: [], controlOpenStatus: [] }
+      }
+    });
+
+    fireEvent.click(screen.getByText('Settings'));
+    const standardDeviation = screen.getByLabelText('Compute standard deviation');
+    const downloadAll = screen.getByLabelText('Download all forecasts');
+
+    fireEvent.click(standardDeviation);
+    expect(standardDeviation).toBeChecked();
+    fireEvent.click(downloadAll);
+    expect(downloadAll).toBeChecked();
+    expect(standardDeviation).not.toBeChecked();
+  });
+
+  test('dismisses an error and reports unsupported clipboard copy', () => {
+    const { container, store } = renderWithProviders(<ForecastSettings />, {
+      preloadedState: {
+        uiInfo: { routeParams: { startTimestamp: 1770908400265, zone: 'America/Los_Angeles', maxDaysInFuture: 5, canForecastPast: true, segment: [0, 10000] }, dialogParams: { errorDetails: 'Forecast failed' } },
+        routeInfo: { distanceInKm: 100, canDoUserSegment: true },
+        controls: { metric: false, celsius: false, displayBanked: false, displayControlTableUI: false, userControlPoints: [], controlOpenStatus: [] }
+      }
+    });
+
+    expect(screen.getByText('Forecast failed')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('alert').querySelector('button')!);
+    expect(store.getState().uiInfo.dialogParams.errorDetails).toBeNull();
+
+    const buttons = container.querySelectorAll('button');
+    fireEvent.click(buttons[buttons.length - 1]);
   });
 });

@@ -15,6 +15,15 @@ const mockAxiosInstance = {
   request: jest.fn()
 };
 const mockAxiosPost = jest.fn();
+const mockPgClient = {
+  connect: jest.fn(),
+  query: jest.fn()
+};
+
+jest.mock('pg', () => ({
+  __esModule: true,
+  Client: jest.fn(() => mockPgClient)
+}));
 
 jest.mock('axios', () => ({
   __esModule: true,
@@ -53,6 +62,10 @@ describe('src/server/server.ts', () => {
     mockAxiosInstance.get.mockReset();
     mockAxiosInstance.request.mockReset();
     mockAxiosPost.mockReset();
+    mockPgClient.connect.mockReset();
+    mockPgClient.query.mockReset();
+    mockPgClient.connect.mockResolvedValue(undefined);
+    mockPgClient.query.mockResolvedValue({ rows: [{ timestamp: '2024-01-01T00:00:00Z', routename: 'Example Route', routenumber: '123', location: { x: 1, y: 2 } }] });
     global.fetch = jest.fn();
   });
 
@@ -117,6 +130,132 @@ describe('src/server/server.ts', () => {
     expect(response.status).toBe(200);
     expect(response.body.forecast.temp).toBe('44');
     expect(response.body.forecast.stdDev).toBe(1.4142135623730951);
+  });
+
+  test('returns cache metadata and db query results', async () => {
+    const { default: app } = await import('./server');
+
+    const cachePerformance = await request(app).get('/cache/performance');
+    const cacheIndex = await request(app).get('/cache/index');
+    const dbQuery = await request(app).get('/dbquery');
+
+    expect(cachePerformance.status).toBe(200);
+    expect(cacheIndex.status).toBe(200);
+    expect(dbQuery.status).toBe(200);
+    expect(dbQuery.text).toContain('Example Route');
+    expect(mockPgClient.connect).toHaveBeenCalled();
+  });
+
+  test('returns RUSA perm lookup results when valid', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ results: [{ rid: 1 }] })
+    });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .get('/rusa_perm_id')
+      .query({ permId: '123' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ results: [{ rid: 1 }] });
+  });
+
+  test('returns pinned route favorites for a valid token', async () => {
+    mockAxiosInstance.get
+      .mockResolvedValueOnce({
+        data: {
+          items: [],
+          meta: { next_sync_url: 'next' }
+        }
+      })
+      .mockResolvedValueOnce({
+        data: { user: { id: '88', email: 'user@example.com' } }
+      })
+      .mockResolvedValueOnce({
+        data: { results: [] }
+      })
+      .mockResolvedValueOnce({
+        data: {
+          routes: [{
+            id: 7,
+            html_url: 'https://ridewithgps.com/routes/demo-route',
+            name: 'Demo route',
+            updated_at: '2024-01-01T00:00:00Z'
+          }]
+        }
+      });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .get('/pinned_routes')
+      .query({ token: 'test-token' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        id: 7,
+        associated_object_id: 'demo-route',
+        associated_object_type: 'route',
+        name: 'Demo route',
+        dateAdded: '2024-01-01T00:00:00Z'
+      }
+    ]);
+  });
+
+  test('returns 500 when the user-routes fallback fails', async () => {
+    mockAxiosInstance.get
+      .mockResolvedValueOnce({
+        data: {
+          items: [],
+          meta: { next_sync_url: 'next' }
+        }
+      })
+      .mockResolvedValueOnce({
+        data: { user: { id: '88', email: 'user@example.com' } }
+      })
+      .mockResolvedValueOnce({
+        data: { results: [] }
+      })
+      .mockRejectedValueOnce({
+        response: { status: 503, data: { error: 'fallback failed' } },
+        message: 'fallback failed'
+      });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .get('/pinned_routes')
+      .query({ token: 'test-token' });
+
+    expect(response.status).toBe(503);
+    expect(response.body).toBe('fallback failed');
+  });
+
+  test('returns 500 when the pinned-routes outer catch is triggered', async () => {
+    mockAxiosInstance.get
+      .mockResolvedValueOnce({
+        data: {
+          items: [],
+          meta: { next_sync_url: 'next' }
+        }
+      })
+      .mockResolvedValueOnce({
+        data: { user: { id: '88', email: 'user@example.com' } }
+      })
+      .mockResolvedValueOnce({
+        data: { results: [] }
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('outer fallback crash');
+      });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .get('/pinned_routes')
+      .query({ token: 'test-token' });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toBeInstanceOf(Object);
   });
 
   test('rejects missing location payload on /aqi_one', async () => {
@@ -309,5 +448,102 @@ describe('src/server/server.ts', () => {
 
     expect(response.status).toBe(401);
     expect(response.body).toEqual({ message: 'invalid refresh' });
+  });
+
+  test('redirects randoplan.com requests to www.randoplan.com', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .get('/?foo=bar')
+      .set('host', 'randoplan.com');
+
+    expect(response.status).toBe(301);
+    expect(response.headers.location).toBe('https://www.randoplan.com/?foo=bar');
+  });
+
+  test('supports privacy-code RWGPS URLs and token headers', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      text: () => Promise.resolve(JSON.stringify({ type: 'route' }))
+    });
+
+    const { default: app } = await import('./server');
+    const response = await request(app)
+      .get('/rwgps_route')
+      .query({ route: 'abc123?privacy_code=secret', token: 'tkn123' });
+
+    expect(response.status).toBe(200);
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain('https://ridewithgps.com/routes/abc123.json?privacy_code=secret&apikey=test-rwgps-api-key&version=2');
+    expect((global.fetch as jest.Mock).mock.calls[0][1]).toMatchObject({
+      headers: { Authorization: 'Bearer tkn123' }
+    });
+  });
+
+  test('rejects missing RUSA perm lookup API key', async () => {
+    delete process.env.RUSA_PERM_ID_KEY;
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .get('/rusa_perm_id')
+      .query({ permId: '123' });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ details: 'Missing RUSA perm lookup API key' });
+  });
+
+  test('exits during startup if Bitly or Short.io env vars are missing', async () => {
+    const originalBitly = process.env.BITLY_TOKEN;
+    const originalShort = process.env.SHORT_IO_KEY;
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as (code?: number) => never);
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    delete process.env.BITLY_TOKEN;
+    delete process.env.SHORT_IO_KEY;
+    jest.resetModules();
+
+    await expect(async () => {
+      await import('./server');
+    }).not.toThrow();
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errorSpy).toHaveBeenCalled();
+
+    process.env.BITLY_TOKEN = originalBitly;
+    process.env.SHORT_IO_KEY = originalShort;
+    exitSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
+  test('renders the home page with a custom route name', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .get('/')
+      .query({ name: 'Test Route' });
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('<title><%= title %></title>');
+  });
+
+  test('renders the visualize page', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .get('/visualize')
+      .query({ foo: 'bar' });
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('<title>Visualization</title>');
+  });
+
+  test('handles invalid Strava state parsing during auth reply', async () => {
+    const { default: app } = await import('./server');
+
+    const response = await request(app)
+      .get('/stravaAuthReply')
+      .query({ error: 'denied', state: '%ZZ' });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.location).toContain('strava_error=denied');
   });
 });

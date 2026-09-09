@@ -1,6 +1,11 @@
 import { mergeControls, loadFromRideWithGps, loadRouteFromURL } from './loadRouteActions';
 import type { UserControl } from './controlsSlice';
 import * as Sentry from '@sentry/react';
+import { loadRwgpsRoute } from '../utils/rwgpsUtilities';
+import { requestTimeZoneForRoute } from '../utils/forecastUtilities';
+import { forecastWithHook } from './forecastActions';
+import { updateHistory } from '../jsx/app/updateHistory';
+import { extractControlsFromRoute } from '../utils/routeUtils';
 
 // Mock dependencies
 jest.mock('../utils/rwgpsUtilities');
@@ -18,6 +23,10 @@ const mockGetState = jest.fn();
 describe('loadRouteActions', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        (Sentry.startSpan as jest.Mock).mockImplementation((_options, callback) => callback());
+        (loadRwgpsRoute as jest.Mock).mockResolvedValue({});
+        (requestTimeZoneForRoute as jest.Mock).mockResolvedValue({ result: 'America/Denver' });
+        (extractControlsFromRoute as jest.Mock).mockReturnValue([]);
     });
 
     describe('mergeControls', () => {
@@ -222,6 +231,52 @@ describe('loadRouteActions', () => {
             // The thunk should be a function that returns a promise
             expect(thunk(mockDispatch, mockGetState)).toBeDefined();
         });
+
+        it('loads a route, extracts controls, and sets its timezone', async () => {
+            const routeData = { route: { track_points: [] } };
+            const extractedControls: UserControl[] = [{
+                id: 1, name: 'Control', distance: 10, lat: 40, lon: -105, duration: 0, business: 'no'
+            }];
+            const mockState = {
+                uiInfo: { routeParams: { rwgpsRoute: '12345', rwgpsRouteIsTrip: false, startTimestamp: Date.now(), zone: 'America/Denver' }, dialogParams: {} },
+                rideWithGpsInfo: { token: 'token' },
+                controls: { userControlPoints: [] },
+                routeInfo: { type: 'route', country: 'US' },
+                forecast: { weatherProvider: 'openWeather' },
+                params: { timezone_api_key: 'key' },
+                strava: { route: '', activity: '' }
+            } as any;
+            mockGetState.mockReturnValue(mockState);
+            (loadRwgpsRoute as jest.Mock).mockResolvedValue(routeData);
+            (requestTimeZoneForRoute as jest.Mock).mockResolvedValue({ result: 'America/Denver' });
+            const routeUtils = await import('../utils/routeUtils');
+            (routeUtils.extractControlsFromRoute as jest.Mock).mockReturnValue(extractedControls);
+
+            await loadFromRideWithGps('12345')(mockDispatch, mockGetState);
+            await Promise.resolve();
+
+            expect(loadRwgpsRoute).toHaveBeenCalledWith('12345', false, 'token');
+            expect(routeUtils.extractControlsFromRoute).toHaveBeenCalledWith(routeData, true);
+            expect(mockDispatch).toHaveBeenCalled();
+            expect(requestTimeZoneForRoute).toHaveBeenCalled();
+        });
+
+        it('dispatches a load failure when RWGPS loading rejects', async () => {
+            const mockState = {
+                uiInfo: { routeParams: { rwgpsRoute: '12345', rwgpsRouteIsTrip: false }, dialogParams: {} },
+                rideWithGpsInfo: { token: 'token' },
+                controls: { userControlPoints: [] },
+                routeInfo: { type: 'route' },
+                params: {},
+                strava: { route: '', activity: '' }
+            } as any;
+            mockGetState.mockReturnValue(mockState);
+            (loadRwgpsRoute as jest.Mock).mockRejectedValue(new Error('route failed'));
+
+            await loadFromRideWithGps('12345')(mockDispatch, mockGetState);
+
+            expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({ type: expect.stringContaining('rwgpsRouteLoadingFailed') }));
+        });
     });
 
     describe('loadRouteFromURL', () => {
@@ -269,6 +324,51 @@ describe('loadRouteActions', () => {
                 return typeof call[0] === 'function' && call[0].toString().includes('loadingFromUrlSet');
             });
             expect(calls.length).toBeGreaterThanOrEqual(0);
+        });
+
+        it('stops before forecasting when no route data or timezone exists', async () => {
+            const forecastFunc = jest.fn(() => ({ unwrap: () => Promise.resolve() }));
+            const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.resolve() }));
+            const thunk = loadRouteFromURL(forecastFunc, aqiFunc, 'en');
+            const state = {
+                uiInfo: {
+                    routeParams: { rwgpsRoute: '', rusaPermRouteId: '', stopAfterLoad: false, zone: '', startTimestamp: Date.now() },
+                    dialogParams: { errorDetails: null, fetchingRoute: false }
+                },
+                strava: { route: '', activity: '' },
+                routeInfo: { rwgpsRouteData: null, gpxRouteData: null, country: 'US' },
+                forecast: { weatherProvider: 'openWeather' },
+                params: { queryString: '', searchString: '' }
+            } as any;
+            mockGetState.mockReturnValue(state);
+
+            await thunk(mockDispatch, mockGetState);
+
+            expect(forecastWithHook).not.toHaveBeenCalled();
+            expect(mockDispatch).toHaveBeenCalled();
+        });
+
+        it('forecasts a loaded route, updates history, and loads activity', async () => {
+            const forecastFunc = jest.fn(() => ({ unwrap: () => Promise.resolve() }));
+            const aqiFunc = jest.fn(() => ({ unwrap: () => Promise.resolve() }));
+            const thunk = loadRouteFromURL(forecastFunc, aqiFunc, 'en');
+            const state = {
+                uiInfo: {
+                    routeParams: { rwgpsRoute: '', rusaPermRouteId: '', stopAfterLoad: false, zone: 'America/Denver', startTimestamp: Date.now() },
+                    dialogParams: { errorDetails: null, fetchingRoute: false }
+                },
+                strava: { route: '', activity: 'activity-1' },
+                routeInfo: { rwgpsRouteData: { route: {} }, gpxRouteData: null, country: 'US' },
+                forecast: { weatherProvider: 'openWeather' },
+                params: { queryString: 'route=1', searchString: '?route=1' }
+            } as any;
+            mockGetState.mockReturnValue(state);
+            (forecastWithHook as jest.Mock).mockResolvedValue(undefined);
+
+            await thunk(mockDispatch, mockGetState);
+
+            expect(forecastWithHook).toHaveBeenCalledWith(forecastFunc, aqiFunc, mockDispatch, mockGetState, 'en');
+            expect(updateHistory).toHaveBeenCalledWith('route=1', '?route=1', true);
         });
     });
 });

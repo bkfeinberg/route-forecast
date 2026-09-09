@@ -12,6 +12,9 @@ const config: Config.InitialOptions = {
     collectCoverage: true,
     collectCoverageFrom: ["src/{jsx,redux,server,utils}/**/*.{js,jsx,ts,tsx}"],
     coveragePathIgnorePatterns: [
+      "\\.eslintrc\\.js$",
+      "meteomatics\\.ts$",
+      "visualize\\.tsx$",
     ],
     testEnvironment: 'jest-fixed-jsdom', // Provides a browser-like environment (Jest 28+ requires separate install)
     testPathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/'],

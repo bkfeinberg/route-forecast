@@ -4,6 +4,10 @@ import type { ChartDataType, ChartData } from '../../utils/gpxParser';
 import React from 'react';
 import ReactGA from 'react-ga4';
 
+const mockXAxisProps: any[] = [];
+const mockYAxisProps: any[] = [];
+const mockTooltipProps: any[] = [];
+
 // Mock react-ga4
 jest.mock('react-ga4', () => ({
   __esModule: true,
@@ -31,9 +35,9 @@ jest.mock('recharts', () => ({
       {children}
     </div>
   ),
-  XAxis: (props: any) => <div data-testid="x-axis" data-props={JSON.stringify(props)} />,
-  YAxis: (props: any) => <div data-testid="y-axis" data-props={JSON.stringify(props)} />,
-  Tooltip: (props: any) => <div data-testid="tooltip" data-props={JSON.stringify(props)} />,
+  XAxis: (props: any) => { mockXAxisProps.push(props); return <div data-testid="x-axis" data-props={JSON.stringify(props)} />; },
+  YAxis: (props: any) => { mockYAxisProps.push(props); return <div data-testid="y-axis" data-props={JSON.stringify(props)} />; },
+  Tooltip: (props: any) => { mockTooltipProps.push(props); return <div data-testid="tooltip" data-props={JSON.stringify(props)} />; },
   Legend: () => <div data-testid="legend" />,
   Line: (props: any) => <div data-testid="line" data-props={JSON.stringify(props)} />,
   CartesianGrid: (props: any) => <div data-testid="cartesian-grid" data-props={JSON.stringify(props)} />,
@@ -50,6 +54,9 @@ describe('TimeChangeChart component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockXAxisProps.length = 0;
+    mockYAxisProps.length = 0;
+    mockTooltipProps.length = 0;
   });
 
   test('renders empty div when popoverIsOpen is false', () => {
@@ -131,6 +138,25 @@ describe('TimeChangeChart component', () => {
     const xAxis = screen.getByTestId('x-axis');
     expect(xAxis).toBeInTheDocument();
     expect(screen.getByTestId('line-chart')).toBeInTheDocument();
+  });
+
+  test('formats metric and imperial axis and tooltip values', () => {
+    render(<TimeChangeChart chartData={mockChartData} metric={true} popoverIsOpen={true} />);
+
+    const xAxisProps = mockXAxisProps[0];
+    const windAxisProps = mockYAxisProps[1];
+    const tooltipProps = mockTooltipProps[0];
+
+    expect(xAxisProps.tickFormatter(10)).toBe('10');
+    expect(windAxisProps.tickFormatter(10)).toBe('+16');
+    expect(tooltipProps.labelFormatter(10)).toBe('10 km');
+    expect(tooltipProps.formatter(10, 'windSpeedMph')).toEqual(['16', 'windSpeedKph']);
+    expect(tooltipProps.formatter(5, 'totalMinutesLost')).toBe(5);
+
+    render(<TimeChangeChart chartData={mockChartData} metric={false} popoverIsOpen={true} />);
+    const imperialTooltipProps = mockTooltipProps[1];
+    expect(imperialTooltipProps.labelFormatter(10)).toBe('6 miles');
+    expect(imperialTooltipProps.formatter(10, 'windSpeedMph')).toEqual([10, 'windSpeedMph']);
   });
 
   test('first line component renders totalMinutesLost', () => {

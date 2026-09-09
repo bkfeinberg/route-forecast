@@ -150,4 +150,51 @@ describe('src/jsx/app/app.tsx', () => {
     const renderedElement = renderMock.mock.calls[0][0];
     expect(renderedElement.props.value).toBe('0.0.0');
   });
+
+  test('handles service worker lifecycle and messages', async () => {
+    const stateChangeListener = jest.fn();
+    const controller = { postMessage: jest.fn() };
+    const registration = {
+      scope: '/worker.js',
+      active: { state: 'activated', scriptURL: '/worker.js' },
+      installing: { addEventListener: stateChangeListener }
+    };
+    const register = jest.fn(() => Promise.resolve(registration));
+    const serviceWorker = {
+      register,
+      ready: Promise.resolve(registration),
+      controller,
+      addEventListener: jest.fn()
+    };
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: serviceWorker
+    });
+
+    await jest.isolateModulesAsync(async () => {
+      await import('./app');
+    });
+
+    window.dispatchEvent(new Event('online'));
+    await Promise.resolve();
+    expect(register).toHaveBeenCalled();
+
+    window.dispatchEvent(new Event('load'));
+    await Promise.resolve();
+
+    expect(register).toHaveBeenCalledWith('/worker.js');
+    expect(stateChangeListener).toHaveBeenCalledWith('statechange', expect.any(Function));
+
+    const messageListener = serviceWorker.addEventListener.mock.calls[0][1];
+    messageListener({ data: { command: 'RETURN_VERSION', version: 'worker-1' } });
+    messageListener({ data: { type: 'info', version: 'worker-1', data: 'info' } });
+    messageListener({ data: { type: 'trace', version: 'worker-1', data: 'trace' } });
+    messageListener({ data: { type: 'warning', version: 'worker-1', data: 'warning' } });
+    messageListener({ data: { type: 'error', version: 'worker-1', data: 'error' } });
+
+    const stateChange = stateChangeListener.mock.calls[0][1];
+    stateChange({ target: { state: 'redundant' } });
+    expect(controller.postMessage).toHaveBeenCalledWith({ command: 'GET_VERSION' });
+
+  });
 });

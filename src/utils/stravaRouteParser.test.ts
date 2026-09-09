@@ -196,6 +196,45 @@ describe('StravaActivityParser', () => {
         });
     });
 
+    describe('findMovingAverages', () => {
+        it('calculates moving intervals with stopped time and smoothed elevation', () => {
+            const activity: StravaActivityData = {
+                message: '',
+                start_date: '2024-01-15T08:00:00Z',
+                total_elevation_gain: 0,
+                [Symbol.for('any')]: undefined
+            };
+            const activityStream: StravaActivityStream = {
+                message: '',
+                distance: { data: [0, 10000, 20000, 30000] },
+                time: { data: [0, 3600, 7200, 10800] },
+                altitude: { data: [100, 100.05, 100.3, 100.5] },
+                latlng: { data: [[40, -105], [40.1, -105.1], [40.2, -105.2], [40.3, -105.3]] },
+                moving: { data: [1, 0, 1, 1] }
+            };
+
+            const result = parser.findMovingAverages(activity, activityStream, 1);
+
+            expect(result).toHaveLength(2);
+            expect(result[0].distance).toBeGreaterThan(0);
+            expect(result[0].stoppedTimeSeconds).toBe(3600);
+            expect(result[0].climb).toBeGreaterThan(0);
+            expect(result[1].start).toBe(20000);
+        });
+    });
+
+    describe('API forwarding methods', () => {
+        it('forwards activity and stream requests to the API', async () => {
+            const api = { get: jest.fn().mockResolvedValue({ data: 'result' }) } as any;
+
+            await expect(parser.fetchActivity('123', api)).resolves.toEqual({ data: 'result' });
+            await expect(parser.processActivityStream('123', api)).resolves.toEqual({ data: 'result' });
+
+            expect(api.get).toHaveBeenNthCalledWith(1, '/activities/123');
+            expect(api.get).toHaveBeenNthCalledWith(2, 'activities/123/streams?keys=distance,time,altitude,velocity_smooth,moving,latlng&key_by_type=true');
+        });
+    });
+
     describe('computeControlPointArrivalTimes', () => {
         it('should return empty array when no control points', () => {
             const activityData: StravaActivityData = {
