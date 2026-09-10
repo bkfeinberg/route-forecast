@@ -1,6 +1,6 @@
 import { connect, ConnectedProps, useSelector } from 'react-redux';
 
-import { stravaActivitySet } from '../../redux/stravaSlice';
+import { stravaAccessTokenClear, stravaActivitySet, stravaRefreshTokenClear } from '../../redux/stravaSlice';
 import { ActionCreatorWithPayload, SerializedError } from '@reduxjs/toolkit';
 import type { RootState } from "../../redux/store";
 import { Flex, Group, Input, Button } from '@mantine/core';
@@ -8,13 +8,14 @@ import {logger} from "@sentry/react";
 const { trace, debug, info, warn, error, fatal, fmt } = logger;
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { StravaActivity, useLoadActivitiesQuery } from '../../redux/stravaApiSlice';
-import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, useState } from 'react';
+import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, useEffect, useState } from 'react';
 import { Alert, Combobox, ComboboxOptionProps, useCombobox, Text } from '@mantine/core';
 import '@mantine/core/styles/Alert.css';
 import { IconMap } from "@tabler/icons-react";
 import stravaImage from 'Images/api_logo_pwrdBy_strava_stack_light.png';
 import { useSearchParams } from 'react-router-dom';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import Cookies from 'universal-cookie';
 type MinimalActivity = {
     id: number,
     name: string
@@ -61,6 +62,15 @@ const StravaActivityIdInput = ({ access_token }: { access_token: string }) => {
     const routeName = useAppSelector(state => state.routeInfo.name);
     const [selectedName, setSelectedName] = useState(routeName);
     const dispatch = useAppDispatch();
+
+    useEffect(() => {
+      if (!isLoading && (isError || !activities)) {
+        dispatch(stravaAccessTokenClear());
+        dispatch(stravaRefreshTokenClear());
+        new Cookies(null, { path: '/' }).remove('strava_access_token');
+        new Cookies(null, { path: '/' }).remove('strava_refresh_token');
+      }
+    }, [activities, dispatch, isError, isLoading]);
 
     if (isLoading) return <Text fw={500}>Loading activities...</Text>;
     if (isError || !activities) {

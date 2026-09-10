@@ -66,6 +66,12 @@ const stravaSlice = createSlice({
                 state.expires_at = action.payload.expires_at
             }
         },
+        stravaAccessTokenClear(state) {
+            state.access_token = null
+        },
+        stravaRefreshTokenClear(state) {
+            state.refresh_token = null
+        },
         stravaRefreshTokenSet(state,action:PayloadAction<string>) {
             if (action.payload) {
                 state.refresh_token = action.payload
@@ -147,6 +153,6 @@ const stravaSlice = createSlice({
 })
 
 export const stravaReducer = stravaSlice.reducer
-export const {stravaTokenSet,stravaRefreshTokenSet,stravaActivitySet,stravaFetchBegun,
+export const {stravaTokenSet,stravaAccessTokenClear,stravaRefreshTokenClear,stravaRefreshTokenSet,stravaActivitySet,stravaFetchBegun,
     stravaFetched,stravaFetchFailed,analysisIntervalSet,mapSubrangeSet,mapRangeToggled,
     stravaRouteSet} = stravaSlice.actions

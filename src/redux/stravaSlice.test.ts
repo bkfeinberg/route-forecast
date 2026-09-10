@@ -1,5 +1,7 @@
 import { stravaReducer,
     stravaTokenSet,
+    stravaAccessTokenClear,
+    stravaRefreshTokenClear,
     stravaRefreshTokenSet,
     stravaActivitySet,
     stravaRouteSet,
@@ -35,6 +37,18 @@ describe('stravaSlice reducer', () => {
         const state = stravaReducer(initial, stravaTokenSet({ token: 'tok', expires_at: 123 }));
         expect(state.access_token).toBe('tok');
         expect(state.expires_at).toBe(123);
+    });
+
+    test('stravaAccessTokenClear clears only the access token', () => {
+        const state = stravaReducer({ ...initial, access_token: 'tok', refresh_token: 'ref' }, stravaAccessTokenClear());
+        expect(state.access_token).toBeNull();
+        expect(state.refresh_token).toBe('ref');
+    });
+
+    test('stravaRefreshTokenClear clears only the refresh token', () => {
+        const state = stravaReducer({ ...initial, access_token: 'tok', refresh_token: 'ref' }, stravaRefreshTokenClear());
+        expect(state.access_token).toBe('tok');
+        expect(state.refresh_token).toBeNull();
     });
 
     test('stravaRefreshTokenSet stores refresh token', () => {
