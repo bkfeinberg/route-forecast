@@ -821,6 +821,11 @@ app.get('/stravaAuthReply', async (req : Request, res : Response) => {
     }
     if (error === undefined && typeof code === "string") {
         console.log(`Requesting Strava token exchange with code ${code} and scope ${scope}`)
+        // check for required scope
+        if (scope && typeof scope === 'string' && !scope.includes('activity:read_all')) {
+            restoredState.strava_error = "Activity read permission not granted. Please authorize Strava with the required permissions.";
+            res.redirect(url.format('/?') + querystring.stringify(restoredState));
+        }
         process.env.STRAVA_CLIENT_SECRET = process.env.STRAVA_API_KEY;
         getStravaToken(code).then(token => {
             restoredState.strava_access_token = token.access_token;
