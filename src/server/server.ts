@@ -824,7 +824,7 @@ app.get('/stravaAuthReply', async (req : Request, res : Response) => {
         // check for required scope
         if (scope && typeof scope === 'string' && !scope.includes('activity:read_all')) {
             restoredState.strava_error = "Activity read permission not granted. Please authorize Strava with the required permissions.";
-            res.redirect(url.format('/?') + querystring.stringify(restoredState));
+            return res.redirect(url.format('/?') + querystring.stringify(restoredState));
         }
         process.env.STRAVA_CLIENT_SECRET = process.env.STRAVA_API_KEY;
         getStravaToken(code).then(token => {
@@ -832,11 +832,11 @@ app.get('/stravaAuthReply', async (req : Request, res : Response) => {
             restoredState.strava_refresh_token = token.refresh_token;
             restoredState.strava_token_expires_at = token.expires_at;   
             delete restoredState.strava_error 
-            res.redirect(url.format('/?') + querystring.stringify(restoredState));
+            return res.redirect(url.format('/?') + querystring.stringify(restoredState));
         }).catch(err => {
             Sentry.captureMessage(`got bad Strava auth reply ${err.message}`); 
             restoredState.strava_error = error = err.message
-            res.redirect(url.format('/?') + querystring.stringify(restoredState));
+            return res.redirect(url.format('/?') + querystring.stringify(restoredState));
         })
     }
     else {
