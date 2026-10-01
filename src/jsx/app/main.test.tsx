@@ -169,16 +169,12 @@ describe('RouteWeatherUI Component', () => {
 
     await waitFor(() => expect(loadRouteFromURL).toHaveBeenCalled());
   });
-/***
-  it('should store a RWGPS token received in the URL', async () => {
+  it('should store a RWGPS token received in the URL', () => {
     const { store } = renderWithProviders(
       <RouteWeatherUI {...defaultProps} search="?rwgpsToken=url-token" />
     );
 
-    await waitFor(() => {
-      expect(store.getState().rideWithGpsInfo.token).toBe('url-token');
-    });
+    expect(store.getState().rideWithGpsInfo.token).toBe('url-token');
   });
-  ***/
 });
 
