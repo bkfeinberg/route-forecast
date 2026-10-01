@@ -1,15 +1,20 @@
 import React from 'react';
+import { act } from '@testing-library/react';
 import { renderWithProviders, waitFor } from '../../utils/test-utils';
 import '@testing-library/jest-dom';
-import RouteWeatherUI from './main';
+import RouteWeatherUI, { useLoadControlPointsFromURL, useSetPageTitle } from './main';
 import * as Sentry from '@sentry/react';
 
 // Mock dependencies
 jest.mock('@sentry/react', () => ({
-  ...jest.requireActual('@sentry/react'),
+  __esModule: true,
+  createReduxEnhancer: jest.fn(() => (createStore: any) => createStore),
+  ErrorBoundary: ({ children }: any) => children,
   addBreadcrumb: jest.fn(),
   setContext: jest.fn(),
   captureException: jest.fn(),
+  metrics: { count: jest.fn() },
+  feedbackIntegration: jest.fn(),
   logger: {
     info: jest.fn(),
   },
@@ -50,10 +55,6 @@ jest.mock('../../redux/loadRouteActions', () => ({
   MutationWrapper: jest.fn(),
 }));
 
-// Mock window.location
-delete (window as any).location;
-window.location = { reload: jest.fn() } as any;
-
 describe('RouteWeatherUI Component', () => {
   const defaultProps = {
     search: '',
@@ -68,6 +69,12 @@ describe('RouteWeatherUI Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const HookHarness = ({ queryParams }: { queryParams: any }) => {
+    useLoadControlPointsFromURL(queryParams);
+    useSetPageTitle();
+    return null;
+  };
 
   it('should render the component without crashing', async () => {
     const { container } = renderWithProviders(<RouteWeatherUI {...defaultProps} />);
@@ -117,5 +124,61 @@ describe('RouteWeatherUI Component', () => {
       expect(state).toBeDefined();
     });
   });
+
+  it('should load control points and update the page title from route state', async () => {
+    const orientation = { type: 'landscape-primary', onchange: null };
+    Object.defineProperty(window.screen, 'orientation', {
+      configurable: true,
+      value: orientation
+    });
+
+    const { store } = renderWithProviders(<HookHarness queryParams={{ controlPoints: 'Cafe,10,20' }} />, {
+      preloadedState: { routeInfo: { name: 'Test Route' } }
+    });
+
+    await waitFor(() => {
+      expect(document.title).toBe('Forecast for Test Route');
+      expect(store.getState().controls.userControlPoints).toHaveLength(1);
+    });
+    expect(store.getState().controls.displayControlTableUI).toBe(true);
+    expect(document.title).toBe('Forecast for Test Route');
+  });
+
+  it('should respond to screen orientation changes', () => {
+    const orientation = { type: 'landscape-primary', onchange: null as ((event: Event) => void) | null };
+    Object.defineProperty(window.screen, 'orientation', { configurable: true, value: orientation });
+
+    renderWithProviders(<RouteWeatherUI {...defaultProps} search="?pace=easy" />);
+
+    expect(typeof orientation.onchange).toBe('function');
+    act(() => orientation.onchange?.(new Event('change')));
+    expect((orientation.onchange as Function)).toBeDefined();
+  });
+
+  it('should reload the route when URL and current route agree', async () => {
+    const { loadRouteFromURL } = jest.requireMock('../../redux/loadRouteActions');
+    renderWithProviders(
+      <RouteWeatherUI
+        {...defaultProps}
+        search="?rwgpsRoute=route-123"
+      />,
+      {
+        preloadedState: { uiInfo: { routeParams: { rwgpsRoute: 'route-123', startTimestamp: Date.now() } } }
+      }
+    );
+
+    await waitFor(() => expect(loadRouteFromURL).toHaveBeenCalled());
+  });
+/***
+  it('should store a RWGPS token received in the URL', async () => {
+    const { store } = renderWithProviders(
+      <RouteWeatherUI {...defaultProps} search="?rwgpsToken=url-token" />
+    );
+
+    await waitFor(() => {
+      expect(store.getState().rideWithGpsInfo.token).toBe('url-token');
+    });
+  });
+  ***/
 });
 

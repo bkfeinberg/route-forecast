@@ -18,7 +18,7 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    debug: true,
+    debug: false,
     fallbackLng: 'en-US',
     nonExplicitSupportedLngs: true,
     supportedLngs: ['en-US', 'en-GB', 'en', 'fr', 'es', 'bg', 'hu', 'it', 'zh'],

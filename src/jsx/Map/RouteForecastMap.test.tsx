@@ -1,9 +1,17 @@
 // src/jsx/Map/RouteForecastMap.test.tsx
 import React from 'react';
-import { render, screen } from 'test-utils';
+import { fireEvent, render, screen, waitFor } from 'test-utils';
 import { findMarkerInfo } from './mapUtils';
 import { milesToMeters } from '../../utils/util';
-import RouteForecastMap, { RotatedArrow } from './RouteForecastMap';
+import RouteForecastMap, {
+  ControlMarker,
+  BoundSetter,
+  MapHighlight,
+  MapMarkers,
+  RainIcon,
+  RotatedArrow,
+  TempMarker
+} from './RouteForecastMap';
 import { useAppSelector, useAppDispatch } from '../../utils/hooks';
 import { useForecastDependentValues } from '../../utils/forecastValuesHook';
 import { usePointsAndBounds } from '../../utils/routeHooks';
@@ -29,12 +37,12 @@ jest.mock('@vis.gl/react-google-maps', () => {
   const useApiIsLoadedMock = jest.fn(() => true);
   return {
     __esModule: true,
-    APIProvider: ({ children, onLoad }: any) => {
+    APIProvider: jest.fn(({ children, onLoad }: any) => {
       React.useEffect(() => {
         onLoad?.();
       }, [onLoad]);
       return <div data-testid="api-provider">{children}</div>;
-    },
+    }),
     Map: ({ children }: any) => <div data-testid="map">{children}</div>,
     InfoWindow: ({ children }: any) => <div data-testid="info-window">{children}</div>,
     useMap: jest.fn(() => ({})),
@@ -70,7 +78,7 @@ jest.mock('./polyline', () => ({
 
 jest.mock('./SafeMarker', () => ({
   __esModule: true,
-  default: ({ children }: any) => <div data-testid="safe-marker">{children}</div>
+  default: ({ children, ...props }: any) => <div data-testid="safe-marker" {...props}>{children}</div>
 }));
 
 const mockUseAppSelector = useAppSelector as jest.Mock;
@@ -79,6 +87,18 @@ const mockUseForecastDependentValues = useForecastDependentValues as jest.Mock;
 const mockUsePointsAndBounds = usePointsAndBounds as jest.Mock;
 const mockUseTranslation = useTranslation as jest.Mock;
 const mockedGoogleMaps = require('@vis.gl/react-google-maps');
+
+class MockLatLngBounds {
+  private values: any[] = [];
+
+  extend(value: any) {
+    this.values.push(value);
+  }
+
+  isEmpty() {
+    return this.values.length === 0;
+  }
+}
 
 const buildState = () => ({
   controls: {
@@ -240,6 +260,18 @@ describe('findMarkerInfo', () => {
 describe('RouteForecastMap', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedGoogleMaps.APIProvider.mockImplementation(({ children, onLoad }: any) => {
+      React.useEffect(() => {
+        onLoad?.();
+      }, [onLoad]);
+      return <div data-testid="api-provider">{children}</div>;
+    });
+    (globalThis as any).google = {
+      maps: {
+        LatLngBounds: MockLatLngBounds,
+        places: { BusinessStatus: { OPERATIONAL: 'OPERATIONAL' } }
+      }
+    };
     mockUseAppDispatch.mockReturnValue(jest.fn());
     mockUseAppSelector.mockImplementation((selector: any) => selector(buildState()));
     mockUseForecastDependentValues.mockReturnValue({ calculatedControlPointValues: [] });
@@ -320,5 +352,177 @@ describe('RouteForecastMap', () => {
     rerender(<RotatedArrow rotation={180} relBearing={120} windSpeed={5} distance="7" />);
     const bluePath = document.querySelector('path');
     expect(bluePath).toHaveAttribute('fill', 'url(#gradualFill-7');
+  });
+
+  test('renders temperature, control, and rain markers from valid data', () => {
+    render(<MapMarkers
+      forecast={[buildState().forecast.forecast[0] as any]}
+      controls={[{ lat: 37.31, lon: -122.01 } as any]}
+      controlNames={['Cafe']}
+      subrange={[]}
+      metric={false}
+    />);
+
+    expect(screen.getAllByTestId('safe-marker')).toHaveLength(2);
+    expect(screen.getByText('0')).toBeInTheDocument();
+
+    fireEvent.mouseEnter(screen.getAllByTestId('safe-marker')[1]);
+    expect(screen.getByTestId('info-window')).toHaveTextContent('Cafe');
+  });
+
+  test('skips invalid marker data and handles unloaded APIs', () => {
+    mockedGoogleMaps.useApiIsLoaded.mockReturnValue(false);
+    render(<>
+      <MapMarkers forecast={[{} as any]} controls={[{} as any]} controlNames={[]} subrange={[]} metric={false} />
+      <RainIcon latitude={1} longitude={2} value={3} title="Rain" isRainy={true} />
+      <TempMarker latitude={1} longitude={2} value="3" title="Wind" bearing={20} relBearing={45} windSpeed="5" />
+    </>);
+
+    expect(screen.queryByTestId('safe-marker')).not.toBeInTheDocument();
+    expect(screen.getByText('API not yet loaded, no rain icon')).toBeInTheDocument();
+    expect(screen.getByText('API not yet loaded, no temperature marker')).toBeInTheDocument();
+  });
+
+  test('renders only rainy icons and handles control marker interaction', () => {
+    render(<>
+      <RainIcon latitude={1} longitude={2} value={3} title="Rain" isRainy={true} />
+      <RainIcon latitude={1} longitude={2} value={3} title="Dry" isRainy={false} />
+      <ControlMarker latitude={1} longitude={2} value="Market" />
+    </>);
+
+    const safeMarkers = screen.getAllByTestId('safe-marker');
+    expect(safeMarkers).toHaveLength(2);
+    fireEvent.mouseEnter(safeMarkers[1]);
+    expect(screen.getByTestId('info-window')).toHaveTextContent('Market');
+    fireEvent.mouseLeave(safeMarkers[1]);
+    expect(screen.queryByTestId('info-window')).not.toBeInTheDocument();
+  });
+
+  test('renders both temperature marker wind branches', () => {
+    const { rerender } = render(<TempMarker
+      latitude={1} longitude={2} value="3" title="Wind" bearing={200}
+      relBearing={45} windSpeed="5"
+    />);
+    expect(screen.getByTestId('safe-marker')).toBeInTheDocument();
+
+    rerender(<TempMarker
+      latitude={1} longitude={2} value="3" title="Calm" bearing={20}
+      relBearing={120} windSpeed="3"
+    />);
+    expect(screen.getByText('3')).toBeInTheDocument();
+  });
+
+  test('renders and skips map highlights based on subrange', () => {
+    const points = [{ lat: 1, lng: 2, dist: 5 }, { lat: 2, lng: 3, dist: 15 }] as any;
+    const { rerender } = render(<MapHighlight points={points} subrange={[]} />);
+    expect(screen.queryByTestId('polyline')).not.toBeInTheDocument();
+
+    rerender(<MapHighlight points={points} subrange={[0, 10]} />);
+    expect(screen.getByTestId('polyline')).toBeInTheDocument();
+  });
+
+  test('fits bounds after the Maps API is loaded', () => {
+    const map = {
+      fitBounds: jest.fn(),
+      getZoom: jest.fn(() => 10),
+      setZoom: jest.fn(),
+      getDiv: jest.fn(() => document.createElement('div'))
+    };
+    mockedGoogleMaps.useMap.mockReturnValue(map);
+
+    render(<BoundSetter
+      points={[{ lat: 1, lng: 2, dist: 5 }] as any}
+      controls={[]}
+      userControlPoints={[]}
+      bounds={{ min_latitude: 0, min_longitude: 0, max_latitude: 2, max_longitude: 2 }}
+      subrange={[]}
+    />);
+
+    expect(map.fitBounds).toHaveBeenCalled();
+    expect(map.setZoom).toHaveBeenCalledWith(9);
+  });
+
+  test('looks up business controls and records operational place status', async () => {
+    const dispatch = jest.fn();
+    const place = {
+      id: 'place-1',
+      businessStatus: 'OPERATIONAL',
+      displayName: 'Cafe',
+      formattedAddress: '1 Main St'
+    };
+    const searchByText = jest.fn().mockResolvedValue({ places: [place] });
+    (globalThis as any).google.maps.places.Place = { searchByText };
+    mockedGoogleMaps.useMap.mockReturnValue({
+      fitBounds: jest.fn(),
+      getZoom: jest.fn(() => 0),
+      getDiv: jest.fn(() => document.createElement('div'))
+    });
+    mockedGoogleMaps.useMapsLibrary.mockReturnValue({});
+    mockUseAppDispatch.mockReturnValue(dispatch);
+    mockUseAppSelector.mockImplementation((selector: any) => selector({
+      ...buildState(),
+      controls: {
+        ...buildState().controls,
+        userControlPoints: [{ business: 'Cafe', lat: 1, lon: 2, distance: 5 }]
+      }
+    }));
+
+    render(<BoundSetter
+      points={[{ lat: 1, lng: 2, dist: 5 }] as any}
+      controls={[{ distance: 5, arrival: 'Mon, Jan 01 2024 8:00AM' } as any]}
+      userControlPoints={[{ business: 'Cafe', lat: 1, lon: 2, distance: 5 } as any]}
+      bounds={{ min_latitude: 0, min_longitude: 0, max_latitude: 2, max_longitude: 2 }}
+      subrange={[]}
+    />);
+
+    await waitFor(() => expect(searchByText).toHaveBeenCalledWith(expect.objectContaining({ textQuery: 'Cafe' })));
+    expect(dispatch).toHaveBeenCalled();
+  });
+
+  test('renders the fallback when no forecast is available for a non-Strava route', () => {
+    mockUseAppSelector.mockImplementation((selector: any) => selector({
+      ...buildState(),
+      forecast: { ...buildState().forecast, forecast: [] }
+    }));
+    mockUsePointsAndBounds.mockReturnValue({
+      points: [{ lat: 37.3, lng: -122.0, dist: 0 }],
+      bounds: { min_latitude: 37.2, min_longitude: -122.1, max_latitude: 37.4, max_longitude: -122.0 }
+    });
+
+    render(<RouteForecastMap maps_api_key="test-key" />);
+
+    expect(screen.getByText('titles.map')).toBeInTheDocument();
+  });
+
+  test('keeps the map available while a Strava route is loading', () => {
+    mockUseAppSelector.mockImplementation((selector: any) => selector({
+      ...buildState(),
+      forecast: { ...buildState().forecast, forecast: [] },
+      uiInfo: { routeParams: { routeLoadingMode: 2, segment: [0, 0] } }
+    }));
+    mockUsePointsAndBounds.mockReturnValue({
+      points: [{ lat: 37.3, lng: -122.0, dist: 0 }],
+      bounds: { min_latitude: 37.2, min_longitude: -122.1, max_latitude: 37.4, max_longitude: -122.0 }
+    });
+
+    render(<RouteForecastMap maps_api_key="test-key" />);
+
+    expect(screen.getByTestId('map')).toBeInTheDocument();
+  });
+
+  test('shows the initializing state before the Maps API reports readiness', () => {
+    const originalApiProvider = mockedGoogleMaps.APIProvider.getMockImplementation();
+    mockedGoogleMaps.APIProvider.mockImplementation(({ children }: any) => (
+      <div data-testid="api-provider">{children}</div>
+    ));
+    mockUsePointsAndBounds.mockReturnValue({
+      points: [{ lat: 37.3, lng: -122.0, dist: 0 }],
+      bounds: { min_latitude: 37.2, min_longitude: -122.1, max_latitude: 37.4, max_longitude: -122.0 }
+    });
+
+    render(<RouteForecastMap maps_api_key="test-key" />);
+
+    expect(screen.getByText('Initializing map...')).toBeInTheDocument();
+    mockedGoogleMaps.APIProvider.mockImplementation(originalApiProvider);
   });
 });

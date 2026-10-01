@@ -69,7 +69,7 @@ const findMapBounds = (points : MapPointList, bounds : Bounds, zoomToRange : boo
     return mapBounds
 }
 
-    const BoundSetter = ({points, controls, userControlPoints, bounds, subrange} : 
+    export const BoundSetter = ({points, controls, userControlPoints, bounds, subrange} : 
         {points: MapPointList, controls: Array<CalculatedValue>, userControlPoints: UserControl[], bounds: Bounds, subrange: [number,number]|[]}) => {
         const [mapBounds, setMapBounds] = useState<google.maps.LatLngBounds|google.maps.LatLngBoundsLiteral|null>(null)
         const placesLib = useMapsLibrary('places')
@@ -376,7 +376,7 @@ interface MapMarkerProps {
     controlNames: string[]
     subrange: [number, number] | []
 }
-const MapMarkers = ({ forecast, controls, controlNames, subrange, metric }: MapMarkerProps) => {
+export const MapMarkers = ({ forecast, controls, controlNames, subrange, metric }: MapMarkerProps) => {
     const { i18n } = useTranslation()
     const celsius = useAppSelector(state => state.controls.celsius)
 
@@ -446,7 +446,7 @@ const MapMarkers = ({ forecast, controls, controlNames, subrange, metric }: MapM
     )
 }
 
-const RainIcon = ({ latitude, longitude, value, title, isRainy }: { latitude: number, longitude: number, value: number, title: string, isRainy: boolean }) => {
+export const RainIcon = ({ latitude, longitude, value, title, isRainy }: { latitude: number, longitude: number, value: number, title: string, isRainy: boolean }) => {
     const apiIsLoaded = useApiIsLoaded();
     if (!apiIsLoaded) {
         return <div>API not yet loaded, no rain icon</div>
@@ -550,7 +550,7 @@ type TempMarkerProps = {
     relBearing: number
     windSpeed: string
 }
-const TempMarker = ({ latitude, longitude, value, title, bearing, relBearing, windSpeed }: TempMarkerProps) => {
+export const TempMarker = ({ latitude, longitude, value, title, bearing, relBearing, windSpeed }: TempMarkerProps) => {
     const apiIsLoaded = useApiIsLoaded();
     if (!apiIsLoaded) {
         return <div>API not yet loaded, no temperature marker</div>
@@ -619,7 +619,7 @@ interface ControlMarkerProps {
     longitude: number
     value: string
 }
-const ControlMarker = ({ latitude, longitude, value = '' }: ControlMarkerProps) => {
+export const ControlMarker = ({ latitude, longitude, value = '' }: ControlMarkerProps) => {
     const apiIsLoaded = useApiIsLoaded();
     const [showTheText, setShowTheText] = React.useState<boolean>(false)
     if (!apiIsLoaded) {
@@ -643,7 +643,7 @@ const ControlMarker = ({ latitude, longitude, value = '' }: ControlMarkerProps) 
     );
 }
 
-const MapHighlight = ({ points, subrange } : { points: MapPointList, subrange: [number,number]|[]}) => {
+export const MapHighlight = ({ points, subrange } : { points: MapPointList, subrange: [number,number]|[]}) => {
     if (subrange.length !== 2) {
         return null;
     }

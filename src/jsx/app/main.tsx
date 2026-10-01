@@ -402,7 +402,7 @@ const useLoadRouteFromURL = (queryParams : QueryParams, forecastFunc : MutationW
     }, [queryParams.rwgpsRoute, rwgpsRoute, queryParams.strava_route, stravaRoute, queryParams.strava_access_token, forecastFunc, aqiFunc, lang])
 }
 
-const useLoadControlPointsFromURL = (queryParams: QueryParams) => {
+export const useLoadControlPointsFromURL = (queryParams: QueryParams) => {
 
     const dispatch = useAppDispatch()
     useEffect(() => {
@@ -415,7 +415,7 @@ const useLoadControlPointsFromURL = (queryParams: QueryParams) => {
     }, [queryParams])
 }
 
-const useSetPageTitle = () => {
+export const useSetPageTitle = () => {
 
     const routeInfo = useAppSelector(state => state.routeInfo)
 
