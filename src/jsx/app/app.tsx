@@ -20,7 +20,7 @@ window.addEventListener('online', (event) => {
         // retry installing service worker when back online
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/worker.js').then((registration) => {
-                console.log(`Service worker registered on reconnect! - ${registration.scope}`);
+                console.log(`Service worker registered on reconnect! - ${registration ? registration.scope : 'Unknown'}`);
                 metrics.count("install_successes", 1, { attributes: { registration: registration } });
                 serviceWorkerInstalled = true;
             }).catch((error) => {
@@ -49,7 +49,18 @@ else {
                 dsn: 'https://ea4c472ff9054dab8c18d594b95d8da2@sentry.io/298059',
                 _experiments: { enableLogs: true },
                 environment: 'production',
-                sendDefaultPii: true,
+                dataCollection: {
+                    userInfo: true,
+                    cookies: true,
+                    httpHeaders: { request: true, response: true },
+                    httpBodies: ['incomingRequest', 'outgoingRequest', 'incomingResponse', 'outgoingResponse'],
+                    urlQueryParams: true,
+                    graphQL: { document: true, variables: true },
+                    genAI: { inputs: true, outputs: true },
+                    databaseQueryData: true,
+                    stackFrameVariables: true,
+                    frameContextLines: 7
+                },
                 ignoreErrors: [
                     "Non-Error exception captured",
                     "Non-Error promise rejection captured"
@@ -164,7 +175,7 @@ else {
             });
 
             navigator.serviceWorker.register('/worker.js').then((registration) => {
-                console.log(`Service worker registered! - ${registration.scope}`);
+                console.log(`Service worker registered! - ${registration ? registration.scope : 'Unknown'}`);
                 serviceWorkerInstalled = true;
                 metrics.count("install_successes", 1, { attributes: { registration: JSON.stringify(registration) } });
                 setContext("serviceWorker", { installed: true });
